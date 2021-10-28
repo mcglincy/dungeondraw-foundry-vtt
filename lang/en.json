@@ -1,0 +1,11 @@
+{
+  "DD.ButtonTitleConfig": "Configure",
+  "DD.ButtonTitleRect": "Rectangle",
+  "DD.ButtonTitleRect": "Select",
+  "DD.ConfigDefaultTitle": "Dungeon Config Default",
+  "DD.ConfigTitle": "Dungeon Config",
+  "DD.SceneControlTitle": "Dungeon Draw",
+  "DD.SubmitCreate": "Submit Create",
+  "DD.SubmitDefault": "Submit Default",
+  "DD.SubmitUpdate": "Submit Update"  
+}
