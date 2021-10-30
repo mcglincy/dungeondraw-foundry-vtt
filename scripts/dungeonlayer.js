@@ -12,10 +12,10 @@ export class DungeonLayer extends PlaceablesLayer {
   static LAYER_NAME = "dungeon";
 
   /**
-   * The named game setting which persists default drawing configuration for the User
+   * The named game setting which persists dungeon configuration for the User
    * @type {string}
    */
-  static DEFAULT_CONFIG_SETTING = "defaultDungeonConfig";  
+  static CONFIG_SETTING = "dungeonConfig";  
 
   constructor() {
     super();
@@ -49,38 +49,6 @@ export class DungeonLayer extends PlaceablesLayer {
   static documentName = "Drawing";
 
   /**
-   * Get initial data for a new dungeon.
-   * Start with some global defaults, apply user default config, then apply mandatory overrides per tool.
-   * @param {Object} origin     The initial coordinate
-   * @return {Object}           The new drawing data
-   */
-  _getNewDungeonData(origin) {
-    const tool = game.activeTool;
-
-    // Get saved user defaults
-    const defaults = game.settings.get(DungeonDraw.MODULE_NAME, this.constructor.DEFAULT_CONFIG_SETTING) || {};
-    const data = foundry.utils.mergeObject(defaults, {
-      fillColor: game.user.color,
-      strokeColor: game.user.color,
-    }, {overwrite: false, inplace: false});
-
-    // Mandatory additions
-    data.x = origin.x;
-    data.y = origin.y;
-    data.author = game.user.id;
-
-    // Tool-based settings
-    switch ( tool ) {
-      case "rect":
-        // TODO: use our own type
-        data.type = CONST.DRAWING_TYPES.RECTANGLE;
-        data.points = [];
-        break;
-    }
-    return data;
-  }
-
-  /**
    * Get initial data for a new drawing.
    * Start with some global defaults, apply user default config, then apply mandatory overrides per tool.
    * @param {Object} origin     The initial coordinate
@@ -88,26 +56,15 @@ export class DungeonLayer extends PlaceablesLayer {
    */
   _getNewDrawingData(origin) {
     const tool = game.activeTool;
-
-    // Get saved user defaults
-    // const defaults = game.settings.get("core", DrawingsLayer.DEFAULT_CONFIG_SETTING) || {};
-    // const data = foundry.utils.mergeObject(defaults, {
-    //   fillColor: game.user.color,
-    //   strokeColor: game.user.color,
-    //   fontFamily: CONFIG.defaultFontFamily
-    // }, {overwrite: false, inplace: false});
-
     const data = {
       fillColor: game.user.color,
       strokeColor: game.user.color,
       strokeWidth: 2,
     };
-
     // Mandatory additions
     data.x = origin.x;
     data.y = origin.y;
     data.author = game.user.id;
-
     // Tool-based settings
     switch ( tool ) {
       case "rect":
@@ -127,12 +84,12 @@ export class DungeonLayer extends PlaceablesLayer {
   }  
 
   /**
-   * Render a configuration sheet to configure the default Drawing settings
+   * Render a configuration sheet to configure the Dungeon settings
    */
-  configureDefault() {
-    const defaults = this._getNewDungeonData({});
+  configureSettings() {
+    const defaults = {};
     const d = new DungeonDocument(defaults);
-    new DungeonConfig(d, {configureDefault: true}).render(true);
+    new DungeonConfig(d, {}).render(true);
   }  
 
   /** @override */
@@ -160,7 +117,7 @@ export class DungeonLayer extends PlaceablesLayer {
   /** @inheritdoc */
   async draw() {
     await super.draw();
-    const data = this._getNewDrawingData({x: 0, y: 0});
+    const data = {};
     const document = new DungeonDocument(data, {parent: canvas.scene});
     this.dungeon = new Dungeon(document);
     // TODO: where should dungeon's draw be done?
@@ -187,27 +144,13 @@ export class DungeonLayer extends PlaceablesLayer {
   async _onDragLeftStart(event) {
     await super._onDragLeftStart(event);
 
-    // creating a new dungeon data / drawing data....
-    // but we need to differentiate between the preview thingy
-    // and the master dungeon/doc/structure...
-    // const data = this._getNewDungeonData(event.data.origin);
-    // const document = new DungeonDocument(data, {parent: canvas.scene});
-    // const dungeon = new Dungeon(document);
-    // event.data.preview = this.preview.addChild(dungeon);
-    // return dungeon.draw();
-
-    // idea: use a Drawing as our preview, but then on end-drag/completion,
-    // update our master dungeon structure thingy
+    // we use a Drawing as our preview, but then on end-drag/completion,
+    // update our single Dungeon instance.
     const data = this._getNewDrawingData(event.data.origin);
     const document = new DrawingDocument(data, {parent: canvas.scene});
     const drawing = new Drawing(document);
     event.data.preview = this.preview.addChild(drawing);
     return drawing.draw();
-  }
-
-  /** @override */
-  _onDragLeftCancel(event) {
-    super._onDragLeftCancel(event);
   }
 
   /** @override */
@@ -242,30 +185,10 @@ export class DungeonLayer extends PlaceablesLayer {
       if (minDistance || completePolygon) {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
-        // preview - Foundry Drawing,
-        // preview.data - Foundry DrawingData
-        // preview.drawing - PIXI.Container
-        // preview.shape - PIXI.Graphics, child of preview.drawing
-
-        // Create the object
         preview._chain = false;
         const createData = this.constructor.placeableClass.normalizeShape(data);
 
-        // const bgData = foundry.utils.mergeObject(createData, {
-        //   fillColor: "#EFE9DA",
-        //   fillType: 1,
-        //   strokeColor: "#000000",
-        //   strokeWidth: 8,
-        // }, {overwrite: true, inplace: false});
-        // console.log("****** about to create()");
-        // console.log(self.objects);
-        // const cls = getDocumentClass("Drawing");  // DrawingDocument
-        // const bgDrawing = await cls.create(bgData, {parent: canvas.scene});
-        // const o = bgDrawing.object;
-        // o._creating = true;
-        // o._pendingText = "";
-        // o.control({isNew: true});
-
+        // Add a rectangle to our single Dungeon instance
         // type = "r"
         const newRect = {
           // (x,y) is upper left corner
@@ -275,13 +198,6 @@ export class DungeonLayer extends PlaceablesLayer {
           width: createData.width
         };
         this.dungeon.addRectangle(newRect);
-
-        // XXXX
-        // const drawing = await cls.create(createData, {parent: canvas.scene});
-        // const o = drawing.object;
-        // o._creating = true;
-        // o._pendingText = "";
-        // o.control({isNew: true});
       }
 
       // Cancel the preview

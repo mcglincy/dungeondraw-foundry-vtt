@@ -1,3 +1,4 @@
+import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 
@@ -7,8 +8,6 @@ import { DungeonLayer } from "./dungeonlayer.js";
  *
  * @param {Dungeon} dungeon         The Dungeon object being configured
  * @param {object} options          Additional application rendering options
- * @param {boolean} [options.configureDefault=false]  Configure the default dungeonsettings, instead of a specific Dungeon
- * @param {boolean} [options.preview]  Configure a preview version of the Dungeon which is not yet saved
  */
 export class DungeonConfig extends FormApplication {
   static get defaultOptions() {
@@ -18,16 +17,21 @@ export class DungeonConfig extends FormApplication {
       template: "modules/dungeon-draw/templates/dungeon-config.html",
       width: 480,
       height: 360,
-      configureDefault: false,
       tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "position"}]
     });
   }
+
+  static defaultConfig = {
+    floorColor: "#F2EDDF",
+    wallColor: "#000000",
+    wallThickness: 8,
+  };
 
   /* -------------------------------------------- */
 
   /** @override */
   get title() {
-    const title = this.options.configureDefault ? "DD.ConfigDefaultTitle" : "DD.ConfigTitle";
+    const title = "DD.ConfigTitle";
     return game.i18n.localize(title);
   }
 
@@ -35,23 +39,11 @@ export class DungeonConfig extends FormApplication {
 
   /** @override */
   getData(options) {
-    const author = game.users.get(this.object.data.author);
-
-    // Submit text
-    let submit;
-    if ( this.options.configureDefault ) {
-      submit = "DD.SubmitDefault";
-    } else {
-      submit = this.options.preview ? "DD.SubmitCreate" : "DD.SubmitUpdate";
-    }
-
+    const config = game.settings.get(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING);
     // Return data
     return {
-      author: author ? author.name : "",
-      isDefault: this.options.configureDefault,
-      object: this.object.toJSON(),
+      object: config,
       options: this.options,
-      submitText: submit
     }
   }
 
@@ -59,22 +51,9 @@ export class DungeonConfig extends FormApplication {
 
   /** @override */
   async _updateObject(event, formData) {
-    if (!this.object.isOwner) {
-      throw new Error("You do not have the ability to configure this Dungeon object.");
-    }
-
     // Configure the default Dungeon settings
-    if (this.options.configureDefault) {
-      formData.author = game.user.id;
-      const newDefault = new DungeonDocument(formData);
-      return game.settings.set("dungeondraw", DungeonLayer.DEFAULT_CONFIG_SETTING, newDefault.toJSON());
-    }
-
-    // Create or update a Drawing
-    if (this.object.id) {
-      return this.object.update(formData);
-    }
-    return this.object.constructor.create(formData);
+    game.settings.set(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING, formData);
+    canvas.dungeon.dungeon.refresh();
   }
 
   /* -------------------------------------------- */
@@ -107,9 +86,9 @@ export class DungeonConfig extends FormApplication {
    */
   _onResetDefaults(event) {
     event.preventDefault();
-    game.settings.set(DungeonDraw.MODULE_NAME, DungeonLayer.DEFAULT_CONFIG_SETTING, {});
-    const defaultValues = new DungeonData(canvas.dungeon._getNewDungeonData({})).toJSON();
-    this.object.data.update(defaultValues);
+    game.settings.set(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING, DungeonConfig.defaultConfig);
+    this.object.data.update(DungeonConfig.defaultConfig);
+    canvas.dungeon.dungeon.refresh();
     this.render();
   }
 }

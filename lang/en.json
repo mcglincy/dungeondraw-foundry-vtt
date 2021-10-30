@@ -8,8 +8,12 @@
   "DD.ButtonTitleUndo": "Undo",
   "DD.ConfigDefaultTitle": "Dungeon Config Default",
   "DD.ConfigTitle": "Dungeon Config",
+  "DD.FloorColor": "Floor Color",
   "DD.SceneControlTitle": "Dungeon Draw",
-  "DD.SubmitCreate": "Submit Create",
-  "DD.SubmitDefault": "Submit Default",
-  "DD.SubmitUpdate": "Submit Update"  
+  "DD.SettingsHint": "Configure Dungeon settings.",
+  "DD.SubmitReset": "Reset to Defaults",
+  "DD.SubmitSave": "Save",
+  "DD.TabSettings": "Settings",
+  "DD.WallColor": "Wall Color",
+  "DD.WallThickness": "Wall Thickness (px)"
 }

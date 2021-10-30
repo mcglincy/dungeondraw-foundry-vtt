@@ -14,19 +14,8 @@ export class DungeonDraw {
 
   static init() {
     console.log("***** DUNGEON DRAW *****");
-    // game.settings.register(DungeonDraw.MODULE_NAME, DungeonLayer.DEFAULT_CONFIG_SETTING, ???);
-    game.settings.register("dungeondraw", "defaultDungeonConfig", {});
-
-    
-  //   , {
-  //   name: 'foreground-drawings.CONTROLS.ClearDrawingsOnlyOnActiveLayerSetting',
-  //   hint: 'foreground-drawings.CONTROLS.ClearDrawingsOnlyOnActiveLayerSettingHint',
-  //   scope: 'client',
-  //   config: true,
-  //   type: Boolean,
-  //   default: true,
-  //   onChange: () => window.location.reload(),
-  // });
+    game.settings.register(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING, 
+      DungeonConfig.defaultConfig);
   }
 
   static getSceneControlButtons(controls) {
@@ -94,7 +83,7 @@ export class DungeonDraw {
           name: "config",
           title: "DD.ButtonTitleConfig",
           icon: "fas fa-cog",
-          onClick: () => canvas.dungeon.configureDefault(),
+          onClick: () => canvas.dungeon.configureSettings(),
           button: true
         },
         {

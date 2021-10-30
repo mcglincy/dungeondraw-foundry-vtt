@@ -1,4 +1,13 @@
+import { DungeonDraw } from "./dungeondraw.js";
+import { DungeonLayer } from "./dungeonlayer.js";
+// TODO: decide if we want to use turf.js instead
 import * as jsts from "./jsts.js";
+
+class DungeonState {
+  constructor(...args) {
+    this.geometry = null;
+  }
+}
 
 /**
  * @extends {PlaceableObject}
@@ -7,46 +16,26 @@ export class Dungeon extends PlaceableObject {
   constructor(...args) {
     super(...args);
 
-    this.geometry = null;
+    /** time-ordered array of DungeonStates */
+    // TODO: currently just array of geometry
+    this.history = [];
 
-    /**
-     * The inner drawing container
-     * @type {PIXI.Container}
-     */
-    this.drawing = null;
-
-    /**
-     * The primary drawing shape
-     * @type {PIXI.Graphics}
-     */
-    this.shape = null;
-
-    /**
-     * Text content, if included
-     * @type {PIXI.Text}
-     */
-    this.text = null;
-
-    /**
-     * The Graphics outer frame and handles
-     * @type {PIXI.Container}
-     */
-    this.frame = null;
+    this.config = null;
 
     /**
      * Internal timestamp for the previous freehand draw time, to limit sampling
      * @type {number}
      * @private
      */
-    this._drawTime = 0;
-    this._sampleTime = 0;
+    // this._drawTime = 0;
+    // this._sampleTime = 0;
 
     /**
      * Internal flag for the permanent points of the polygon
      * @type {boolean}
      * @private
      */
-    this._fixedPoints = foundry.utils.deepClone(this.data.points || []);
+    // this._fixedPoints = foundry.utils.deepClone(this.data.points || []);
   }
 
   /* -------------------------------------------- */
@@ -62,7 +51,7 @@ export class Dungeon extends PlaceableObject {
    * The rate at which points are sampled (in milliseconds) during a freehand drawing workflow
    * @type {number}
    */
-  static FREEHAND_SAMPLE_RATE = 75;
+  //static FREEHAND_SAMPLE_RATE = 75;
 
   /* -------------------------------------------- */
   /*  Properties                                  */
@@ -72,50 +61,15 @@ export class Dungeon extends PlaceableObject {
    * A Boolean flag for whether or not the Drawing utilizes a tiled texture background
    * @type {boolean}
    */
-  get isTiled() {
-    return this.data.fillType === CONST.DRAWING_FILL_TYPES.PATTERN;
-  }
+  // get isTiled() {
+  //   return this.data.fillType === CONST.DRAWING_FILL_TYPES.PATTERN;
+  // }
 
   /* -------------------------------------------- */
 
-  /**
-   * A Boolean flag for whether or not the Drawing is a Polygon type (either linear or freehand)
-   * @type {boolean}
-   */
-  get isPolygon() {
-    return [CONST.DRAWING_TYPES.POLYGON, CONST.DRAWING_TYPES.FREEHAND].includes(this.data.type);
-  }
-
-  _cleanData() {
-    // TODO
-  }
-
   deleteAll() {
-    this.rectangles = [];
-    this.polyPoints = null;
-    this.geometry = null;
+    this.history = [];
     this.refresh();
-  }
-
-  /**
-   * Create the components of the drawing element, the drawing container, the drawn shape, and the overlay text
-   */
-  _createDrawing() {
-    // Drawing container
-    this.drawing = this.addChild(new PIXI.Container());
-
-    // Drawing Shape
-    this.shape = this.drawing.addChild(new PIXI.Graphics());
-  }
-
-    /**
-   * Create elements for the Drawing border and handles
-   * @private
-   */
-  _createFrame() {
-    this.frame = this.addChild(new PIXI.Container());
-    this.frame.border = this.frame.addChild(new PIXI.Graphics());
-    this.frame.handle = this.frame.addChild(new ResizeHandle([1,1]));
   }
 
   /* -------------------------------------------- */
@@ -124,41 +78,28 @@ export class Dungeon extends PlaceableObject {
 
   /** @override */
   async draw() {
-    //this.clear();
-    // this._cleanData();
-
-
-    /*
-    // Load the background texture, if one is defined
-    // if ( this.data.texture ) {
-    //   this.texture = await loadTexture(this.data.texture, {fallback: 'icons/svg/hazard.svg'});
-    // } else {
-    //   this.texture = null;
-    // }
-
-    // Create the inner Drawing container
-    this._createDrawing();
-
-    // Control Border
-    this._createFrame();
-
-    // Apply the z-index
-    this.zIndex = this.data.z;
-
-    // Render Appearance
-    this.refresh();
-
-    // Enable Interactivity, if this is a true Drawing
-    if ( this.id ) this.activateListeners();
-    */
-
     this.refresh();
     return this;
   }  
 
   /* -------------------------------------------- */
 
-  rectToWKTPolygonString(rect) {
+  addRectangle(rect) {
+    const reader = new jsts.io.WKTReader(); 
+    const polyString = this._rectToWKTPolygonString(rect);
+    const poly = reader.read(polyString);
+
+    if (this.history.length) {
+      const union = this.history[this.history.length - 1].union(poly);
+      this.history.push(union);
+    } else {
+      this.history.push(poly);
+    }
+
+    this.refresh();
+  }
+
+  _rectToWKTPolygonString(rect) {
     const p = [
       rect.x, rect.y,
       rect.x + rect.width, rect.y,
@@ -170,33 +111,12 @@ export class Dungeon extends PlaceableObject {
     return `POLYGON((${p[0]} ${p[1]}, ${p[2]} ${p[3]}, ${p[4]} ${p[5]}, ${p[6]} ${p[7]}, ${p[8]} ${p[9]}))`;
   }
 
-  addRectangle(rect) {
-    const reader = new jsts.io.WKTReader(); 
-    const polyString = this.rectToWKTPolygonString(rect);
-    const poly = reader.read(polyString);
-
-    if (this.geometry) {
-      this.geometry = this.geometry.union(poly);
-    } else {
-      this.geometry = poly;
-    }
-
-    this.refresh();
-  }
-
-  _drawRect(gfx, rect) {
-    gfx.beginFill(0xF2EDDF, 1.0);
-    gfx.drawRect(rect.x, rect.y, rect.width, rect.height);
-    gfx.endFill();
-    gfx.lineStyle(10, 0x000000, 1.0).drawRect(rect.x, rect.y, rect.width, rect.height);
-  }
-
   _drawPolygon(gfx, poly) {
     const nums = poly.getCoordinates().map(c => [c.x, c.y]).flat();
-    gfx.beginFill(0xF2EDDF, 1.0);
+    gfx.beginFill(PIXI.utils.string2hex(this.config.floorColor), 1.0);
     gfx.drawPolygon(nums);
     gfx.endFill();
-    gfx.lineStyle(10, 0x000000, 1.0).drawPolygon(nums);
+    gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0).drawPolygon(nums);
   }
 
   _drawMultiPolygon(gfx, multi) {
@@ -233,16 +153,26 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  /** @override */
+  refresh() {
+    //if ( this._destroyed || this.shape._destroyed ) return;
+
+    // stash latest-greatest config settings
+    this.config = game.settings.get(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING);    
+    this._refreshGraphics();
+    this._refreshWalls();
+  }
 
   _refreshGraphics() {
     this.clear();
 
     const gfx = new PIXI.Graphics();
-    if (this.geometry) {
-      if (this.geometry instanceof jsts.geom.MultiPolygon) {
-        this._drawMultiPolygon(gfx, this.geometry);
-      } else if (this.geometry instanceof jsts.geom.Polygon) {
-        this._drawPolygon(gfx, this.geometry);
+    if (this.history) {
+      const geometry = this.history[this.history.length - 1];
+      if (geometry instanceof jsts.geom.MultiPolygon) {
+        this._drawMultiPolygon(gfx, geometry);
+      } else if (geometry instanceof jsts.geom.Polygon) {
+        this._drawPolygon(gfx, geometry);
       }
     }
     this.addChild(gfx);
@@ -250,20 +180,14 @@ export class Dungeon extends PlaceableObject {
 
   async _refreshWalls() {
     await this._deleteAllWalls();
-    if (this.geometry) {
-      if (this.geometry instanceof jsts.geom.MultiPolygon) {
-        await this._makeWallsFromMulti(this.geometry);
-      } else if (this.geometry instanceof jsts.geom.Polygon) {
-        await this._makeWallsFromPoly(this.geometry);
+    if (this.history) {
+      const geometry = this.history[this.history.length - 1];
+      if (geometry instanceof jsts.geom.MultiPolygon) {
+        await this._makeWallsFromMulti(geometry);
+      } else if (geometry instanceof jsts.geom.Polygon) {
+        await this._makeWallsFromPoly(geometry);
       }
     }
-  }
-
-  /** @override */
-  refresh() {
-    //if ( this._destroyed || this.shape._destroyed ) return;
-    this._refreshGraphics();
-    this._refreshWalls();
   }
 
   /* -------------------------------------------- */
@@ -273,6 +197,7 @@ export class Dungeon extends PlaceableObject {
    * @param {PIXI.InteractionEvent} event
    * @private
    */
+   /*
   _onMouseDraw(event) {
     const {destination, originalEvent} = event.data;
     const isShift = originalEvent.shiftKey;
@@ -307,20 +232,21 @@ export class Dungeon extends PlaceableObject {
     // Refresh the display
     this.refresh();
   }
+  */
 
   /**
    * Add a new polygon point to the drawing, ensuring it differs from the last one
    * @private
    */
-  _addPoint(position, temporary=true) {
-    const point = [position.x - this.data.x, position.y - this.data.y];
-    const points = this._fixedPoints.concat([point]);
-    this.data.update({points});
-    if ( !temporary ) {
-      this._fixedPoints = points
-      this._drawTime = Date.now();
-    }
-  }
+  // _addPoint(position, temporary=true) {
+  //   const point = [position.x - this.data.x, position.y - this.data.y];
+  //   const points = this._fixedPoints.concat([point]);
+  //   this.data.update({points});
+  //   if ( !temporary ) {
+  //     this._fixedPoints = points
+  //     this._drawTime = Date.now();
+  //   }
+  // }
 
   /* -------------------------------------------- */
 
@@ -328,8 +254,8 @@ export class Dungeon extends PlaceableObject {
    * Remove the last fixed point from the polygon
    * @private
    */
-  _removePoint() {
-    if ( this._fixedPoints.length ) this._fixedPoints.pop();
-    this.data.update({points: this._fixedPoints});
-  }  
+  // _removePoint() {
+  //   if ( this._fixedPoints.length ) this._fixedPoints.pop();
+  //   this.data.update({points: this._fixedPoints});
+  // }  
 }
