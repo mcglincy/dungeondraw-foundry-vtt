@@ -2,6 +2,11 @@ import { DungeonConfig } from "./dungeonconfig.js";
 import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 
+
+const notImplementedYet = () => {
+  ui.notifications.info("Not implemented yet", {permanent: false});
+}
+
 export class DungeonDraw {
 
   static MODULE_ID = "DD";
@@ -49,14 +54,16 @@ export class DungeonDraw {
         {
           name: "select",
           title: "DD.ButtonTitleSelect",
-          icon: "fas fa-expand"
+          icon: "fas fa-expand",
+          onClick: () => {
+            notImplementedYet();
+          },
         },
         {
           name: "rect",
           title: "DD.ButtonTitleRect",
           icon: "fas fa-square",
           onClick: () => {
-            console.log("***** rectangle");
           },
         },
         {
@@ -64,18 +71,24 @@ export class DungeonDraw {
           title: "DD.ButtonTitleDoor",
           icon: "fas fa-door-open",
           onClick: () => {
-            console.log("***** door");
+            notImplementedYet();
           },
         },
         {
           name: "undo",
           title: "DD.ButtonTitleUndo",
-          icon: "fas fa-undo"
+          icon: "fas fa-undo",
+          onClick: () => {
+            notImplementedYet();
+          },
         },
         {
           name: "redo",
           title: "DD.ButtonTitleRedo",
-          icon: "fas fa-redo"
+          icon: "fas fa-redo",
+          onClick: () => {
+            notImplementedYet();
+          },          
         },
         {
           name: "config",
@@ -90,8 +103,6 @@ export class DungeonDraw {
           icon: "fas fa-trash",
           // visible: isGM,
           visible: true,
-          // TODO: deal with error
-          // document.mjs:479 Uncaught (in promise) Error: Dungeon is not a valid embedded Document within the Scene Document
           onClick: () => canvas.dungeon.deleteAll(),
           button: true
         }
