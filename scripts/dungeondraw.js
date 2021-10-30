@@ -48,27 +48,45 @@ export class DungeonDraw {
       tools: [
         {
           name: "select",
-          title: "DP.ButtonTitleSelect",
+          title: "DD.ButtonTitleSelect",
           icon: "fas fa-expand"
         },
         {
           name: "rect",
-          title: "DP.ButtonTitleRect",
+          title: "DD.ButtonTitleRect",
           icon: "fas fa-square",
           onClick: () => {
             console.log("***** rectangle");
           },
         },
         {
+          name: "door",
+          title: "DD.ButtonTitleDoor",
+          icon: "fas fa-door-open",
+          onClick: () => {
+            console.log("***** door");
+          },
+        },
+        {
+          name: "undo",
+          title: "DD.ButtonTitleUndo",
+          icon: "fas fa-undo"
+        },
+        {
+          name: "redo",
+          title: "DD.ButtonTitleRedo",
+          icon: "fas fa-redo"
+        },
+        {
           name: "config",
-          title: "DP.ButtonTitleConfig",
+          title: "DD.ButtonTitleConfig",
           icon: "fas fa-cog",
           onClick: () => canvas.dungeon.configureDefault(),
           button: true
         },
         {
           name: "clear",
-          title: "CONTROLS.DrawingClear",
+          title: "DD.ButtonTitleClear",
           icon: "fas fa-trash",
           // visible: isGM,
           visible: true,

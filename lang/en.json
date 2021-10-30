@@ -1,7 +1,11 @@
 {
   "DD.ButtonTitleConfig": "Configure",
-  "DD.ButtonTitleRect": "Rectangle",
-  "DD.ButtonTitleRect": "Select",
+  "DD.ButtonTitleClear": "Clear All",
+  "DD.ButtonTitleDoor": "Draw Doors",
+  "DD.ButtonTitleRect": "Draw Rectangles",
+  "DD.ButtonTitleRedo": "Redo",
+  "DD.ButtonTitleSelect": "Select",
+  "DD.ButtonTitleUndo": "Undo",
   "DD.ConfigDefaultTitle": "Dungeon Config Default",
   "DD.ConfigTitle": "Dungeon Config",
   "DD.SceneControlTitle": "Dungeon Draw",
