@@ -1,9 +1,15 @@
+import * as jsts from "./jsts.js";
+
 /**
  * @extends {PlaceableObject}
  */
 export class Dungeon extends PlaceableObject {
   constructor(...args) {
     super(...args);
+
+    this.rectangles = [];
+    this.polyPoints = null;
+    this.geometry = null;
 
     /**
      * The inner drawing container
@@ -43,10 +49,58 @@ export class Dungeon extends PlaceableObject {
      * @private
      */
     this._fixedPoints = foundry.utils.deepClone(this.data.points || []);
+
+    console.log(jsts);
+    console.log(jsts.io);
+
+  }
+
+  /* -------------------------------------------- */
+
+  // TODO: figure out what documentName / embeddedName / type we should be using
+  /** @inheritdoc */
+  // static embeddedName = "Dungeon";
+  static embeddedName = "Drawing";
+
+  /* -------------------------------------------- */
+
+  /**
+   * The rate at which points are sampled (in milliseconds) during a freehand drawing workflow
+   * @type {number}
+   */
+  static FREEHAND_SAMPLE_RATE = 75;
+
+  /* -------------------------------------------- */
+  /*  Properties                                  */
+  /* -------------------------------------------- */
+
+  /**
+   * A Boolean flag for whether or not the Drawing utilizes a tiled texture background
+   * @type {boolean}
+   */
+  get isTiled() {
+    return this.data.fillType === CONST.DRAWING_FILL_TYPES.PATTERN;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * A Boolean flag for whether or not the Drawing is a Polygon type (either linear or freehand)
+   * @type {boolean}
+   */
+  get isPolygon() {
+    return [CONST.DRAWING_TYPES.POLYGON, CONST.DRAWING_TYPES.FREEHAND].includes(this.data.type);
   }
 
   _cleanData() {
     // TODO
+  }
+
+  deleteAll() {
+    this.rectangles = [];
+    this.polyPoints = null;
+    this.geometry = null;
+    this.refresh();
   }
 
   /**
@@ -76,9 +130,11 @@ export class Dungeon extends PlaceableObject {
 
   /** @override */
   async draw() {
-    this.clear();
-    this._cleanData();
+    //this.clear();
+    // this._cleanData();
 
+
+    /*
     // Load the background texture, if one is defined
     // if ( this.data.texture ) {
     //   this.texture = await loadTexture(this.data.texture, {fallback: 'icons/svg/hazard.svg'});
@@ -100,79 +156,80 @@ export class Dungeon extends PlaceableObject {
 
     // Enable Interactivity, if this is a true Drawing
     if ( this.id ) this.activateListeners();
+    */
+
+    this.refresh();
     return this;
   }  
 
   /* -------------------------------------------- */
 
+  rectToWKTPolygonString(rect) {
+    const p = [
+      rect.x, rect.y,
+      rect.x + rect.width, rect.y,
+      rect.x + rect.width, rect.y + rect.height,
+      rect.x, rect.y + rect.height,
+      // close off poly
+      rect.x, rect.y,
+    ];
+    return `POLYGON((${p[0]} ${p[1]}, ${p[2]} ${p[3]}, ${p[4]} ${p[5]}, ${p[6]} ${p[7]}, ${p[8]} ${p[9]}))`;
+  }
+
+  addRectangle(rect) {
+    const reader = new jsts.io.WKTReader(); 
+    const polyString = this.rectToWKTPolygonString(rect);
+    const poly = reader.read(polyString);
+
+    if (this.geometry) {
+      this.geometry = this.geometry.union(poly);
+    } else {
+      this.geometry = poly;
+    }
+
+    this.refresh();
+  }
+
+  _drawRect(gfx, rect) {
+    gfx.beginFill(0xF2EDDF, 1.0);
+    gfx.drawRect(rect.x, rect.y, rect.width, rect.height);
+    gfx.endFill();
+    gfx.lineStyle(10, 0x000000, 1.0).drawRect(rect.x, rect.y, rect.width, rect.height);
+  }
+
+  _drawPolygon(gfx, poly) {
+    const nums = poly.getCoordinates().map(c => [c.x, c.y]).flat();
+    gfx.beginFill(0xF2EDDF, 1.0);
+    gfx.drawPolygon(nums);
+    gfx.endFill();
+    gfx.lineStyle(10, 0x000000, 1.0).drawPolygon(nums);
+  }
+
+  _drawMultiPolygon(gfx, multi) {
+    for (let i = 0; i < multi.getNumGeometries(); i++) {
+      const poly = multi.getGeometryN(i);
+      console.log(poly);
+      if (poly) {
+        this._drawPolygon(gfx, poly);        
+      }
+    }
+  }
+
   /** @override */
   refresh() {
     //if ( this._destroyed || this.shape._destroyed ) return;
-    if ( this._destroyed || this.shape._destroyed ) return;
 
-    /*
-    const isTextPreview = (this.data.type === CONST.DRAWING_TYPES.TEXT) && this._controlled;
-    this.shape.clear();
+    this.clear();
 
-    // Outer Stroke
-    if ( this.data.strokeWidth || isTextPreview ) {
-      let sc = foundry.utils.colorStringToHex(this.data.strokeColor || "#FFFFFF");
-      const sw = isTextPreview ? 8 : this.data.strokeWidth ?? 8;
-      this.shape.lineStyle(sw, sc, this.data.strokeAlpha ?? 1);
-    }
-
-    // Fill Color or Texture
-    if ( this.data.fillType || isTextPreview ) {
-      const fc = foundry.utils.colorStringToHex(this.data.fillColor || "#FFFFFF");
-      if ( (this.data.fillType === CONST.DRAWING_FILL_TYPES.PATTERN) && this.texture ) {
-        this.shape.beginTextureFill({
-          texture: this.texture,
-          color: fc || 0xFFFFFF,
-          alpha: fc ? this.data.fillAlpha : 1
-        });
-      } else {
-        const fa = isTextPreview ? 0.25 : this.data.fillAlpha;
-        this.shape.beginFill(fc, fa);
+    const gfx = new PIXI.Graphics();
+    if (this.geometry) {
+      if (this.geometry instanceof jsts.geom.MultiPolygon) {
+        this._drawMultiPolygon(gfx, this.geometry);
+      } else if (this.geometry instanceof jsts.geom.Polygon) {
+        this._drawPolygon(gfx, this.geometry);
       }
     }
-
-    // Draw the shape
-    switch ( this.data.type ) {
-      case CONST.DRAWING_TYPES.RECTANGLE:
-      case CONST.DRAWING_TYPES.TEXT:
-        this._drawRectangle();
-        break;
-      case CONST.DRAWING_TYPES.ELLIPSE:
-        this._drawEllipse();
-        break;
-      case CONST.DRAWING_TYPES.POLYGON:
-        this._drawPolygon();
-        break;
-      case CONST.DRAWING_TYPES.FREEHAND:
-        this._drawFreehand();
-        break;
-    }
-
-    // Conclude fills
-    this.shape.lineStyle(0x000000, 0.0).closePath();
-    this.shape.endFill();
-
-    // Set shape rotation, pivoting about the non-rotated center
-    this.shape.pivot.set(this.data.width / 2, this.data.height / 2);
-    this.shape.position.set(this.data.width / 2, this.data.height / 2);
-    this.shape.rotation = Math.toRadians(this.data.rotation || 0);
-
-    // Determine shape bounds and update the frame
-    const bounds = this.drawing.getLocalBounds();
-    if ( this.id && this._controlled ) this._refreshFrame(bounds);
-    else this.frame.visible = false;
-
-    // Toggle visibility
-    this.position.set(this.data.x, this.data.y);
-    this.drawing.hitArea = bounds;
-    this.alpha = this.data.hidden ? 0.5 : 1.0;
-    this.visible = !this.data.hidden || game.user.isGM;
-    */
+    this.addChild(gfx);
   }
 
   /* -------------------------------------------- */

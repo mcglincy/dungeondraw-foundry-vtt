@@ -2,7 +2,7 @@ import { DungeonConfig } from "./dungeonconfig.js";
 import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 
-class DungeonDraw {
+export class DungeonDraw {
 
   static MODULE_ID = "DD";
   static MODULE_NAME = "dungeondraw"
@@ -43,11 +43,12 @@ class DungeonDraw {
       layer: DungeonLayer.LAYER_NAME,
       icon: "fas fa-dungeon",
       // TODO: use module-specific perms?
-      visible: game.user.can("DRAWING_CREATE"),
+      //visible: game.user.can("DRAWING_CREATE"),
+      visible: true,
       tools: [
         {
           name: "select",
-          title: "CONTROLS.DrawingSelect",
+          title: "DP.ButtonTitleSelect",
           icon: "fas fa-expand"
         },
         {
