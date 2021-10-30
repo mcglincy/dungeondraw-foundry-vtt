@@ -160,23 +160,12 @@ export class DungeonLayer extends PlaceablesLayer {
   /** @inheritdoc */
   async draw() {
     await super.draw();
-
-    // TODO: push all this drawing foo into Dungeon class?
-
     const data = this._getNewDrawingData({x: 0, y: 0});
     const document = new DungeonDocument(data, {parent: canvas.scene});
     this.dungeon = new Dungeon(document);
-    // TODO: where should draw be done?
+    // TODO: where should dungeon's draw be done?
     this.dungeon.draw();
     this.addChild(this.dungeon);
-
-    // const sd = canvas.scene.data;
-
-    // Draw the outline
-    // const outline = new PIXI.Graphics();
-    // outline.lineStyle(20, 0xFF0000, 1.0).drawShape(canvas.dimensions.rect);
-    // this.addChildAt(outline, 0);
-
     return this;
   }  
 

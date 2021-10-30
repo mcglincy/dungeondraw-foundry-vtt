@@ -7,8 +7,6 @@ export class Dungeon extends PlaceableObject {
   constructor(...args) {
     super(...args);
 
-    this.rectangles = [];
-    this.polyPoints = null;
     this.geometry = null;
 
     /**
@@ -49,10 +47,6 @@ export class Dungeon extends PlaceableObject {
      * @private
      */
     this._fixedPoints = foundry.utils.deepClone(this.data.points || []);
-
-    console.log(jsts);
-    console.log(jsts.io);
-
   }
 
   /* -------------------------------------------- */
@@ -208,17 +202,39 @@ export class Dungeon extends PlaceableObject {
   _drawMultiPolygon(gfx, multi) {
     for (let i = 0; i < multi.getNumGeometries(); i++) {
       const poly = multi.getGeometryN(i);
-      console.log(poly);
       if (poly) {
         this._drawPolygon(gfx, poly);        
       }
     }
   }
 
-  /** @override */
-  refresh() {
-    //if ( this._destroyed || this.shape._destroyed ) return;
+  async _deleteAllWalls() {
+    for (const wall of canvas.scene.data.walls) {
+      await wall.delete();
+    }
+  }
 
+  _makeWallsFromMulti(multi) {
+    for (let i = 0; i < multi.getNumGeometries(); i++) {
+      const poly = multi.getGeometryN(i);
+      if (poly) {
+        this._makeWallsFromPoly(poly);
+      }
+    }
+  }
+
+  async _makeWallsFromPoly(poly) {
+    const coords = poly.getCoordinates();
+    for (let i = 0; i < coords.length - 1; i++) {
+      const wallData = {
+        c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
+      };
+      const wallDoc = await WallDocument.create(wallData, {parent: canvas.scene});
+    }
+  }
+
+
+  _refreshGraphics() {
     this.clear();
 
     const gfx = new PIXI.Graphics();
@@ -230,6 +246,24 @@ export class Dungeon extends PlaceableObject {
       }
     }
     this.addChild(gfx);
+  }
+
+  async _refreshWalls() {
+    await this._deleteAllWalls();
+    if (this.geometry) {
+      if (this.geometry instanceof jsts.geom.MultiPolygon) {
+        await this._makeWallsFromMulti(this.geometry);
+      } else if (this.geometry instanceof jsts.geom.Polygon) {
+        await this._makeWallsFromPoly(this.geometry);
+      }
+    }
+  }
+
+  /** @override */
+  refresh() {
+    //if ( this._destroyed || this.shape._destroyed ) return;
+    this._refreshGraphics();
+    this._refreshWalls();
   }
 
   /* -------------------------------------------- */
