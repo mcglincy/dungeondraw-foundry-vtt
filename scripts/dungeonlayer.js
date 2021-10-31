@@ -71,6 +71,10 @@ export class DungeonLayer extends PlaceablesLayer {
         data.type = CONST.DRAWING_TYPES.RECTANGLE;
         data.points = [];
         break;
+      case "door":
+        data.type = CONST.DRAWING_TYPES.POLYGON;
+        data.points = [[0, 0]];
+        break;        
       case "ellipse":
         data.type = CONST.DRAWING_TYPES.ELLIPSE;
         data.points = [];
@@ -165,7 +169,7 @@ export class DungeonLayer extends PlaceablesLayer {
     }
     if (createState >= 1) {
       preview._onMouseDraw(event);
-      if (preview.data.type !== CONST.DRAWING_TYPES.POLYGON) {
+      if (preview.data.type !== CONST.DRAWING_TYPES.POLYGON || game.activeTool === "door") {
         event.data.createState = 2;
       }
     }    
@@ -176,13 +180,18 @@ export class DungeonLayer extends PlaceablesLayer {
     const { createState, destination, origin, preview } = event.data;
 
     // Successful drawing completion
-    if ( createState === 2 ) {
+    if (createState === 2) {
       const distance = Math.hypot(destination.x - origin.x, destination.y - origin.y);
       const minDistance = distance >= (canvas.dimensions.size / 8);
       const completePolygon = preview.isPolygon && (preview.data.points.length > 2);
 
-      // Create a completed drawing
-      if (minDistance || completePolygon) {
+      if (game.activeTool === "door") {
+        event.data.createState = 0;
+        const data = preview.data.toObject(false);
+        preview._chain = false;
+        this.dungeon.addDoor(data.x, data.y,
+          data.x + data.points[1][0], data.y + data.points[1][1]);
+      } else if (minDistance || completePolygon) {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;

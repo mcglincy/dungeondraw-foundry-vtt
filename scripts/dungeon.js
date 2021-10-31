@@ -4,8 +4,21 @@ import { DungeonLayer } from "./dungeonlayer.js";
 import * as jsts from "./jsts.js";
 
 class DungeonState {
-  constructor(...args) {
-    this.geometry = null;
+  constructor(geometry, doors) {
+    this.geometry = geometry;
+    this.doors = doors;
+  }
+
+  clone() {
+    const geoClone = this.geometry ? this.geometry.copy() : null;
+    return new DungeonState(
+      geoClone,
+      JSON.parse(JSON.stringify(this.doors))
+      );
+  }
+
+  static startState() {
+    return new DungeonState(null, []);
   }
 }
 
@@ -16,12 +29,12 @@ export class Dungeon extends PlaceableObject {
   constructor(...args) {
     super(...args);
 
-    /** time-ordered array of DungeonStates */
-    // TODO: currently just array of geometry
-    this.history = [];
-    this.historyIndex = -1;
-
+    /** local copy of Dungeon config from settings */
     this.config = null;
+
+    /** time-ordered array of DungeonStates */
+    this.history = [DungeonState.startState()];
+    this.historyIndex = 0;
 
     /**
      * Internal timestamp for the previous freehand draw time, to limit sampling
@@ -69,7 +82,8 @@ export class Dungeon extends PlaceableObject {
   /* -------------------------------------------- */
 
   deleteAll() {
-    this.history = [];
+    this.history = [DungeonState.startState()];
+    this.historyIndex = 0;
     this.refresh();
   }
 
@@ -86,7 +100,7 @@ export class Dungeon extends PlaceableObject {
   /* -------------------------------------------- */
 
   undo() {
-    this.historyIndex = Math.max(-1, this.historyIndex - 1);
+    this.historyIndex = Math.max(0, this.historyIndex - 1);
     console.log(`<<<historyIndex: ${this.historyIndex}`);
     console.log(`<<<history length: ${this.history.length}`);    
     this.refresh();
@@ -101,27 +115,38 @@ export class Dungeon extends PlaceableObject {
 
   /* -------------------------------------------- */
 
+  pushState(newState) {
+    // throw away any history states after current
+    for (let i = this.history.length - 1; i > this.historyIndex; i--) {
+      this.history.pop();
+    }
+    // and add our new state    
+    this.history.push(newState);
+    this.historyIndex++;
+    console.log(`<<<historyIndex: ${this.historyIndex}`);
+    console.log(`<<<history length: ${this.history.length}`);
+    console.log(this.history);  
+  }
+
+  addDoor(x1, y1, x2, y2) {
+    const newState = this.history[this.historyIndex].clone();
+    newState.doors.push([x1, y1, x2, y2]);
+    this.pushState(newState);
+    this.refresh();
+  }
+
   addRectangle(rect) {
     const reader = new jsts.io.WKTReader(); 
     const polyString = this._rectToWKTPolygonString(rect);
     const poly = reader.read(polyString);
 
-    if (this.historyIndex < 0) {
-      this.history.push(poly);
-      this.historyIndex = 0;
+    const newState = this.history[this.historyIndex].clone();    
+    if (newState.geometry) {
+      newState.geometry = newState.geometry.union(poly);
     } else {
-      const union = this.history[this.historyIndex].union(poly);
-      // TODO: decide how history should work for this
-      for (let i = this.history.length - 1; i > this.historyIndex; i--) {
-        this.history.pop();
-      }
-      this.history.push(union);
-      this.historyIndex = this.historyIndex + 1;
+      newState.geometry = poly;
     }
-
-    console.log(`<<<historyIndex: ${this.historyIndex}`);
-    console.log(`<<<history length: ${this.history.length}`);
-
+    this.pushState(newState);
     this.refresh();
   }
 
@@ -137,24 +162,54 @@ export class Dungeon extends PlaceableObject {
     return `POLYGON((${p[0]} ${p[1]}, ${p[2]} ${p[3]}, ${p[4]} ${p[5]}, ${p[6]} ${p[7]}, ${p[8]} ${p[9]}))`;
   }
 
-  _drawPolygon(gfx, poly) {
+  _drawPolygonRoom(gfx, poly) {
     const nums = poly.getCoordinates().map(c => [c.x, c.y]).flat();
     gfx.beginFill(PIXI.utils.string2hex(this.config.floorColor), 1.0);
     gfx.drawPolygon(nums);
     gfx.endFill();
-    gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0).drawPolygon(nums);
+    gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0);
+    gfx.drawPolygon(nums);
   }
 
-  _drawMultiPolygon(gfx, multi) {
+  _drawMultiPolygonRoom(gfx, multi) {
     for (let i = 0; i < multi.getNumGeometries(); i++) {
       const poly = multi.getGeometryN(i);
       if (poly) {
-        this._drawPolygon(gfx, poly);        
+        this._drawPolygonRoom(gfx, poly);        
       }
     }
   }
 
+  _distanceBetweenPoints(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  }
+
+  _drawDoor(gfx, door) {
+    const totalLength = this._distanceBetweenPoints(door[0], door[1], door[2], door[3]);
+    const jambLength = 10;
+    const rectLength = totalLength - (2 * jambLength);
+    const jambFraction = jambLength / totalLength;
+    const rectFraction = rectLength / totalLength;
+    const rectEndFraction = jambFraction + rectFraction;
+    const deltaX = door[2] - door[0];
+    const deltaY = door[3] - door[1];
+    const jamb1End = [door[0] + (deltaX * jambFraction), door[1] + (deltaY * jambFraction)];
+    const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
+
+    // jamb1, rectangle, jamb2
+    gfx.lineStyle(this.config.doorThickness, PIXI.utils.string2hex(this.config.doorColor), 1.0);
+    gfx.moveTo(door[0], door[1]);
+    gfx.lineTo(jamb1End[0], jamb1End[1]);
+    // cheating with just a thicker line; TODO: make an actual rect with some additional trig
+    gfx.lineStyle(this.config.doorThickness * 4, PIXI.utils.string2hex(this.config.doorColor), 1.0);
+    gfx.lineTo(rectEnd[0], rectEnd[1]);
+    gfx.lineStyle(this.config.doorThickness, PIXI.utils.string2hex(this.config.doorColor), 1.0);
+    gfx.lineTo(door[2], door[3]);
+  }
+
   async _deleteAllWalls() {
+    // TODO: does this include doors?
+    console.log(canvas.scene.data);
     for (const wall of canvas.scene.data.walls) {
       await wall.delete();
     }
@@ -179,12 +234,24 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  /** [[x1,y1,x2,y2],...] */
+  async _makeDoors(doors) {
+    for (const door of doors) {
+      const doorData = {
+        c: [door[0], door[1], door[2], door[3]],
+        door: 1
+      };
+      console.log(doorData);
+      const wallDoc = await WallDocument.create(doorData, {parent: canvas.scene});
+    }
+  }
+
   /** @override */
   refresh() {
     //if ( this._destroyed || this.shape._destroyed ) return;
 
     // stash latest-greatest config settings
-    this.config = game.settings.get(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING);    
+    this.config = game.settings.get(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING);        
     this._refreshGraphics();
     this._refreshWalls();
   }
@@ -192,28 +259,36 @@ export class Dungeon extends PlaceableObject {
   _refreshGraphics() {
     this.clear();
 
+    const state = this.history[this.historyIndex];
+
     const gfx = new PIXI.Graphics();
-    if (this.historyIndex >= 0) {
-      const geometry = this.history[this.historyIndex];
-      if (geometry instanceof jsts.geom.MultiPolygon) {
-        this._drawMultiPolygon(gfx, geometry);
-      } else if (geometry instanceof jsts.geom.Polygon) {
-        this._drawPolygon(gfx, geometry);
+    if (state.geometry) {
+      if (state.geometry instanceof jsts.geom.MultiPolygon) {
+        this._drawMultiPolygonRoom(gfx, state.geometry);
+      } else if (state.geometry instanceof jsts.geom.Polygon) {
+        this._drawPolygonRoom(gfx, state.geometry);
       }
+    }
+    for (let door of state.doors) {
+      this._drawDoor(gfx, door);
     }
     this.addChild(gfx);
   }
 
   async _refreshWalls() {
     await this._deleteAllWalls();
-    if (this.historyIndex >= 0) {
-      const geometry = this.history[this.historyIndex];
-      if (geometry instanceof jsts.geom.MultiPolygon) {
-        await this._makeWallsFromMulti(geometry);
-      } else if (geometry instanceof jsts.geom.Polygon) {
-        await this._makeWallsFromPoly(geometry);
+
+    const state = this.history[this.historyIndex];
+
+    if (state.geometry) {
+      if (state.geometry instanceof jsts.geom.MultiPolygon) {
+        await this._makeWallsFromMulti(state.geometry);
+      } else if (state.geometry instanceof jsts.geom.Polygon) {
+        await this._makeWallsFromPoly(state.geometry);
       }
     }
+
+    await this._makeDoors(state.doors);
   }
 
   /* -------------------------------------------- */

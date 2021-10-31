@@ -8,6 +8,8 @@
   "DD.ButtonTitleUndo": "Undo",
   "DD.ConfigDefaultTitle": "Dungeon Config Default",
   "DD.ConfigTitle": "Dungeon Config",
+  "DD.DoorColor": "Door Color",
+  "DD.DoorThickness": "Door Thickness",
   "DD.FloorColor": "Floor Color",
   "DD.SceneControlTitle": "Dungeon Draw",
   "DD.SettingsHint": "Configure Dungeon settings.",

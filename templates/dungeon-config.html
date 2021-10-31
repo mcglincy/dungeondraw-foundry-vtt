@@ -12,6 +12,14 @@
       <div class="wallfloor-section">
         <hr>
         <div class="form-group">
+          <label>{{localize "DD.DoorColor"}}</label>
+          <input type="color" name="doorColor" value="{{object.doorColor}}" data-dtype="String"/>
+        </div>
+        <div class="form-group">
+          <label for="doorThickness">{{localize "DD.DoorThickness"}}</label>
+          <input type="text" name="doorThickness" value="{{object.doorThickness}}" data-dtype="Number"/>
+        </div>
+        <div class="form-group">
           <label>{{localize "DD.FloorColor"}}</label>
           <input type="color" name="floorColor" value="{{object.floorColor}}" data-dtype="String"/>
         </div>

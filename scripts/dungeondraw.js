@@ -40,14 +40,15 @@ export class DungeonDraw {
       //visible: game.user.can("DRAWING_CREATE"),
       visible: true,
       tools: [
-        {
-          name: "select",
-          title: "DD.ButtonTitleSelect",
-          icon: "fas fa-expand",
-          onClick: () => {
-            notImplementedYet();
-          },
-        },
+        // TODO: implement
+        // {
+        //   name: "select",
+        //   title: "DD.ButtonTitleSelect",
+        //   icon: "fas fa-expand",
+        //   onClick: () => {
+        //     notImplementedYet();
+        //   },
+        // },
         {
           name: "rect",
           title: "DD.ButtonTitleRect",
@@ -60,7 +61,6 @@ export class DungeonDraw {
           title: "DD.ButtonTitleDoor",
           icon: "fas fa-door-open",
           onClick: () => {
-            notImplementedYet();
           },
         },
         {
