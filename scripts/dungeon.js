@@ -101,15 +101,11 @@ export class Dungeon extends PlaceableObject {
 
   undo() {
     this.historyIndex = Math.max(0, this.historyIndex - 1);
-    console.log(`<<<historyIndex: ${this.historyIndex}`);
-    console.log(`<<<history length: ${this.history.length}`);    
     this.refresh();
   }
 
   redo() {
     this.historyIndex = Math.min(this.history.length - 1, this.historyIndex + 1);
-    console.log(`<<<historyIndex: ${this.historyIndex}`);
-    console.log(`<<<history length: ${this.history.length}`);    
     this.refresh();
   }
 
@@ -123,9 +119,6 @@ export class Dungeon extends PlaceableObject {
     // and add our new state    
     this.history.push(newState);
     this.historyIndex++;
-    console.log(`<<<historyIndex: ${this.historyIndex}`);
-    console.log(`<<<history length: ${this.history.length}`);
-    console.log(this.history);  
   }
 
   addDoor(x1, y1, x2, y2) {
@@ -208,8 +201,7 @@ export class Dungeon extends PlaceableObject {
   }
 
   async _deleteAllWalls() {
-    // TODO: does this include doors?
-    console.log(canvas.scene.data);
+    // this includes doors, which are just walls with a door value set
     for (const wall of canvas.scene.data.walls) {
       await wall.delete();
     }
@@ -241,7 +233,6 @@ export class Dungeon extends PlaceableObject {
         c: [door[0], door[1], door[2], door[3]],
         door: 1
       };
-      console.log(doorData);
       const wallDoc = await WallDocument.create(doorData, {parent: canvas.scene});
     }
   }
