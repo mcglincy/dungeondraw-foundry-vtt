@@ -19,6 +19,7 @@ export class Dungeon extends PlaceableObject {
     /** time-ordered array of DungeonStates */
     // TODO: currently just array of geometry
     this.history = [];
+    this.historyIndex = -1;
 
     this.config = null;
 
@@ -84,17 +85,42 @@ export class Dungeon extends PlaceableObject {
 
   /* -------------------------------------------- */
 
+  undo() {
+    this.historyIndex = Math.max(-1, this.historyIndex - 1);
+    console.log(`<<<historyIndex: ${this.historyIndex}`);
+    console.log(`<<<history length: ${this.history.length}`);    
+    this.refresh();
+  }
+
+  redo() {
+    this.historyIndex = Math.min(this.history.length - 1, this.historyIndex + 1);
+    console.log(`<<<historyIndex: ${this.historyIndex}`);
+    console.log(`<<<history length: ${this.history.length}`);    
+    this.refresh();
+  }
+
+  /* -------------------------------------------- */
+
   addRectangle(rect) {
     const reader = new jsts.io.WKTReader(); 
     const polyString = this._rectToWKTPolygonString(rect);
     const poly = reader.read(polyString);
 
-    if (this.history.length) {
-      const union = this.history[this.history.length - 1].union(poly);
-      this.history.push(union);
-    } else {
+    if (this.historyIndex < 0) {
       this.history.push(poly);
+      this.historyIndex = 0;
+    } else {
+      const union = this.history[this.historyIndex].union(poly);
+      // TODO: decide how history should work for this
+      for (let i = this.history.length - 1; i > this.historyIndex; i--) {
+        this.history.pop();
+      }
+      this.history.push(union);
+      this.historyIndex = this.historyIndex + 1;
     }
+
+    console.log(`<<<historyIndex: ${this.historyIndex}`);
+    console.log(`<<<history length: ${this.history.length}`);
 
     this.refresh();
   }
@@ -167,8 +193,8 @@ export class Dungeon extends PlaceableObject {
     this.clear();
 
     const gfx = new PIXI.Graphics();
-    if (this.history) {
-      const geometry = this.history[this.history.length - 1];
+    if (this.historyIndex >= 0) {
+      const geometry = this.history[this.historyIndex];
       if (geometry instanceof jsts.geom.MultiPolygon) {
         this._drawMultiPolygon(gfx, geometry);
       } else if (geometry instanceof jsts.geom.Polygon) {
@@ -180,8 +206,8 @@ export class Dungeon extends PlaceableObject {
 
   async _refreshWalls() {
     await this._deleteAllWalls();
-    if (this.history) {
-      const geometry = this.history[this.history.length - 1];
+    if (this.historyIndex >= 0) {
+      const geometry = this.history[this.historyIndex];
       if (geometry instanceof jsts.geom.MultiPolygon) {
         await this._makeWallsFromMulti(geometry);
       } else if (geometry instanceof jsts.geom.Polygon) {

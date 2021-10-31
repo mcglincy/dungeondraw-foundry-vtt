@@ -68,7 +68,7 @@ export class DungeonDraw {
           title: "DD.ButtonTitleUndo",
           icon: "fas fa-undo",
           onClick: () => {
-            notImplementedYet();
+            canvas.dungeon.dungeon.undo();
           },
         },
         {
@@ -76,7 +76,7 @@ export class DungeonDraw {
           title: "DD.ButtonTitleRedo",
           icon: "fas fa-redo",
           onClick: () => {
-            notImplementedYet();
+            canvas.dungeon.dungeon.redo();
           },          
         },
         {
