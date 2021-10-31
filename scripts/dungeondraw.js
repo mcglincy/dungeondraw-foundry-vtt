@@ -70,6 +70,7 @@ export class DungeonDraw {
           onClick: () => {
             canvas.dungeon.dungeon.undo();
           },
+          button: true
         },
         {
           name: "redo",
@@ -78,6 +79,7 @@ export class DungeonDraw {
           onClick: () => {
             canvas.dungeon.dungeon.redo();
           },          
+          button: true
         },
         {
           name: "config",
