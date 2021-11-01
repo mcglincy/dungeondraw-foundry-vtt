@@ -84,21 +84,6 @@ export class Dungeon extends PlaceableObject {
     /** time-ordered array of DungeonStates */
     this.history = [DungeonState.startState()];
     this.historyIndex = 0;
-
-    /**
-     * Internal timestamp for the previous freehand draw time, to limit sampling
-     * @type {number}
-     * @private
-     */
-    // this._drawTime = 0;
-    // this._sampleTime = 0;
-
-    /**
-     * Internal flag for the permanent points of the polygon
-     * @type {boolean}
-     * @private
-     */
-    // this._fixedPoints = foundry.utils.deepClone(this.data.points || []);
   }
 
   /* -------------------------------------------- */
@@ -110,23 +95,9 @@ export class Dungeon extends PlaceableObject {
 
   /* -------------------------------------------- */
 
-  /**
-   * The rate at which points are sampled (in milliseconds) during a freehand drawing workflow
-   * @type {number}
-   */
-  //static FREEHAND_SAMPLE_RATE = 75;
-
   /* -------------------------------------------- */
   /*  Properties                                  */
   /* -------------------------------------------- */
-
-  /**
-   * A Boolean flag for whether or not the Drawing utilizes a tiled texture background
-   * @type {boolean}
-   */
-  // get isTiled() {
-  //   return this.data.fillType === CONST.DRAWING_FILL_TYPES.PATTERN;
-  // }
 
   /* -------------------------------------------- */
 
@@ -161,6 +132,11 @@ export class Dungeon extends PlaceableObject {
   }
 
   /* -------------------------------------------- */
+
+  async loadFromScene() {
+    const savedState = await DungeonState.loadFromScene();
+    this.pushState(savedState);
+  };
 
   pushState(newState) {
     // throw away any history states after current
@@ -255,7 +231,6 @@ export class Dungeon extends PlaceableObject {
 
   /** @override */
   async refresh() {
-    console.log("***** refresh");
     //if ( this._destroyed || this.shape._destroyed ) return;
 
     // stash latest-greatest config settings
@@ -267,10 +242,8 @@ export class Dungeon extends PlaceableObject {
 
   _refreshGraphics() {
     this.clear();
-
-    const state = this.history[this.historyIndex];
-
     const gfx = new PIXI.Graphics();
+    const state = this.history[this.historyIndex];
     if (state.geometry) {
       if (state.geometry instanceof jsts.geom.MultiPolygon) {
         this._drawMultiPolygonRoom(gfx, state.geometry);
@@ -285,11 +258,8 @@ export class Dungeon extends PlaceableObject {
   }
 
   async _refreshWalls() {
-    console.log("****** refreshWalls");
     await this._deleteAllWalls();
-
     const state = this.history[this.historyIndex];
-
     if (state.geometry) {
       if (state.geometry instanceof jsts.geom.MultiPolygon) {
         await this._makeWallsFromMulti(state.geometry);
@@ -297,19 +267,19 @@ export class Dungeon extends PlaceableObject {
         await this._makeWallsFromPoly(state.geometry);
       }
     }
-
     await this._makeDoors(state.doors);
-    console.log(canvas.scene.walls);
   }
 
   async _deleteAllWalls() {
-    console.log("****** deleteAllWalls");    
     const ids = canvas.scene.walls.map(w => w.id);
-    await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
+    try {
+      await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
+    } catch(error) {
+      console.error(error);
+    }
   }
 
   async _makeWallsFromMulti(multi) {
-    console.log("****** makeWallsFromMulti");    
     for (let i = 0; i < multi.getNumGeometries(); i++) {
       const poly = multi.getGeometryN(i);
       if (poly) {
@@ -319,7 +289,6 @@ export class Dungeon extends PlaceableObject {
   }
 
   async _makeWallsFromPoly(poly) {
-    console.log("****** makeWallsFromPoly");
     const allWalls = [];
     const coords = poly.getCoordinates();
     for (let i = 0; i < coords.length - 1; i++) {
@@ -335,13 +304,13 @@ export class Dungeon extends PlaceableObject {
 
   /** [[x1,y1,x2,y2],...] */
   async _makeDoors(doors) {
-    console.log("****** makeDoors");
     const allDoors = [];
     for (const door of doors) {
       const doorData = {
         c: [door[0], door[1], door[2], door[3]],
         door: 1
       };
+      allDoors.push(doorData);
     }
     if (allDoors.length) {
       await canvas.scene.createEmbeddedDocuments("Wall", allDoors);

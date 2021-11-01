@@ -19,6 +19,7 @@ export class DungeonLayer extends PlaceablesLayer {
 
   constructor() {
     super();
+    this.dungeonContainer = null;
     this.dungeon = null;
   }
 
@@ -120,23 +121,18 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @inheritdoc */
   async draw() {
-    console.log("****** dungeonLayer.draw()");
     await super.draw();
     return this;
   }  
 
   async loadDungeon() {
-    console.log("***** loadDungeon");
     const data = {};
-    // TODO: it seems like document isn't really needed here?    
+    // TODO: it seems like DungeonDocument isn't really needed here?    
     const document = new DungeonDocument(data, {parent: canvas.scene});
     this.dungeon = new Dungeon(document);
-    // TODO: refactor into Dungeon?
-    const savedState = await DungeonState.loadFromScene();
-    this.dungeon.pushState(savedState);
-    // TODO: where should dungeon's draw be done?
-    //XXX this.dungeon.draw();
-    this.addChild(this.dungeon);    
+    await this.dungeon.loadFromScene();
+    // add dungeon underneath any placeables or drawing preview
+    this.addChildAt(this.dungeon, 0);
   }
 
   /* -------------------------------------------- */
@@ -156,6 +152,7 @@ export class DungeonLayer extends PlaceablesLayer {
   /** @override */
   async _onDragLeftStart(event) {
     await super._onDragLeftStart(event);
+    console.log(this.preview);
 
     // we use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
