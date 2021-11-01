@@ -185,12 +185,25 @@ export class Dungeon extends PlaceableObject {
   }
 
   _drawPolygonRoom(gfx, poly) {
-    const nums = poly.getCoordinates().map(c => [c.x, c.y]).flat();
+    const exterior = poly.getExteriorRing();
+    const nums = exterior.getCoordinates().map(c => [c.x, c.y]).flat();
     gfx.beginFill(PIXI.utils.string2hex(this.config.floorColor), 1.0);
     gfx.drawPolygon(nums);
     gfx.endFill();
     gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0);
     gfx.drawPolygon(nums);
+
+    // draw interior holes
+    const numHoles = poly.getNumInteriorRing();    
+    for (let i = 0; i < numHoles; i++) {
+      const hole = poly.getInteriorRingN(i);
+      const nums = hole.getCoordinates().map(c => [c.x, c.y]).flat();
+      gfx.beginFill(0x888888, 1.0);
+      gfx.drawPolygon(nums);
+      gfx.endFill();
+      gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0);
+      gfx.drawPolygon(nums);
+    }
   }
 
   _drawMultiPolygonRoom(gfx, multi) {
@@ -290,12 +303,24 @@ export class Dungeon extends PlaceableObject {
 
   async _makeWallsFromPoly(poly) {
     const allWalls = [];
-    const coords = poly.getCoordinates();
+    const exterior = poly.getExteriorRing();
+    const coords = exterior.getCoordinates();
     for (let i = 0; i < coords.length - 1; i++) {
       const wallData = {
         c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
       };
       allWalls.push(wallData);
+    }
+    const numHoles = poly.getNumInteriorRing();    
+    for (let i = 0; i < numHoles; i++) {
+      const hole = poly.getInteriorRingN(i);
+      const coords = hole.getCoordinates();
+      for (let i = 0; i < coords.length - 1; i++) {
+        const wallData = {
+          c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
+        };
+        allWalls.push(wallData);
+      }      
     }
     if (allWalls.length) {      
       await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
