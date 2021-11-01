@@ -24,8 +24,6 @@ export class DungeonDraw {
     //   return;
     // }
 
-    console.log("***** getSceneControlButtons");
-
     CONFIG.Canvas.layers.dungeon = DungeonLayer;
     CONFIG.Dungeon = {
       documentClass: DungeonDocument,
@@ -104,9 +102,9 @@ export class DungeonDraw {
     });
   }
 
-  static canvasReady(canvase) {
+  static async canvasReady(canvase) {
     console.log("****** canvas ready");
-    console.log(canvas);
+    await canvas.dungeon.loadDungeon();
   }
 }
 

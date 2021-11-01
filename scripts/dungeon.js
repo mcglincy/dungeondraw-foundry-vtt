@@ -66,9 +66,7 @@ export class DungeonState {
     if (!s) {
       return DungeonState.startState();
     }
-    console.log(s);
     const obj = JSON.parse(s);
-    console.log(obj);
     return new DungeonState(wktToGeometry(obj.wkt), obj.doors);
   }
 }
@@ -152,13 +150,13 @@ export class Dungeon extends PlaceableObject {
 
   undo() {
     this.historyIndex = Math.max(0, this.historyIndex - 1);
-    newState.saveToScene();
+    this.history[this.historyIndex].saveToScene();
     this.refresh();
   }
 
   redo() {
     this.historyIndex = Math.min(this.history.length - 1, this.historyIndex + 1);
-    newState.saveToScene();
+    this.history[this.historyIndex].saveToScene();
     this.refresh();
   }
 
@@ -172,11 +170,6 @@ export class Dungeon extends PlaceableObject {
     // and add our new state    
     this.history.push(newState);
     this.historyIndex++;
-    // if (newState.geometry) {
-    //   console.log(newState.geometry);
-    //   console.log(JSON.stringify(newState.geometry));
-    //   console.log(geometryToWkt(newState.geometry));      
-    // }
 
     // TODO: make this await?
     newState.saveToScene();
@@ -260,66 +253,16 @@ export class Dungeon extends PlaceableObject {
     gfx.lineTo(door[2], door[3]);
   }
 
-  async _deleteAllWalls() {
-    // this includes doors, which are just walls with a door value set
-    for (const wall of canvas.scene.data.walls) {
-      try {
-        // TODO: debug errors we're seeing when switching scenes
-        // dungeon.js:269 Error: The key Kx81UnLone3apJRt does not exist in the EmbeddedCollection Collection
-        // at Map.get (/Applications/FoundryVTT.app/Contents/Resources/app/common/utils/collection.mjs:106)
-        // at ServerDatabaseBackend._deleteEmbeddedDocuments (/Applications/FoundryVTT.app/Contents/Resources/app/dist/database/backend/server-backend.mjs:1)
-        // at ServerDatabaseBackend.delete (/Applications/FoundryVTT.app/Contents/Resources/app/common/abstract/backend.mjs:214)
-        // at async Socket.handleEvent (/Applications/FoundryVTT.app/Contents/Resources/app/dist/server/sockets.mjs:1)        
-        //
-        // are we trying to delete too early/late when switching?
-        // or is this a race, and we should be awaiting?
-        // It also seems like this is endemic to Foundry v8, based on Discord searches.
-        await wall.delete();
-      } catch(error) {
-        console.error(error);
-      }
-    }
-  }
-
-  _makeWallsFromMulti(multi) {
-    for (let i = 0; i < multi.getNumGeometries(); i++) {
-      const poly = multi.getGeometryN(i);
-      if (poly) {
-        this._makeWallsFromPoly(poly);
-      }
-    }
-  }
-
-  async _makeWallsFromPoly(poly) {
-    const coords = poly.getCoordinates();
-    for (let i = 0; i < coords.length - 1; i++) {
-      const wallData = {
-        c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
-      };
-      const wallDoc = await WallDocument.create(wallData, {parent: canvas.scene});
-    }
-  }
-
-  /** [[x1,y1,x2,y2],...] */
-  async _makeDoors(doors) {
-    for (const door of doors) {
-      const doorData = {
-        c: [door[0], door[1], door[2], door[3]],
-        door: 1
-      };
-      const wallDoc = await WallDocument.create(doorData, {parent: canvas.scene});
-    }
-  }
-
   /** @override */
-  refresh() {
+  async refresh() {
+    console.log("***** refresh");
     //if ( this._destroyed || this.shape._destroyed ) return;
 
     // stash latest-greatest config settings
     this.config = game.settings.get(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING);        
-    this._refreshGraphics();
+    await this._refreshGraphics();
     // TODO can refresh be async, and we can await refreshing/deleting walls?
-    this._refreshWalls();
+    await this._refreshWalls();
   }
 
   _refreshGraphics() {
@@ -342,6 +285,7 @@ export class Dungeon extends PlaceableObject {
   }
 
   async _refreshWalls() {
+    console.log("****** refreshWalls");
     await this._deleteAllWalls();
 
     const state = this.history[this.historyIndex];
@@ -355,74 +299,52 @@ export class Dungeon extends PlaceableObject {
     }
 
     await this._makeDoors(state.doors);
+    console.log(canvas.scene.walls);
   }
 
-  /* -------------------------------------------- */
-
-  /**
-   * Handle mouse movement which modifies the dimensions of the drawn shape
-   * @param {PIXI.InteractionEvent} event
-   * @private
-   */
-   /*
-  _onMouseDraw(event) {
-    const {destination, originalEvent} = event.data;
-    const isShift = originalEvent.shiftKey;
-    const isAlt = originalEvent.altKey;
-
-    // Determine position
-    let position = destination;
-    if (!isShift) {
-      position = canvas.grid.getSnappedPosition(position.x, position.y, this.layer.gridPrecision);
-    } else {
-      position = {x: Math.round(position.x), y: Math.round(position.y)};
-    }
-
-    // Drag differently depending on shape type
-    switch ( this.data.type ) {
-      // Polygon Shapes
-      case CONST.DRAWING_TYPES.POLYGON:
-        this._addPoint(position, true);
-        break;
-
-      // Geometric Shapes
-      default:
-        let dx = (position.x - this.data.x) || (canvas.dimensions.size * Math.sign(this.data.width) * 0.5);
-        let dy = (position.y - this.data.y) || (canvas.dimensions.size * Math.sign(this.data.height) * 0.5);
-        if ( isAlt ) {
-          dx = Math.abs(dy) < Math.abs(dx) ? Math.abs(dy) * Math.sign(dx) : dx;
-          dy = Math.abs(dx) < Math.abs(dy) ? Math.abs(dx) * Math.sign(dy) : dy;
-        }
-        this.data.update({width: dx, height: dy});
-    }
-
-    // Refresh the display
-    this.refresh();
+  async _deleteAllWalls() {
+    console.log("****** deleteAllWalls");    
+    const ids = canvas.scene.walls.map(w => w.id);
+    await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
   }
-  */
 
-  /**
-   * Add a new polygon point to the drawing, ensuring it differs from the last one
-   * @private
-   */
-  // _addPoint(position, temporary=true) {
-  //   const point = [position.x - this.data.x, position.y - this.data.y];
-  //   const points = this._fixedPoints.concat([point]);
-  //   this.data.update({points});
-  //   if ( !temporary ) {
-  //     this._fixedPoints = points
-  //     this._drawTime = Date.now();
-  //   }
-  // }
+  async _makeWallsFromMulti(multi) {
+    console.log("****** makeWallsFromMulti");    
+    for (let i = 0; i < multi.getNumGeometries(); i++) {
+      const poly = multi.getGeometryN(i);
+      if (poly) {
+        await this._makeWallsFromPoly(poly);
+      }
+    }
+  }
 
-  /* -------------------------------------------- */
+  async _makeWallsFromPoly(poly) {
+    console.log("****** makeWallsFromPoly");
+    const allWalls = [];
+    const coords = poly.getCoordinates();
+    for (let i = 0; i < coords.length - 1; i++) {
+      const wallData = {
+        c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
+      };
+      allWalls.push(wallData);
+    }
+    if (allWalls.length) {      
+      await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
+    }
+  }
 
-  /**
-   * Remove the last fixed point from the polygon
-   * @private
-   */
-  // _removePoint() {
-  //   if ( this._fixedPoints.length ) this._fixedPoints.pop();
-  //   this.data.update({points: this._fixedPoints});
-  // }  
+  /** [[x1,y1,x2,y2],...] */
+  async _makeDoors(doors) {
+    console.log("****** makeDoors");
+    const allDoors = [];
+    for (const door of doors) {
+      const doorData = {
+        c: [door[0], door[1], door[2], door[3]],
+        door: 1
+      };
+    }
+    if (allDoors.length) {
+      await canvas.scene.createEmbeddedDocuments("Wall", allDoors);
+    }
+  }  
 }

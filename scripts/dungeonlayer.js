@@ -120,7 +120,13 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @inheritdoc */
   async draw() {
+    console.log("****** dungeonLayer.draw()");
     await super.draw();
+    return this;
+  }  
+
+  async loadDungeon() {
+    console.log("***** loadDungeon");
     const data = {};
     // TODO: it seems like document isn't really needed here?    
     const document = new DungeonDocument(data, {parent: canvas.scene});
@@ -129,10 +135,9 @@ export class DungeonLayer extends PlaceablesLayer {
     const savedState = await DungeonState.loadFromScene();
     this.dungeon.pushState(savedState);
     // TODO: where should dungeon's draw be done?
-    this.dungeon.draw();
-    this.addChild(this.dungeon);
-    return this;
-  }  
+    //XXX this.dungeon.draw();
+    this.addChild(this.dungeon);    
+  }
 
   /* -------------------------------------------- */
   /*  Event Listeners and Handlers                */
