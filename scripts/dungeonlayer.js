@@ -1,4 +1,4 @@
-import { Dungeon } from "./dungeon.js";
+import { Dungeon, DungeonState } from "./dungeon.js";
 import { DungeonConfig } from "./dungeonconfig.js";
 import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonDraw } from "./dungeondraw.js";
@@ -122,8 +122,12 @@ export class DungeonLayer extends PlaceablesLayer {
   async draw() {
     await super.draw();
     const data = {};
+    // TODO: it seems like document isn't really needed here?    
     const document = new DungeonDocument(data, {parent: canvas.scene});
     this.dungeon = new Dungeon(document);
+    // TODO: refactor into Dungeon?
+    const savedState = await DungeonState.loadFromScene();
+    this.dungeon.pushState(savedState);
     // TODO: where should dungeon's draw be done?
     this.dungeon.draw();
     this.addChild(this.dungeon);

@@ -3,22 +3,73 @@ import { DungeonLayer } from "./dungeonlayer.js";
 // TODO: decide if we want to use turf.js instead
 import * as jsts from "./jsts.js";
 
-class DungeonState {
+const geometryToWkt = (geometry) => {
+  if (!geometry) {
+    return null;
+  }
+  const precisionModel = new jsts.geom.PrecisionModel();
+  const factory = new jsts.geom.GeometryFactory(precisionModel);
+  const wktWriter = new jsts.io.WKTWriter(factory);
+  return wktWriter.write(geometry);
+};
+
+const wktToGeometry = (wkt) => {
+  if (!wkt) {
+    return null;
+  }
+  const wktReader = new jsts.io.WKTReader(); 
+  return wktReader.read(wkt);
+};
+
+export class DungeonState {
+  static FLAG_KEY = "dungeonState";
+
   constructor(geometry, doors) {
     this.geometry = geometry;
     this.doors = doors;
   }
 
   clone() {
-    const geoClone = this.geometry ? this.geometry.copy() : null;
     return new DungeonState(
-      geoClone,
+      this.geometry ? this.geometry.copy() : null,
       JSON.parse(JSON.stringify(this.doors))
       );
   }
 
+  toString() {
+    return JSON.stringify({
+      // serialize the geometry object as a WKT string
+      wkt: geometryToWkt(this.geometry),
+      doors: this.doors,
+    });
+  }
+
+  async saveToScene() {
+    const serialized = this.toString();
+    await canvas.scene.setFlag(DungeonDraw.MODULE_NAME, DungeonState.FLAG_KEY, serialized);
+  }
+
+  static async loadFromScene() {
+    const flagVal = canvas.scene.getFlag(DungeonDraw.MODULE_NAME, DungeonState.FLAG_KEY);
+    if (flagVal) {
+      return DungeonState.fromString(flagVal);
+    } else {
+      return DungeonState.startState();
+    }
+  }
+
   static startState() {
     return new DungeonState(null, []);
+  }
+
+  static fromString(s) {
+    if (!s) {
+      return DungeonState.startState();
+    }
+    console.log(s);
+    const obj = JSON.parse(s);
+    console.log(obj);
+    return new DungeonState(wktToGeometry(obj.wkt), obj.doors);
   }
 }
 
@@ -101,11 +152,13 @@ export class Dungeon extends PlaceableObject {
 
   undo() {
     this.historyIndex = Math.max(0, this.historyIndex - 1);
+    newState.saveToScene();
     this.refresh();
   }
 
   redo() {
     this.historyIndex = Math.min(this.history.length - 1, this.historyIndex + 1);
+    newState.saveToScene();
     this.refresh();
   }
 
@@ -119,13 +172,21 @@ export class Dungeon extends PlaceableObject {
     // and add our new state    
     this.history.push(newState);
     this.historyIndex++;
+    // if (newState.geometry) {
+    //   console.log(newState.geometry);
+    //   console.log(JSON.stringify(newState.geometry));
+    //   console.log(geometryToWkt(newState.geometry));      
+    // }
+
+    // TODO: make this await?
+    newState.saveToScene();
+    this.refresh();
   }
 
   addDoor(x1, y1, x2, y2) {
     const newState = this.history[this.historyIndex].clone();
     newState.doors.push([x1, y1, x2, y2]);
     this.pushState(newState);
-    this.refresh();
   }
 
   addRectangle(rect) {
@@ -140,7 +201,6 @@ export class Dungeon extends PlaceableObject {
       newState.geometry = poly;
     }
     this.pushState(newState);
-    this.refresh();
   }
 
   _rectToWKTPolygonString(rect) {
@@ -203,7 +263,21 @@ export class Dungeon extends PlaceableObject {
   async _deleteAllWalls() {
     // this includes doors, which are just walls with a door value set
     for (const wall of canvas.scene.data.walls) {
-      await wall.delete();
+      try {
+        // TODO: debug errors we're seeing when switching scenes
+        // dungeon.js:269 Error: The key Kx81UnLone3apJRt does not exist in the EmbeddedCollection Collection
+        // at Map.get (/Applications/FoundryVTT.app/Contents/Resources/app/common/utils/collection.mjs:106)
+        // at ServerDatabaseBackend._deleteEmbeddedDocuments (/Applications/FoundryVTT.app/Contents/Resources/app/dist/database/backend/server-backend.mjs:1)
+        // at ServerDatabaseBackend.delete (/Applications/FoundryVTT.app/Contents/Resources/app/common/abstract/backend.mjs:214)
+        // at async Socket.handleEvent (/Applications/FoundryVTT.app/Contents/Resources/app/dist/server/sockets.mjs:1)        
+        //
+        // are we trying to delete too early/late when switching?
+        // or is this a race, and we should be awaiting?
+        // It also seems like this is endemic to Foundry v8, based on Discord searches.
+        await wall.delete();
+      } catch(error) {
+        console.error(error);
+      }
     }
   }
 
@@ -244,6 +318,7 @@ export class Dungeon extends PlaceableObject {
     // stash latest-greatest config settings
     this.config = game.settings.get(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING);        
     this._refreshGraphics();
+    // TODO can refresh be async, and we can await refreshing/deleting walls?
     this._refreshWalls();
   }
 

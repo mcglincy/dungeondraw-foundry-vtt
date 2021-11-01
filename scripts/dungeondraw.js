@@ -10,7 +10,8 @@ const notImplementedYet = () => {
 export class DungeonDraw {
 
   static MODULE_ID = "DD";
-  static MODULE_NAME = "dungeondraw"
+  // module name from module.json
+  static MODULE_NAME = "dungeon-draw"
 
   static init() {
     console.log("***** DUNGEON DRAW *****");
@@ -23,8 +24,9 @@ export class DungeonDraw {
     //   return;
     // }
 
+    console.log("***** getSceneControlButtons");
+
     CONFIG.Canvas.layers.dungeon = DungeonLayer;
-    //     if ( control ) canvas[control.layer].activate();
     CONFIG.Dungeon = {
       documentClass: DungeonDocument,
       layerClass: DungeonLayer,
@@ -101,7 +103,13 @@ export class DungeonDraw {
       activeTool: "rect"
     });
   }
+
+  static canvasReady(canvase) {
+    console.log("****** canvas ready");
+    console.log(canvas);
+  }
 }
 
 Hooks.on("init", DungeonDraw.init);
 Hooks.on("getSceneControlButtons", DungeonDraw.getSceneControlButtons);
+Hooks.on("canvasReady", DungeonDraw.canvasReady);
