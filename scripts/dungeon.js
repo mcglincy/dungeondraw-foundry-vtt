@@ -200,17 +200,39 @@ export class Dungeon extends PlaceableObject {
     return false;
   }
 
+  // _inflateGeometry(geometry, distance) {
+  //   return geometry.buffer(spacing, jsts.operation.buffer.BufferParameters.CAP_FLAT);
+  // }
+
   _drawPolygonRoom(gfx, poly) {
     const exterior = poly.getExteriorRing();
     const coords = exterior.getCoordinates();
     const flatCoords = coords.map(c => [c.x, c.y]).flat();
+
+    // draw outside shadow
+    const expanded = exterior.buffer(25.0);
+    gfx.beginFill(0x000000, 0.2);
+    gfx.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
+    gfx.endFill();
 
     // draw floor
     gfx.beginFill(PIXI.utils.string2hex(this.config.floorColor), 1.0);
     gfx.drawPolygon(flatCoords);
     gfx.endFill();
 
-    // draw inner wall shadows
+    // cut out holes
+    const numHoles = poly.getNumInteriorRing();    
+    for (let i = 0; i < numHoles; i++) {
+      const hole = poly.getInteriorRingN(i);
+      const coords = hole.getCoordinates();
+      const flatCoords = coords.map(c => [c.x, c.y]).flat();
+      gfx.lineStyle(0, 0x000000, 1.0, 1, 0.5);
+      gfx.beginHole();
+      gfx.drawPolygon(flatCoords);
+      gfx.endHole();
+    }
+
+    // draw inner wall drop shadows
     gfx.lineStyle(this.config.wallThickness / 2.0 + 8.0, 0x000000, 0.2, 1);
     for (let i = 0; i < coords.length - 1; i++) {
       gfx.moveTo(coords[i].x, coords[i].y);
@@ -219,27 +241,39 @@ export class Dungeon extends PlaceableObject {
       } 
     }
 
+    // trying offset wall shadow
+    // const offset = this.config.wallThickness;
+    // gfx.lineStyle(this.config.wallThickness, 0x000000, 0.2, 0.5);
+    // for (let i = 0; i < coords.length - 1; i++) {
+    //   gfx.moveTo(coords[i].x + offset, coords[i].y + offset);
+    //   gfx.lineTo(coords[i+1].x + offset, coords[i+1].y + offset);
+    // }    
+
     // draw outer wall poly
     gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0, 0.5);
     gfx.drawPolygon(flatCoords);
 
-    // draw interior holes
-    const numHoles = poly.getNumInteriorRing();    
+    // draw interior hole walls/shadows
+    //const numHoles = poly.getNumInteriorRing();    
     for (let i = 0; i < numHoles; i++) {
+
       const hole = poly.getInteriorRingN(i);
       const coords = hole.getCoordinates();
       const flatCoords = coords.map(c => [c.x, c.y]).flat();
-      // draw hole floor
-      console.log(canvas.scene.data.backgroundColor);
-      gfx.beginFill(PIXI.utils.string2hex(canvas.scene.data.backgroundColor), 1.0);
+
+      // draw hole inside shadow
+      // TODO: buffer() with negative number results in no-coord poly, 
+      // so just draw a line with inner alignment
+      // const shrunk = hole.buffer(-10.0);      
+      gfx.lineStyle(25, 0x000000, 0.2, 0);
       gfx.drawPolygon(flatCoords);
-      gfx.endFill();
-      // draw hole wall shadows
+
+      // draw hole wall outer drop shadows
       gfx.lineStyle(this.config.wallThickness / 2.0 + 8.0, 0x000000, 0.2, 1);
       for (let i = 0; i < coords.length - 1; i++) {
         gfx.moveTo(coords[i].x, coords[i].y);
         if (this._needsShadow(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y)) {
-          gfx.lineTo(coords[i+1].x, coords[i+1].y);
+          // gfx.lineTo(coords[i+1].x, coords[i+1].y);
         } 
       }      
       // draw hole wall poly
