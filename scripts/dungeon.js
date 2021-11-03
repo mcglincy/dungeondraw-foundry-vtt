@@ -88,6 +88,7 @@ export class Dungeon extends PlaceableObject {
   deleteAll() {
     this.history = [DungeonState.startState()];
     this.historyIndex = 0;
+    this.history[this.historyIndex].saveToScene();
     this.refresh();
   }
 
@@ -157,7 +158,7 @@ export class Dungeon extends PlaceableObject {
   _rectangleForSegment(x1, y1, x2, y2) {
     console.log(`_rectangleForSegment: ${x1} ${y1} ${x2} ${y2}`);
     const slope = geo.slope(x1, y1, x2, y2);
-    const rectDelta = this.config.wallThickness / 2.0;
+    const rectDelta = this.config.doorThickness / 2.0;
 
     // slope is delta y / delta x
     if (slope === 0) {
@@ -218,6 +219,7 @@ export class Dungeon extends PlaceableObject {
 
     // draw outside shadow
     const expanded = exterior.buffer(25.0);
+    gfx.lineStyle(0, PIXI.utils.string2hex(this.config.wallColor), 1.0);
     gfx.beginFill(0x000000, 0.2);
     gfx.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
     gfx.endFill();
