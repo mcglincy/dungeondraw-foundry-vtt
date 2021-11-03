@@ -1,24 +1,20 @@
 {
     "name": "dungeon-draw",
+    "author": "mcglintlock",
     "title": "Dungeon Draw",
-    "description": "",
+    "description": "A dungeon-drawing module for Foundry VTT",
     "version": "0.1.0",
     "library": "false",
     "manifestPlusVersion": "1.0.0",
     "minimumCoreVersion": "0.8.9",
     "compatibleCoreVersion": "0.8.9",
-    "author": "mcglintlock",
-    "dependencies": [
-    ],
+    "dependencies": [],
     "esmodules": [
-      "./scripts/dungeonlayer.js",
       "./scripts/dungeondraw.js"
     ],
     "packs": [],
     "scripts": [],
-    "styles": [
-        "/styles/module.css"
-    ],
+    "styles": [],
     "languages": [
         {
             "lang": "en",
