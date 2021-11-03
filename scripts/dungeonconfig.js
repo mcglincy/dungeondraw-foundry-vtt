@@ -22,7 +22,7 @@ export class DungeonConfig extends FormApplication {
   }
 
   static defaultConfig = {
-    doorThickness: 5,
+    doorThickness: 25,
     doorColor: "#000000",
     floorColor: "#F2EDDF",
     wallColor: "#000000",
