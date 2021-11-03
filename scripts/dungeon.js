@@ -1,25 +1,9 @@
 import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
+import * as geo from "./geo-utils.js";
 // TODO: decide if we want to use turf.js instead
 import * as jsts from "./jsts.js";
 
-const geometryToWkt = (geometry) => {
-  if (!geometry) {
-    return null;
-  }
-  const precisionModel = new jsts.geom.PrecisionModel();
-  const factory = new jsts.geom.GeometryFactory(precisionModel);
-  const wktWriter = new jsts.io.WKTWriter(factory);
-  return wktWriter.write(geometry);
-};
-
-const wktToGeometry = (wkt) => {
-  if (!wkt) {
-    return null;
-  }
-  const wktReader = new jsts.io.WKTReader(); 
-  return wktReader.read(wkt);
-};
 
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
@@ -39,7 +23,7 @@ export class DungeonState {
   toString() {
     return JSON.stringify({
       // serialize the geometry object as a WKT string
-      wkt: geometryToWkt(this.geometry),
+      wkt: geo.geometryToWkt(this.geometry),
       doors: this.doors,
     });
   }
@@ -67,7 +51,7 @@ export class DungeonState {
       return DungeonState.startState();
     }
     const obj = JSON.parse(s);
-    return new DungeonState(wktToGeometry(obj.wkt), obj.doors);
+    return new DungeonState(geo.wktToGeometry(obj.wkt), obj.doors);
   }
 }
 
@@ -159,9 +143,7 @@ export class Dungeon extends PlaceableObject {
   }
 
   addRectangle(rect) {
-    const reader = new jsts.io.WKTReader(); 
-    const polyString = this._rectToWKTPolygonString(rect);
-    const poly = reader.read(polyString);
+    const poly = geo.rectToPolygon(rect);
 
     const newState = this.history[this.historyIndex].clone();    
     if (newState.geometry) {
@@ -172,16 +154,45 @@ export class Dungeon extends PlaceableObject {
     this.pushState(newState);
   }
 
-  _rectToWKTPolygonString(rect) {
-    const p = [
-      rect.x, rect.y,
-      rect.x + rect.width, rect.y,
-      rect.x + rect.width, rect.y + rect.height,
-      rect.x, rect.y + rect.height,
-      // close off poly
-      rect.x, rect.y,
+  _rectangleForSegment(x1, y1, x2, y2) {
+    console.log(`_rectangleForSegment: ${x1} ${y1} ${x2} ${y2}`);
+    const slope = geo.slope(x1, y1, x2, y2);
+    const rectHeight = 12.0;  // actually 1/2 h
+
+    // slope is delta y / delta x
+    if (slope === 0) {
+      console.log("inverse is infinity");
+      // door is horizontal
+      return [
+        x1,
+        y1 + rectHeight,
+        x2,
+        y1 + rectHeight,
+        x2,
+        y1 - rectHeight,
+        x1,
+        y1 - rectHeight,
+      ];
+    }
+    if (slope === Infinity) {
+      // door is vertical
+      return [
+        x1 - rectHeight,
+        y1,
+        x1 - rectHeight,
+        y2,
+        x2 + rectHeight,
+        y2,
+        x2 + rectHeight,
+        y1,        
+      ];
+    };
+
+    const inverseSlope = geo.inverseSlope(slope);
+
+    // TODO: do the math
+    return [
     ];
-    return `POLYGON((${p[0]} ${p[1]}, ${p[2]} ${p[3]}, ${p[4]} ${p[5]}, ${p[6]} ${p[7]}, ${p[8]} ${p[9]}))`;
   }
 
   _needsShadow(x1, y1, x2, y2) {
@@ -190,13 +201,9 @@ export class Dungeon extends PlaceableObject {
       return true;
     }
     if (y1 === y2 && x1 > x2) {
+      // east to west horizontal
       return true;
     }
-    // TODO: debug this, slope is either 0 or -infinity
-    // console.log(`${x1} ${y1} ${x2} ${x1}`);
-    // const slope = (y2 - y1) / (x2 - x1);
-    // console.log(`slope ${slope}`);
-    // return slope > 0;
     return false;
   }
 
@@ -273,7 +280,7 @@ export class Dungeon extends PlaceableObject {
       for (let i = 0; i < coords.length - 1; i++) {
         gfx.moveTo(coords[i].x, coords[i].y);
         if (this._needsShadow(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y)) {
-          // gfx.lineTo(coords[i+1].x, coords[i+1].y);
+          gfx.lineTo(coords[i+1].x, coords[i+1].y);
         } 
       }      
       // draw hole wall poly
@@ -297,7 +304,7 @@ export class Dungeon extends PlaceableObject {
 
   _drawDoor(gfx, door) {
     const totalLength = this._distanceBetweenPoints(door[0], door[1], door[2], door[3]);
-    const jambLength = 10;
+    const jambLength = 20;
     const rectLength = totalLength - (2 * jambLength);
     const jambFraction = jambLength / totalLength;
     const rectFraction = rectLength / totalLength;
@@ -307,6 +314,7 @@ export class Dungeon extends PlaceableObject {
     const jamb1End = [door[0] + (deltaX * jambFraction), door[1] + (deltaY * jambFraction)];
     const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
 
+    /*
     // jamb1, rectangle, jamb2
     gfx.lineStyle(this.config.doorThickness, PIXI.utils.string2hex(this.config.doorColor), 1.0);
     gfx.moveTo(door[0], door[1]);
@@ -316,6 +324,19 @@ export class Dungeon extends PlaceableObject {
     gfx.lineTo(rectEnd[0], rectEnd[1]);
     gfx.lineStyle(this.config.doorThickness, PIXI.utils.string2hex(this.config.doorColor), 1.0);
     gfx.lineTo(door[2], door[3]);
+    */
+
+    const doorRect = this._rectangleForSegment(jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
+    console.log(doorRect);
+    gfx.moveTo(door[0], door[1]);
+    gfx.lineTo(jamb1End[0], jamb1End[1]);
+    gfx.moveTo(rectEnd[0], rectEnd[1]);
+    gfx.lineTo(door[2], door[3]);
+    gfx.drawPolygon(
+      doorRect[0], doorRect[1], doorRect[2], doorRect[3],
+      doorRect[4], doorRect[5], doorRect[6], doorRect[7],
+      doorRect[0], doorRect[1]
+      );
   }
 
   /** @override */

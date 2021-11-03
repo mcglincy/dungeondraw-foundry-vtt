@@ -33,7 +33,7 @@ export class DungeonDraw {
 
     controls.push({
       name: "dungeondraw",
-      title: "DP.SceneControlTitle",
+      title: "DD.SceneControlTitle",
       layer: DungeonLayer.LAYER_NAME,
       icon: "fas fa-dungeon",
       // TODO: use module-specific perms?
