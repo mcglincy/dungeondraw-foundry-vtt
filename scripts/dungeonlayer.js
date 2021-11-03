@@ -29,7 +29,7 @@ export class DungeonLayer extends PlaceablesLayer {
       name: DungeonLayer.LAYER_NAME,
       // canDragCreate: game.user.isGM,
       canDragCreate: true,
-      zIndex: 2
+      zIndex: -1  // under tiles and background image
     });
   }
 
