@@ -119,10 +119,10 @@ export class Dungeon extends PlaceableObject {
 
   async loadFromScene() {
     const savedState = await DungeonState.loadFromScene();
-    this.pushState(savedState);
+    await this.pushState(savedState);
   };
 
-  pushState(newState) {
+  async pushState(newState) {
     // throw away any history states after current
     for (let i = this.history.length - 1; i > this.historyIndex; i--) {
       this.history.pop();
@@ -132,32 +132,32 @@ export class Dungeon extends PlaceableObject {
     this.historyIndex++;
 
     // TODO: make this await?
-    newState.saveToScene();
-    this.refresh();
+    await newState.saveToScene();
+    await this.refresh();
   }
 
-  addDoor(x1, y1, x2, y2) {
+  async addDoor(x1, y1, x2, y2) {
     const newState = this.history[this.historyIndex].clone();
     newState.doors.push([x1, y1, x2, y2]);
-    this.pushState(newState);
+    await this.pushState(newState);
   }
 
-  addRectangle(rect) {
+  // {x, y, height, width}
+  async addRectangle(rect) {
     const poly = geo.rectToPolygon(rect);
-
     const newState = this.history[this.historyIndex].clone();    
     if (newState.geometry) {
       newState.geometry = newState.geometry.union(poly);
     } else {
       newState.geometry = poly;
     }
-    this.pushState(newState);
+    await this.pushState(newState);
   }
 
   _rectangleForSegment(x1, y1, x2, y2) {
     console.log(`_rectangleForSegment: ${x1} ${y1} ${x2} ${y2}`);
     const slope = geo.slope(x1, y1, x2, y2);
-    const rectHeight = 12.0;  // actually 1/2 h
+    const rectDelta = this.config.wallThickness / 2.0;
 
     // slope is delta y / delta x
     if (slope === 0) {
@@ -165,25 +165,25 @@ export class Dungeon extends PlaceableObject {
       // door is horizontal
       return [
         x1,
-        y1 + rectHeight,
+        y1 + rectDelta,
         x2,
-        y1 + rectHeight,
+        y1 + rectDelta,
         x2,
-        y1 - rectHeight,
+        y1 - rectDelta,
         x1,
-        y1 - rectHeight,
+        y1 - rectDelta,
       ];
     }
     if (slope === Infinity) {
       // door is vertical
       return [
-        x1 - rectHeight,
+        x1 - rectDelta,
         y1,
-        x1 - rectHeight,
+        x1 - rectDelta,
         y2,
-        x2 + rectHeight,
+        x2 + rectDelta,
         y2,
-        x2 + rectHeight,
+        x2 + rectDelta,
         y1,        
       ];
     };
@@ -328,6 +328,7 @@ export class Dungeon extends PlaceableObject {
 
     const doorRect = this._rectangleForSegment(jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
     console.log(doorRect);
+    gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0, 0.5);    
     gfx.moveTo(door[0], door[1]);
     gfx.lineTo(jamb1End[0], jamb1End[1]);
     gfx.moveTo(rectEnd[0], rectEnd[1]);

@@ -195,7 +195,7 @@ export class DungeonLayer extends PlaceablesLayer {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
-        this.dungeon.addDoor(data.x, data.y,
+        await this.dungeon.addDoor(data.x, data.y,
           data.x + data.points[1][0], data.y + data.points[1][1]);
       } else if (minDistance || completePolygon) {
         event.data.createState = 0;
@@ -212,7 +212,7 @@ export class DungeonLayer extends PlaceablesLayer {
           height: createData.height,
           width: createData.width
         };
-        this.dungeon.addRectangle(newRect);
+        await this.dungeon.addRectangle(newRect);
       }
 
       // Cancel the preview

@@ -19,12 +19,14 @@ export const wktToGeometry = (wkt) => {
   return wktReader.read(wkt);
 };
 
+// {x, y, height, width}
 export const rectToPolygon = (rect) => {
   const reader = new jsts.io.WKTReader(); 
   const polyString = rectToWKTPolygonString(rect);
   return reader.read(polyString);
 };
 
+// {x, y, height, width}
 export const rectToWKTPolygonString = (rect) => {
   const p = [
     rect.x, rect.y,
