@@ -50,16 +50,30 @@ export class DungeonDraw {
         //   },
         // },
         {
-          name: "rect",
+          name: "addrect",
           title: "DD.ButtonTitleRect",
-          icon: "fas fa-square",
+          icon: "fas fa-plus-square",
           onClick: () => {
           },
         },
         {
-          name: "door",
+          name: "subtractrect",
+          title: "DD.ButtonTitleSubtract",
+          icon: "fas fa-minus-square",
+          onClick: () => {
+          },
+        },
+        {
+          name: "adddoor",
           title: "DD.ButtonTitleDoor",
           icon: "fas fa-door-open",
+          onClick: () => {
+          },
+        },
+        {
+          name: "subtractdoor",
+          title: "DD.ButtonTitleDoor",
+          icon: "fas fa-door-closed",
           onClick: () => {
           },
         },
@@ -67,8 +81,8 @@ export class DungeonDraw {
           name: "undo",
           title: "DD.ButtonTitleUndo",
           icon: "fas fa-undo",
-          onClick: () => {
-            canvas.dungeon.dungeon.undo();
+          onClick: async () => {
+            await canvas.dungeon.dungeon.undo();
           },
           button: true
         },
@@ -76,8 +90,8 @@ export class DungeonDraw {
           name: "redo",
           title: "DD.ButtonTitleRedo",
           icon: "fas fa-redo",
-          onClick: () => {
-            canvas.dungeon.dungeon.redo();
+          onClick: async () => {
+            await canvas.dungeon.dungeon.redo();
           },          
           button: true
         },
@@ -98,12 +112,11 @@ export class DungeonDraw {
           button: true
         }
       ],
-      activeTool: "rect"
+      activeTool: "addrect"
     });
   }
 
   static async canvasReady(canvase) {
-    console.log("****** canvas ready");
     await canvas.dungeon.loadDungeon();
   }
 }

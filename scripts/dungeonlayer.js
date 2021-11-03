@@ -68,11 +68,13 @@ export class DungeonLayer extends PlaceablesLayer {
     data.author = game.user.id;
     // Tool-based settings
     switch ( tool ) {
-      case "rect":
+      case "addrect":
+      case "subtractdoor":
+      case "subtractrect":
         data.type = CONST.DRAWING_TYPES.RECTANGLE;
         data.points = [];
         break;
-      case "door":
+      case "adddoor":
         data.type = CONST.DRAWING_TYPES.POLYGON;
         data.points = [[0, 0]];
         break;        
@@ -175,7 +177,7 @@ export class DungeonLayer extends PlaceablesLayer {
     }
     if (createState >= 1) {
       preview._onMouseDraw(event);
-      if (preview.data.type !== CONST.DRAWING_TYPES.POLYGON || game.activeTool === "door") {
+      if (preview.data.type !== CONST.DRAWING_TYPES.POLYGON || game.activeTool === "adddoor") {
         event.data.createState = 2;
       }
     }    
@@ -191,28 +193,35 @@ export class DungeonLayer extends PlaceablesLayer {
       const minDistance = distance >= (canvas.dimensions.size / 8);
       const completePolygon = preview.isPolygon && (preview.data.points.length > 2);
 
-      if (game.activeTool === "door") {
+      if (game.activeTool === "adddoor") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
         await this.dungeon.addDoor(data.x, data.y,
           data.x + data.points[1][0], data.y + data.points[1][1]);
       } else if (minDistance || completePolygon) {
+        // addrect or subtractrect
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
         const createData = this.constructor.placeableClass.normalizeShape(data);
 
-        // Add a rectangle to our single Dungeon instance
         // type = "r"
-        const newRect = {
+        const rect = {
           // (x,y) is upper left corner
           x: createData.x, 
           y: createData.y,
           height: createData.height,
           width: createData.width
         };
-        await this.dungeon.addRectangle(newRect);
+
+        if (game.activeTool === "addrect") {
+          await this.dungeon.addRectangle(rect);
+        } else if (game.activeTool === "subtractrect") {
+          await this.dungeon.subtractRectangle(rect);
+        } else if (game.activeTool === "subtractdoor") {
+          await this.dungeon.subtractDoors(rect);
+        }
       }
 
       // Cancel the preview

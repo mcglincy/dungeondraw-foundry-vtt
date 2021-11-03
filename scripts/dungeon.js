@@ -98,22 +98,22 @@ export class Dungeon extends PlaceableObject {
 
   /** @override */
   async draw() {
-    this.refresh();
+    await this.refresh();
     return this;
   }  
 
   /* -------------------------------------------- */
 
-  undo() {
+  async undo() {
     this.historyIndex = Math.max(0, this.historyIndex - 1);
     this.history[this.historyIndex].saveToScene();
-    this.refresh();
+    await this.refresh();
   }
 
-  redo() {
+  async redo() {
     this.historyIndex = Math.min(this.history.length - 1, this.historyIndex + 1);
     this.history[this.historyIndex].saveToScene();
-    this.refresh();
+    await this.refresh();
   }
 
   /* -------------------------------------------- */
@@ -143,6 +143,19 @@ export class Dungeon extends PlaceableObject {
     await this.pushState(newState);
   }
 
+  async subtractDoors(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const doorsToKeep = this.history[this.historyIndex].doors.filter(d => {
+      const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
+      return !rectPoly.intersects(doorPoly);
+    });
+    if (doorsToKeep.length != this.history[this.historyIndex].doors.length) {
+      const newState = this.history[this.historyIndex].clone();
+      newState.doors = doorsToKeep;
+      await this.pushState(newState);      
+    }
+  }
+
   // {x, y, height, width}
   async addRectangle(rect) {
     const poly = geo.rectToPolygon(rect);
@@ -154,6 +167,22 @@ export class Dungeon extends PlaceableObject {
     }
     await this.pushState(newState);
   }
+
+  // {x, y, height, width}
+  async subtractRectangle(rect) {
+    // only makes sense to subtract if we have geometry
+    if (!this.history[this.historyIndex].geometry) {
+      return;
+    }
+    const poly = geo.rectToPolygon(rect);
+    // and if the poly intersects existing geometry
+    if (!this.history[this.historyIndex].geometry.intersects(poly)) {
+      return;
+    }
+    const newState = this.history[this.historyIndex].clone();    
+    newState.geometry = newState.geometry.difference(poly);
+    await this.pushState(newState);
+  };
 
   _rectangleForSegment(x1, y1, x2, y2) {
     console.log(`_rectangleForSegment: ${x1} ${y1} ${x2} ${y2}`);
@@ -196,6 +225,9 @@ export class Dungeon extends PlaceableObject {
     ];
   }
 
+  // TODO: this is wrong for first drawn rectangle
+  // maybe simple poly has different vertex ordering?
+  // or we should adjust our POLY string vertex order
   _needsShadow(x1, y1, x2, y2) {
     if (x1 === x2 && y2 > y1) {
       // south to north vertical

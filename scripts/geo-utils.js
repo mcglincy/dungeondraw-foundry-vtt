@@ -39,6 +39,13 @@ export const rectToWKTPolygonString = (rect) => {
   return `POLYGON((${p[0]} ${p[1]}, ${p[2]} ${p[3]}, ${p[4]} ${p[5]}, ${p[6]} ${p[7]}, ${p[8]} ${p[9]}))`;
 };
 
+export const twoPointsToLineString = (x1, y1, x2, y2) => {
+  return new jsts.geom.GeometryFactory().createLineString([
+    new jsts.geom.Coordinate(x1, y1),
+    new jsts.geom.Coordinate(x2, y2),
+    ]);
+};
+
 export const slope = (x1, y1, x2, y2) => {
   if (x1 === x2) {
     // vertical line has undefined slope
