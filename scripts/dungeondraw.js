@@ -51,28 +51,28 @@ export class DungeonDraw {
         // },
         {
           name: "addrect",
-          title: "DD.ButtonTitleRect",
+          title: "DD.ButtonTitleAddRect",
           icon: "fas fa-plus-square",
           onClick: () => {
           },
         },
         {
           name: "subtractrect",
-          title: "DD.ButtonTitleSubtract",
+          title: "DD.ButtonTitleSubtractRect",
           icon: "fas fa-minus-square",
           onClick: () => {
           },
         },
         {
           name: "adddoor",
-          title: "DD.ButtonTitleDoor",
+          title: "DD.ButtonTitleAddDoor",
           icon: "fas fa-door-open",
           onClick: () => {
           },
         },
         {
           name: "subtractdoor",
-          title: "DD.ButtonTitleDoor",
+          title: "DD.ButtonTitleSubtractDoor",
           icon: "fas fa-door-closed",
           onClick: () => {
           },
