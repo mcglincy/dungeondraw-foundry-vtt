@@ -185,13 +185,11 @@ export class Dungeon extends PlaceableObject {
   };
 
   _rectangleForSegment(x1, y1, x2, y2) {
-    console.log(`_rectangleForSegment: ${x1} ${y1} ${x2} ${y2}`);
     const slope = geo.slope(x1, y1, x2, y2);
     const rectDelta = this.config.doorThickness / 2.0;
 
     // slope is delta y / delta x
     if (slope === 0) {
-      console.log("inverse is infinity");
       // door is horizontal
       return [
         x1,
@@ -222,6 +220,7 @@ export class Dungeon extends PlaceableObject {
 
     // TODO: do the math
     return [
+      0, 0, 0, 0
     ];
   }
 
@@ -340,7 +339,6 @@ export class Dungeon extends PlaceableObject {
     const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
 
     const doorRect = this._rectangleForSegment(jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
-    console.log(doorRect);
     gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0, 0.5);    
     gfx.moveTo(door[0], door[1]);
     gfx.lineTo(jamb1End[0], jamb1End[1]);
