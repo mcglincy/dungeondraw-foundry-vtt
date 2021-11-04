@@ -3,7 +3,7 @@ import { DungeonLayer } from "./dungeonlayer.js";
 import * as geo from "./geo-utils.js";
 // TODO: decide if we want to use turf.js instead
 import * as jsts from "./jsts.js";
-
+import './pixi-filters.js';
 
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
@@ -250,11 +250,11 @@ export class Dungeon extends PlaceableObject {
     const flatCoords = coords.map(c => [c.x, c.y]).flat();
 
     // draw outside shadow
-    const expanded = exterior.buffer(25.0);
-    gfx.lineStyle(0, PIXI.utils.string2hex(this.config.wallColor), 1.0);
-    gfx.beginFill(0x000000, 0.2);
-    gfx.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
-    gfx.endFill();
+    // const expanded = exterior.buffer(25.0);
+    // gfx.lineStyle(0, PIXI.utils.string2hex(this.config.wallColor), 1.0);
+    // gfx.beginFill(0x000000, 0.2);
+    // gfx.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
+    // gfx.endFill();
 
     // draw floor
     gfx.beginFill(PIXI.utils.string2hex(this.config.floorColor), 1.0);
@@ -282,14 +282,6 @@ export class Dungeon extends PlaceableObject {
       } 
     }
 
-    // trying offset wall shadow
-    // const offset = this.config.wallThickness;
-    // gfx.lineStyle(this.config.wallThickness, 0x000000, 0.2, 0.5);
-    // for (let i = 0; i < coords.length - 1; i++) {
-    //   gfx.moveTo(coords[i].x + offset, coords[i].y + offset);
-    //   gfx.lineTo(coords[i+1].x + offset, coords[i+1].y + offset);
-    // }    
-
     // draw outer wall poly
     gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0, 0.5);
     gfx.drawPolygon(flatCoords);
@@ -303,11 +295,10 @@ export class Dungeon extends PlaceableObject {
       const flatCoords = coords.map(c => [c.x, c.y]).flat();
 
       // draw hole inside shadow
-      // TODO: buffer() with negative number results in no-coord poly, 
+      // TODO: hole.buffer() with negative number results in no-coord poly, 
       // so just draw a line with inner alignment
-      // const shrunk = hole.buffer(-10.0);      
-      gfx.lineStyle(25, 0x000000, 0.2, 0);
-      gfx.drawPolygon(flatCoords);
+      // gfx.lineStyle(25, 0x000000, 0.2, 0);
+      // gfx.drawPolygon(flatCoords);
 
       // draw hole wall outer drop shadows
       gfx.lineStyle(this.config.wallThickness / 2.0 + 8.0, 0x000000, 0.2, 1);
@@ -348,18 +339,6 @@ export class Dungeon extends PlaceableObject {
     const jamb1End = [door[0] + (deltaX * jambFraction), door[1] + (deltaY * jambFraction)];
     const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
 
-    /*
-    // jamb1, rectangle, jamb2
-    gfx.lineStyle(this.config.doorThickness, PIXI.utils.string2hex(this.config.doorColor), 1.0);
-    gfx.moveTo(door[0], door[1]);
-    gfx.lineTo(jamb1End[0], jamb1End[1]);
-    // cheating with just a thicker line; TODO: make an actual rect with some additional trig
-    gfx.lineStyle(this.config.doorThickness * 4, PIXI.utils.string2hex(this.config.doorColor), 1.0);
-    gfx.lineTo(rectEnd[0], rectEnd[1]);
-    gfx.lineStyle(this.config.doorThickness, PIXI.utils.string2hex(this.config.doorColor), 1.0);
-    gfx.lineTo(door[2], door[3]);
-    */
-
     const doorRect = this._rectangleForSegment(jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
     console.log(doorRect);
     gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0, 0.5);    
@@ -385,17 +364,32 @@ export class Dungeon extends PlaceableObject {
     await this._refreshWalls();
   }
 
+  _addOuterShadow() {
+    const outerShadow = new PIXI.Graphics();
+    const expanded = this.history[this.historyIndex].geometry.buffer(20.0);
+    outerShadow.beginFill(0x000000, 0.5);
+    outerShadow.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
+    outerShadow.endFill();
+    const blurFilter = new PIXI.filters.BlurFilter();
+    outerShadow.filters = [blurFilter];
+    this.addChild(outerShadow);
+  }
+
   _refreshGraphics() {
     this.clear();
     const gfx = new PIXI.Graphics();
     const state = this.history[this.historyIndex];
     if (state.geometry) {
+      // draw an outer surrounding blurred shadow
+      this._addOuterShadow();
+      // draw the dungeon geometry room(s)
       if (state.geometry instanceof jsts.geom.MultiPolygon) {
         this._drawMultiPolygonRoom(gfx, state.geometry);
       } else if (state.geometry instanceof jsts.geom.Polygon) {
         this._drawPolygonRoom(gfx, state.geometry);
       }
     }
+    // draw doors
     for (let door of state.doors) {
       this._drawDoor(gfx, door);
     }
