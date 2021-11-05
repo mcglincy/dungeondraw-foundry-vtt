@@ -2,8 +2,8 @@ import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 import * as geo from "./geo-utils.js";
 // TODO: decide if we want to use turf.js instead
-import * as jsts from "./jsts.js";
-import './pixi-filters.js';
+import "./lib/jsts.min.js";
+import "./lib/pixi-filters.min.js";
 
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
