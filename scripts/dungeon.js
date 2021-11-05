@@ -120,7 +120,9 @@ export class Dungeon extends PlaceableObject {
 
   async loadFromScene() {
     const savedState = await DungeonState.loadFromScene();
-    await this.pushState(savedState);
+    this.history = [savedState];
+    this.historyIndex = 0;
+    await this.refresh();
   };
 
   async pushState(newState) {
