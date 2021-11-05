@@ -64,6 +64,13 @@ export class DungeonDraw {
           },
         },
         {
+          name: "addpoly",
+          title: "DD.ButtonTitleAddPoly",
+          icon: "fas fa-draw-polygon",
+          onClick: () => {
+          },
+        },
+        {
           name: "adddoor",
           title: "DD.ButtonTitleAddDoor",
           icon: "fas fa-door-open",

@@ -46,6 +46,12 @@ export const twoPointsToLineString = (x1, y1, x2, y2) => {
     ]);
 };
 
+// [[x,y]...]
+export const pointsToPolygon = (points) => {
+  const coords = points.map(p => new jsts.geom.Coordinate(p[0], p[1]));
+  return new jsts.geom.GeometryFactory().createPolygon(coords);
+};
+
 export const slope = (x1, y1, x2, y2) => {
   if (x1 === x2) {
     // vertical line has undefined slope

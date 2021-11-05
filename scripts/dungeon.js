@@ -156,16 +156,20 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
-  // {x, y, height, width}
-  async addRectangle(rect) {
-    const poly = geo.rectToPolygon(rect);
+  async _addPoly(poly) {
     const newState = this.history[this.historyIndex].clone();    
     if (newState.geometry) {
       newState.geometry = newState.geometry.union(poly);
     } else {
       newState.geometry = poly;
     }
-    await this.pushState(newState);
+    await this.pushState(newState);    
+  }
+
+  // {x, y, height, width}
+  async addRectangle(rect) {
+    const poly = geo.rectToPolygon(rect);
+    this._addPoly(poly);
   }
 
   // {x, y, height, width}
@@ -183,6 +187,16 @@ export class Dungeon extends PlaceableObject {
     newState.geometry = newState.geometry.difference(poly);
     await this.pushState(newState);
   };
+
+  // [[x,y]...]
+  async addPolygon(points) {
+    try {
+      const poly = geo.pointsToPolygon(points);
+      await this._addPoly(poly);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   _rectangleForSegment(x1, y1, x2, y2) {
     const slope = geo.slope(x1, y1, x2, y2);
