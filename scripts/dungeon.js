@@ -232,11 +232,27 @@ export class Dungeon extends PlaceableObject {
       ];
     };
 
-    const inverseSlope = geo.inverseSlope(slope);
-
-    // TODO: do the math
+    // https://math.stackexchange.com/questions/656500/given-a-point-slope-and-a-distance-along-that-slope-easily-find-a-second-p/656512
+    const theta = Math.atan(slope);
+    // flipped dx/dy and +/- to make things work
+    const dy = rectDelta * Math.cos(theta);
+    const dx = rectDelta * Math.sin(theta);
     return [
-      0, 0, 0, 0
+      // lower right - more x, more y
+      x1 - dx,
+      y1 + dy,
+      // upper right - more x, less y
+      x2 - dx,
+      y2 + dy,
+      // upper left - less x, less y
+      x2 + dx, 
+      y2 - dy,
+      // lower left - less x, more y
+      x1 + dx, 
+      y1 - dy,
+      // close the polygon
+      x1 + dy,
+      y1 - dx,
     ];
   }
 
@@ -366,8 +382,10 @@ export class Dungeon extends PlaceableObject {
     gfx.moveTo(rectEnd[0], rectEnd[1]);
     gfx.lineTo(door[2], door[3]);
     gfx.drawPolygon(
-      doorRect[0], doorRect[1], doorRect[2], doorRect[3],
-      doorRect[4], doorRect[5], doorRect[6], doorRect[7],
+      doorRect[0], doorRect[1], 
+      doorRect[2], doorRect[3],
+      doorRect[4], doorRect[5], 
+      doorRect[6], doorRect[7],
       doorRect[0], doorRect[1]
       );
   }
