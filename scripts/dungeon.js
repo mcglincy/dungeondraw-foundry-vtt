@@ -244,15 +244,17 @@ export class Dungeon extends PlaceableObject {
   // maybe simple poly has different vertex ordering?
   // or we should adjust our POLY string vertex order
   _needsShadow(x1, y1, x2, y2) {
-    if (x1 === x2 && y2 > y1) {
-      // south to north vertical
-      return true;
+    if (x1 === x2) {
+      // north to south vertical
+      return y2 > y1;
     }
-    if (y1 === y2 && x1 > x2) {
+    if (y1 === y2) {
       // east to west horizontal
-      return true;
+      return x1 > x2;
     }
-    return false;
+    const slope = geo.slope(x1, y1, x2, y2);
+    // we know slope is non-zero and non-infinity because of earlier checks
+    return slope < 0 && y2 > y1;
   }
 
   // _inflateGeometry(geometry, distance) {
@@ -289,31 +291,34 @@ export class Dungeon extends PlaceableObject {
     }
 
     // draw inner wall drop shadows
-    gfx.lineStyle(this.config.wallThickness / 2.0 + 8.0, 0x000000, 0.2, 1);
-    for (let i = 0; i < coords.length - 1; i++) {
-      gfx.moveTo(coords[i].x, coords[i].y);
-      if (this._needsShadow(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y)) {
-        gfx.lineTo(coords[i+1].x, coords[i+1].y);
-      } 
+    gfx.lineStyle({
+      width: this.config.wallThickness / 2.0 + 8.0,
+      color: 0x000000,
+      alpha: 0.2,
+      alignment: 1,
+      join: "round"
+    });
+
+    gfx.moveTo(coords[0].x, coords[0].y);
+    for (let i = 1; i < coords.length; i++) {
+      if (this._needsShadow(coords[i-1].x, coords[i-1].y, coords[i].x, coords[i].y)) {
+        gfx.lineTo(coords[i].x, coords[i].y);
+      } else {
+        gfx.moveTo(coords[i].x, coords[i].y);
+      }
     }
+
 
     // draw outer wall poly
     gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0, 0.5);
     gfx.drawPolygon(flatCoords);
 
     // draw interior hole walls/shadows
-    //const numHoles = poly.getNumInteriorRing();    
     for (let i = 0; i < numHoles; i++) {
 
       const hole = poly.getInteriorRingN(i);
       const coords = hole.getCoordinates();
       const flatCoords = coords.map(c => [c.x, c.y]).flat();
-
-      // draw hole inside shadow
-      // TODO: hole.buffer() with negative number results in no-coord poly, 
-      // so just draw a line with inner alignment
-      // gfx.lineStyle(25, 0x000000, 0.2, 0);
-      // gfx.drawPolygon(flatCoords);
 
       // draw hole wall outer drop shadows
       gfx.lineStyle(this.config.wallThickness / 2.0 + 8.0, 0x000000, 0.2, 1);
@@ -379,8 +384,20 @@ export class Dungeon extends PlaceableObject {
   }
 
   _addOuterShadow() {
+    const state = this.history[this.historyIndex];
+    if (state.geometry instanceof jsts.geom.MultiPolygon) {
+      for (let i = 0; i < state.geometry.getNumGeometries(); i++) {
+        const poly = state.geometry.getGeometryN(i);
+        this._addOuterShadowForPoly(poly);
+      }
+    } else if (state.geometry instanceof jsts.geom.Polygon) {
+      this._addOuterShadowForPoly(state.geometry);
+    }
+  }
+
+  _addOuterShadowForPoly(poly) {
     const outerShadow = new PIXI.Graphics();
-    const expanded = this.history[this.historyIndex].geometry.buffer(20.0);
+    const expanded = poly.buffer(20.0);
     outerShadow.beginFill(0x000000, 0.5);
     outerShadow.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
     outerShadow.endFill();
@@ -435,9 +452,7 @@ export class Dungeon extends PlaceableObject {
   async _makeWallsFromMulti(multi) {
     for (let i = 0; i < multi.getNumGeometries(); i++) {
       const poly = multi.getGeometryN(i);
-      if (poly) {
-        await this._makeWallsFromPoly(poly);
-      }
+      await this._makeWallsFromPoly(poly);
     }
   }
 
