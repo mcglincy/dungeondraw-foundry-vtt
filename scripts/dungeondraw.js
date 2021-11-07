@@ -24,7 +24,6 @@ export class DungeonDraw {
     //   return;
     // }
 
-    console.log(CONFIG.Canvas);
     CONFIG.Canvas.layers.dungeon = DungeonLayer;
     CONFIG.Dungeon = {
       documentClass: DungeonDocument,
@@ -127,8 +126,16 @@ export class DungeonDraw {
   static async canvasReady(canvase) {
     await canvas.dungeon.loadDungeon();
   }
+
+  static async updateJournalEntry(document, change, options, userId) {
+    if (game.user.id !== userId) {
+      // if somebody else changed the backing JournalEntry, we need to refresh
+      await canvas.dungeon.dungeon?.maybeRefresh(document);
+    }
+  }
 }
 
 Hooks.on("init", DungeonDraw.init);
 Hooks.on("getSceneControlButtons", DungeonDraw.getSceneControlButtons);
 Hooks.on("canvasReady", DungeonDraw.canvasReady);
+Hooks.on("updateJournalEntry", DungeonDraw.updateJournalEntry);

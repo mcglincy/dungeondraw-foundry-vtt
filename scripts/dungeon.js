@@ -38,25 +38,11 @@ export class DungeonState {
     return new DungeonState(geo.wktToGeometry(obj.wkt), obj.doors);
   }
 
-  async saveToScene() {
-    const serialized = this.toString();
-    await canvas.scene.setFlag(DungeonDraw.MODULE_NAME, DungeonState.FLAG_KEY, serialized);
-  }
-
   async saveToJournalEntry(journalEntry) {
     const serialized = this.toString();
     await journalEntry.update({
       content: serialized,
     });
-  }
-
-  static async loadFromScene() {
-    const flagVal = canvas.scene.getFlag(DungeonDraw.MODULE_NAME, DungeonState.FLAG_KEY);
-    if (flagVal) {
-      return DungeonState.fromString(flagVal);
-    } else {
-      return DungeonState.startState();
-    }
   }
 
   static async loadFromJournalEntry(journalEntry) {
@@ -80,7 +66,6 @@ export class DungeonState {
 export class Dungeon extends PlaceableObject {
   // expects JournalEntry for constructor
   constructor(journalEntry, note) {
-    console.log(note);
     // note will be saved as this.document
     super(note);
 
@@ -122,28 +107,29 @@ export class Dungeon extends PlaceableObject {
     return this;
   }  
 
+  async maybeRefresh(journalEntry) {
+    if (journalEntry.id === this.journalEntry.id) {
+      const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
+      this.pushState(savedState);
+      this.refresh();
+    }
+  }
+
   /* -------------------------------------------- */
 
   async undo() {
     this.historyIndex = Math.max(0, this.historyIndex - 1);
-    this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
+    await this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
     await this.refresh();
   }
 
   async redo() {
     this.historyIndex = Math.min(this.history.length - 1, this.historyIndex + 1);
-    this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
+    await this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
     await this.refresh();
   }
 
   /* -------------------------------------------- */
-
-  async loadFromScene() {
-    const savedState = await DungeonState.loadFromScene();
-    this.history = [savedState];
-    this.historyIndex = 0;
-    await this.refresh();
-  };
 
   async loadFromJournalEntry() {
     const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
@@ -471,6 +457,8 @@ export class Dungeon extends PlaceableObject {
   }
 
   async _refreshWalls() {
+    // TODO debug
+    return;
     await this._deleteAllWalls();
     const state = this.history[this.historyIndex];
     if (state.geometry) {
