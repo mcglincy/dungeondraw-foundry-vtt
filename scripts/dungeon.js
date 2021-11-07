@@ -408,7 +408,6 @@ export class Dungeon extends PlaceableObject {
     // stash latest-greatest config settings
     this.config = game.settings.get(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING);        
     await this._refreshGraphics();
-    // TODO can refresh be async, and we can await refreshing/deleting walls?
     await this._refreshWalls();
   }
 
@@ -457,8 +456,6 @@ export class Dungeon extends PlaceableObject {
   }
 
   async _refreshWalls() {
-    // TODO debug
-    return;
     await this._deleteAllWalls();
     const state = this.history[this.historyIndex];
     if (state.geometry) {
