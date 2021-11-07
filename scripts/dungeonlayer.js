@@ -4,13 +4,16 @@ import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonDraw } from "./dungeondraw.js";
 
 
+const FOLDER_NAME = "Dungeon Draw";
 
 const findDungeonEntryAndNote = () => {
   for (const [key, note] of canvas.scene.notes.entries()) {
     const journalEntry = game.journal.get(note.data.entryId);
-    const flag = journalEntry.getFlag(DungeonDraw.MODULE_NAME, "dungeonVersion");
-    if (flag) {
-      return {journalEntry, note};  
+    if (journalEntry) {
+      const flag = journalEntry.getFlag(DungeonDraw.MODULE_NAME, "dungeonVersion");
+      if (flag) {
+        return {journalEntry, note};
+      }
     }
   }
   return {journalEntry: null, note: null};
@@ -23,8 +26,20 @@ const createDungeonEntryAndNote = async () => {
 }
 
 const createDungeonEntry = async () => {
+  let folder = game.folders.filter((f) =>
+    f.data.type === "JournalEntry" && f.name === FOLDER_NAME).pop();
+  if (!folder) {
+    folder = await Folder.create({
+      name: FOLDER_NAME,
+      type: "JournalEntry"
+    });
+  }
+
+  console.log(folder);
+
   const journalEntry = await JournalEntry.create({
-    name: "Dungeon Draw Dungeon"
+    name: canvas.scene.name,
+    folder: folder.id,
     // flags: {
     //   dungeonVersion: {
 
@@ -81,6 +96,7 @@ export class DungeonLayer extends PlaceablesLayer {
       // canDragCreate: game.user.isGM,
       canDragCreate: true,
       zIndex: -1  // under tiles and background image
+//      zIndex: 0  // on top of tiles and background image
     });
   }
 
@@ -183,14 +199,18 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   async loadDungeon() {
-    let {journalEntry, note} = await findDungeonEntryAndNote();
-    if (!journalEntry) {
-      let {journalEntry, note} = createDungeonEntryAndNote();
+    const {journalEntry, note} = await findDungeonEntryAndNote();
+    if (journalEntry) {
+      this.dungeon = new Dungeon(journalEntry, note);
+      await this.dungeon.loadFromJournalEntry();
+      // add dungeon underneath any placeables or drawing preview
+      this.addChildAt(this.dungeon, 0);
     }
-    this.dungeon = new Dungeon(journalEntry, note);
-    await this.dungeon.loadFromJournalEntry();
-    // add dungeon underneath any placeables or drawing preview
-    this.addChildAt(this.dungeon, 0);
+  }
+
+  async createNewDungeon() {
+    const {journalEntry, note} = await createDungeonEntryAndNote();
+    await this.loadDungeon();
   }
 
   /* -------------------------------------------- */
@@ -273,6 +293,11 @@ export class DungeonLayer extends PlaceablesLayer {
 
     // Successful drawing completion
     if (createState === 2) {
+      // create a new dungeon if we don't already have one
+      if (!this.dungeon) {
+        await this.createNewDungeon();
+      }
+
       const distance = Math.hypot(destination.x - origin.x, destination.y - origin.y);
       const minDistance = distance >= (canvas.dimensions.size / 8);
       const completePolygon = preview.isPolygon && (preview.data.points.length > 2);

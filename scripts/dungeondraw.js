@@ -24,6 +24,7 @@ export class DungeonDraw {
     //   return;
     // }
 
+    console.log(CONFIG.Canvas);
     CONFIG.Canvas.layers.dungeon = DungeonLayer;
     CONFIG.Dungeon = {
       documentClass: DungeonDocument,
