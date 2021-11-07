@@ -3,6 +3,57 @@ import { DungeonConfig } from "./dungeonconfig.js";
 import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonDraw } from "./dungeondraw.js";
 
+
+
+const findDungeonEntryAndNote = () => {
+  for (const [key, note] of canvas.scene.notes.entries()) {
+    const journalEntry = game.journal.get(note.data.entryId);
+    const flag = journalEntry.getFlag(DungeonDraw.MODULE_NAME, "dungeonVersion");
+    if (flag) {
+      return {journalEntry, note};  
+    }
+  }
+  return {journalEntry: null, note: null};
+};
+
+const createDungeonEntryAndNote = async () => {
+  const journalEntry = await createDungeonEntry();
+  const note = await createDungeonNote(journalEntry);
+  return {journalEntry, note};
+}
+
+const createDungeonEntry = async () => {
+  const journalEntry = await JournalEntry.create({
+    name: "Dungeon Draw Dungeon"
+    // flags: {
+    //   dungeonVersion: {
+
+    //   }
+    // }
+  });
+  // can the flag be set in the initial create data?
+  // e.g., flag.dungeonVersion
+  await journalEntry.setFlag(DungeonDraw.MODULE_NAME, "dungeonVersion", "1.0");
+  return journalEntry;
+};
+
+const createDungeonNote = async (journalEntry) => {
+  await canvas.scene.createEmbeddedDocuments("Note", [{
+    entryId : journalEntry.id,
+    fontSize : 20,
+    icon : "icons/svg/cave.svg",
+    iconSize : 32,
+    textAnchor : 1, 
+    textColor : "#FFFFFF",
+    x : 50,
+    y : 50, 
+    iconTint : "",
+    text : "Dungeon Draw",
+    flags : {
+    } 
+  }]);    
+};
+
 /**
  * 
  * @extends {PlaceablesLayer} 
@@ -118,6 +169,31 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   /* -------------------------------------------- */
+
+  async OLDloadDungeon() {
+    const data = {};
+    // TODO: it seems like DungeonDocument isn't really needed here?    
+    // const document = new DungeonDocument(data, {parent: canvas.scene});
+    // this.dungeon = new Dungeon(document);
+    const document = new DungeonDocument(data, {parent: canvas.scene});
+    this.dungeon = new Dungeon(document);
+    await this.dungeon.loadFromScene();
+    // add dungeon underneath any placeables or drawing preview
+    this.addChildAt(this.dungeon, 0);
+  }
+
+  async loadDungeon() {
+    let {journalEntry, note} = await findDungeonEntryAndNote();
+    if (!journalEntry) {
+      let {journalEntry, note} = createDungeonEntryAndNote();
+    }
+    this.dungeon = new Dungeon(journalEntry, note);
+    await this.dungeon.loadFromJournalEntry();
+    // add dungeon underneath any placeables or drawing preview
+    this.addChildAt(this.dungeon, 0);
+  }
+
+  /* -------------------------------------------- */
   /*  Rendering                                   */
   /* -------------------------------------------- */
 
@@ -126,16 +202,6 @@ export class DungeonLayer extends PlaceablesLayer {
     await super.draw();
     return this;
   }  
-
-  async loadDungeon() {
-    const data = {};
-    // TODO: it seems like DungeonDocument isn't really needed here?    
-    const document = new DungeonDocument(data, {parent: canvas.scene});
-    this.dungeon = new Dungeon(document);
-    await this.dungeon.loadFromScene();
-    // add dungeon underneath any placeables or drawing preview
-    this.addChildAt(this.dungeon, 0);
-  }
 
   /* -------------------------------------------- */
   /*  Event Listeners and Handlers                */
@@ -173,7 +239,6 @@ export class DungeonLayer extends PlaceablesLayer {
   /** @override */
   async _onDragLeftStart(event) {
     await super._onDragLeftStart(event);
-    console.log(this.preview);
 
     // we use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
@@ -250,7 +315,6 @@ export class DungeonLayer extends PlaceablesLayer {
           };
           await this.dungeon.subtractDoors(rect);
         } else if (game.activeTool === "addpoly") {
-          console.log(createData);
           const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
           await this.dungeon.addPolygon(offsetPoints);
         }

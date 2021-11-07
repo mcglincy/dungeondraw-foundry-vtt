@@ -20,6 +20,8 @@ export class DungeonState {
       );
   }
 
+  /* -------------------------------------------- */  
+
   toString() {
     return JSON.stringify({
       // serialize the geometry object as a WKT string
@@ -28,9 +30,24 @@ export class DungeonState {
     });
   }
 
+  static fromString(s) {
+    if (!s) {
+      return DungeonState.startState();
+    }
+    const obj = JSON.parse(s);
+    return new DungeonState(geo.wktToGeometry(obj.wkt), obj.doors);
+  }
+
   async saveToScene() {
     const serialized = this.toString();
     await canvas.scene.setFlag(DungeonDraw.MODULE_NAME, DungeonState.FLAG_KEY, serialized);
+  }
+
+  async saveToJournalEntry(journalEntry) {
+    const serialized = this.toString();
+    await journalEntry.update({
+      content: serialized,
+    });
   }
 
   static async loadFromScene() {
@@ -42,25 +59,32 @@ export class DungeonState {
     }
   }
 
-  static startState() {
-    return new DungeonState(null, []);
-  }
-
-  static fromString(s) {
-    if (!s) {
+  static async loadFromJournalEntry(journalEntry) {
+    if (journalEntry.data.content) {
+      return DungeonState.fromString(journalEntry.data.content);
+    } else {
       return DungeonState.startState();
     }
-    const obj = JSON.parse(s);
-    return new DungeonState(geo.wktToGeometry(obj.wkt), obj.doors);
+  }
+
+  static startState() {
+    return new DungeonState(null, []);
   }
 }
 
 /**
  * @extends {PlaceableObject}
  */
+// TODO: does Dungeon even need to be a PlaceableObject?
+// or could it just extend PIXI.Container?
 export class Dungeon extends PlaceableObject {
-  constructor(...args) {
-    super(...args);
+  // expects JournalEntry for constructor
+  constructor(journalEntry, note) {
+    console.log(note);
+    // note will be saved as this.document
+    super(note);
+
+    this.journalEntry = journalEntry;
 
     /** local copy of Dungeon config from settings */
     this.config = null;
@@ -79,18 +103,14 @@ export class Dungeon extends PlaceableObject {
 
   /* -------------------------------------------- */
 
-  /* -------------------------------------------- */
-  /*  Properties                                  */
-  /* -------------------------------------------- */
-
-  /* -------------------------------------------- */
-
   deleteAll() {
     this.history = [DungeonState.startState()];
     this.historyIndex = 0;
-    this.history[this.historyIndex].saveToScene();
+    this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
     this.refresh();
   }
+
+  /* -------------------------------------------- */
 
   /* -------------------------------------------- */
   /* Rendering                                    */
@@ -106,13 +126,13 @@ export class Dungeon extends PlaceableObject {
 
   async undo() {
     this.historyIndex = Math.max(0, this.historyIndex - 1);
-    this.history[this.historyIndex].saveToScene();
+    this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
     await this.refresh();
   }
 
   async redo() {
     this.historyIndex = Math.min(this.history.length - 1, this.historyIndex + 1);
-    this.history[this.historyIndex].saveToScene();
+    this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
     await this.refresh();
   }
 
@@ -120,6 +140,13 @@ export class Dungeon extends PlaceableObject {
 
   async loadFromScene() {
     const savedState = await DungeonState.loadFromScene();
+    this.history = [savedState];
+    this.historyIndex = 0;
+    await this.refresh();
+  };
+
+  async loadFromJournalEntry() {
+    const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
     this.history = [savedState];
     this.historyIndex = 0;
     await this.refresh();
@@ -134,8 +161,7 @@ export class Dungeon extends PlaceableObject {
     this.history.push(newState);
     this.historyIndex++;
 
-    // TODO: make this await?
-    await newState.saveToScene();
+    await newState.saveToJournalEntry(this.journalEntry);
     await this.refresh();
   }
 
@@ -323,7 +349,6 @@ export class Dungeon extends PlaceableObject {
         gfx.moveTo(coords[i].x, coords[i].y);
       }
     }
-
 
     // draw outer wall poly
     gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0, 0.5);
