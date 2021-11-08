@@ -5,6 +5,7 @@ import * as geo from "./geo-utils.js";
 import "./lib/jsts.min.js";
 import "./lib/pixi-filters.min.js";
 
+
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
 
@@ -143,6 +144,7 @@ export class DungeonState {
   }   
 }
 
+
 /**
  * @extends {PlaceableObject}
  */
@@ -191,8 +193,6 @@ export class Dungeon extends PlaceableObject {
   }
 
   /* -------------------------------------------- */
-
-  /* -------------------------------------------- */
   /* Rendering                                    */
   /* -------------------------------------------- */
 
@@ -202,6 +202,11 @@ export class Dungeon extends PlaceableObject {
     return this;
   }  
 
+  /** @override */
+  async refresh() {
+    await this._refreshGraphics();
+  }
+
   async maybeRefresh(journalEntry) {
     if (journalEntry.id === this.journalEntry.id) {
       const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
@@ -209,11 +214,14 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
-  /** @override */
-  async refresh() {
-    //if ( this._destroyed || this.shape._destroyed ) return;
-    await this._refreshGraphics();
-  }
+  /* -------------------------------------------- */
+
+  async loadFromJournalEntry() {
+    const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
+    this.history = [savedState];
+    this.historyIndex = 0;
+    await this.refresh();
+  };
 
   /* -------------------------------------------- */
 
@@ -228,15 +236,6 @@ export class Dungeon extends PlaceableObject {
     await this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
     await this.refresh();
   }
-
-  /* -------------------------------------------- */
-
-  async loadFromJournalEntry() {
-    const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
-    this.history = [savedState];
-    this.historyIndex = 0;
-    await this.refresh();
-  };
 
   /* -------------------------------------------- */
 
@@ -393,6 +392,20 @@ export class Dungeon extends PlaceableObject {
     return slope < 0 && y2 > y1;
   }
 
+  _doorNeedsShadow(x1, y1, x2, y2) {
+    if (x1 === x2) {
+      // vertical doors always need shadow
+      return true;
+    }
+    if (y1 === y2) {
+      // horizontal doors always need shadow
+      return true;
+    }
+    const slope = geo.slope(x1, y1, x2, y2);
+    // we know slope is non-zero and non-infinity because of earlier checks
+    return slope < 0 && y2 > y1;
+  }
+
   // _inflateGeometry(geometry, distance) {
   //   return geometry.buffer(spacing, jsts.operation.buffer.BufferParameters.CAP_FLAT);
   // }
@@ -427,7 +440,6 @@ export class Dungeon extends PlaceableObject {
       alignment: 1,
       join: "round"
     });
-
     gfx.moveTo(coords[0].x, coords[0].y);
     for (let i = 1; i < coords.length; i++) {
       if (this._needsShadow(coords[i-1].x, coords[i-1].y, coords[i].x, coords[i].y)) {
@@ -443,11 +455,9 @@ export class Dungeon extends PlaceableObject {
 
     // draw interior hole walls/shadows
     for (let i = 0; i < numHoles; i++) {
-
       const hole = poly.getInteriorRingN(i);
       const coords = hole.getCoordinates();
       const flatCoords = coords.map(c => [c.x, c.y]).flat();
-
       // draw hole wall outer drop shadows
       gfx.lineStyle(this.state().config.wallThickness / 2.0 + 8.0, 0x000000, 0.2, 1);
       for (let i = 0; i < coords.length - 1; i++) {
@@ -471,6 +481,7 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  // [x1, y1, x2, y2]
   _drawDoor(gfx, door) {
     const totalLength = geo.distanceBetweenPoints(door[0], door[1], door[2], door[3]);
     const jambLength = 20;
@@ -482,13 +493,15 @@ export class Dungeon extends PlaceableObject {
     const deltaY = door[3] - door[1];
     const jamb1End = [door[0] + (deltaX * jambFraction), door[1] + (deltaY * jambFraction)];
     const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
-
     const doorRect = this._rectangleForSegment(jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
     gfx.lineStyle(this.state().config.wallThickness, PIXI.utils.string2hex(this.state().config.wallColor), 1.0, 0.5);    
     gfx.moveTo(door[0], door[1]);
+    // left jamb
     gfx.lineTo(jamb1End[0], jamb1End[1]);
+    // right jamb
     gfx.moveTo(rectEnd[0], rectEnd[1]);
     gfx.lineTo(door[2], door[3]);
+    // door rectangle
     gfx.drawPolygon(
       doorRect[0], doorRect[1], 
       doorRect[2], doorRect[3],
@@ -496,6 +509,58 @@ export class Dungeon extends PlaceableObject {
       doorRect[6], doorRect[7],
       doorRect[0], doorRect[1]
       );
+
+    // draw drop shadows
+    // our needsShadow check is assuming counter-clockwise??? ordering
+    // TODO: doors need different shadow-logic than walls.
+    // doors are always interior and should always have shadows if vert/horiz,
+    // regardless of original ordering. So maybe we reorder the door
+    // to lowest x/y starting?
+    // TODO: this door shadow logic is hacky and awful; rewrite with a calm brain.
+    if (door[2] < door[0]) {
+      this._drawDoorShadow(gfx, [door[2], door[3], door[0], door[1]]);
+    } else if (door[2] === door[0] && door[3] >= door[1]) {
+      this._drawDoorShadow(gfx, [door[2], door[3], door[0], door[1]]);
+    } else {
+      this._drawDoorShadow(gfx, door);        
+    }
+  }
+
+  _drawDoorShadow(gfx, door) {
+    if (!this._doorNeedsShadow(door[2], door[3], door[0], door[1])) {
+      return;
+    }
+    const totalLength = geo.distanceBetweenPoints(door[0], door[1], door[2], door[3]);
+    const jambLength = 20;
+    const rectLength = totalLength - (2 * jambLength);
+    const jambFraction = jambLength / totalLength;
+    const rectFraction = rectLength / totalLength;
+    const rectEndFraction = jambFraction + rectFraction;
+    const deltaX = door[2] - door[0];
+    const deltaY = door[3] - door[1];
+    const jamb1End = [door[0] + (deltaX * jambFraction), door[1] + (deltaY * jambFraction)];
+    const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
+    const doorRect = this._rectangleForSegment(jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
+
+    gfx.lineStyle({
+      width: this.state().config.wallThickness / 2.0 + 8.0,
+      color: 0x000000,
+      alpha: 0.2,
+      alignment: 1,
+      join: "round"
+    });      
+    gfx.moveTo(door[2], door[3]);
+    // left jamb
+    gfx.lineTo(rectEnd[0], rectEnd[1]);
+    // door rect top
+    gfx.moveTo(doorRect[4], doorRect[5]);
+    gfx.lineTo(doorRect[6], doorRect[7]);
+    // door rect bottom
+    gfx.moveTo(doorRect[2], doorRect[3]);
+    gfx.lineTo(doorRect[0], doorRect[1]);
+    // right jamb
+    gfx.moveTo(jamb1End[0], jamb1End[1]);
+    gfx.lineTo(door[0], door[1]);
   }
 
   _addOuterShadow() {
