@@ -42,8 +42,12 @@ export class DungeonState {
     return new DungeonState(geo.wktToGeometry(obj.wkt), obj.doors, obj.config);
   }
 
+  /* -------------------------------------------- */  
+
   async saveToJournalEntry(journalEntry) {
     const serialized = this.toString();
+    // update walls before we update the journal
+    await this._refreshWalls();
     await journalEntry.update({
       content: serialized,
     });
@@ -60,6 +64,83 @@ export class DungeonState {
   static startState() {
     return new DungeonState(null, [], Dungeon.defaultConfig());
   }
+
+  /* -------------------------------------------- */  
+
+  async _refreshWalls() {
+    await this._deleteAllWalls();
+    if (this.geometry) {
+      if (this.geometry instanceof jsts.geom.MultiPolygon) {
+        await this._makeWallsFromMulti(this.geometry);
+      } else if (this.geometry instanceof jsts.geom.Polygon) {
+        await this._makeWallsFromPoly(this.geometry);
+      }
+    }
+    await this._makeDoors(this.doors);
+  }
+
+  async _deleteAllWalls() {
+    try {   
+      // scene.update() triggers a redraw, 
+      // which causes an infinite loop of redraw/refresh.
+      // so avoid it :P
+      const collection = canvas.scene.getEmbeddedCollection("Wall");
+      const ids = Array.from(collection.keys());
+      await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
+    } catch(error) {
+      console.error(error);
+    }
+  }
+
+  async _makeWallsFromMulti(multi) {
+    for (let i = 0; i < multi.getNumGeometries(); i++) {
+      const poly = multi.getGeometryN(i);
+      await this._makeWallsFromPoly(poly);
+    }
+  }
+
+  async _makeWallsFromPoly(poly) {
+    const allWalls = [];
+    const exterior = poly.getExteriorRing();
+    const coords = exterior.getCoordinates();
+    for (let i = 0; i < coords.length - 1; i++) {
+      const wallData = {
+        // From Foundry API docs:
+        // "The wall coordinates, a length-4 array of finite numbers [x0,y0,x1,y1]"
+        c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
+      };
+      allWalls.push(wallData);
+    }
+    const numHoles = poly.getNumInteriorRing();    
+    for (let i = 0; i < numHoles; i++) {
+      const hole = poly.getInteriorRingN(i);
+      const coords = hole.getCoordinates();
+      for (let i = 0; i < coords.length - 1; i++) {
+        const wallData = {
+          c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
+        };
+        allWalls.push(wallData);
+      }      
+    }
+    if (allWalls.length) {
+      await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
+    }
+  }
+
+  /** [[x1,y1,x2,y2],...] */
+  async _makeDoors(doors) {
+    const allDoors = [];
+    for (const door of doors) {
+      const doorData = {
+        c: [door[0], door[1], door[2], door[3]],
+        door: 1
+      };
+      allDoors.push(doorData);
+    }
+    if (allDoors.length) {
+      await canvas.scene.createEmbeddedDocuments("Wall", allDoors);
+    }
+  }   
 }
 
 /**
@@ -83,9 +164,7 @@ export class Dungeon extends PlaceableObject {
   constructor(journalEntry, note) {
     // note will be saved as this.document
     super(note);
-
     this.journalEntry = journalEntry;
-
     /** time-ordered array of DungeonStates */
     this.history = [DungeonState.startState()];
     this.historyIndex = 0;
@@ -126,8 +205,7 @@ export class Dungeon extends PlaceableObject {
   async maybeRefresh(journalEntry) {
     if (journalEntry.id === this.journalEntry.id) {
       const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
-      this.pushState(savedState);
-      this.refresh();
+      await this.pushState(savedState);
     }
   }
 
@@ -135,7 +213,6 @@ export class Dungeon extends PlaceableObject {
   async refresh() {
     //if ( this._destroyed || this.shape._destroyed ) return;
     await this._refreshGraphics();
-    await this._refreshWalls();
   }
 
   /* -------------------------------------------- */
@@ -394,12 +471,8 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
-  _distanceBetweenPoints(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-  }
-
   _drawDoor(gfx, door) {
-    const totalLength = this._distanceBetweenPoints(door[0], door[1], door[2], door[3]);
+    const totalLength = geo.distanceBetweenPoints(door[0], door[1], door[2], door[3]);
     const jambLength = 20;
     const rectLength = totalLength - (2 * jambLength);
     const jambFraction = jambLength / totalLength;
@@ -468,76 +541,5 @@ export class Dungeon extends PlaceableObject {
     }
     this.addChild(gfx);
   }
-
-  async _refreshWalls() {
-    // TODO: fix update / refresh infinite loop
-    //await this._deleteAllWalls();
-    const state = this.history[this.historyIndex];
-    if (state.geometry) {
-      if (state.geometry instanceof jsts.geom.MultiPolygon) {
-        await this._makeWallsFromMulti(state.geometry);
-      } else if (state.geometry instanceof jsts.geom.Polygon) {
-        await this._makeWallsFromPoly(state.geometry);
-      }
-    }
-    await this._makeDoors(state.doors);
-  }
-
-  async _deleteAllWalls() {
-    try {   
-      // it looks like scene.update() causes a redraw, which causes a refresh
-      // and puts us in an infinite loop   
-      await canvas.scene.update({ walls: [] });
-    } catch(error) {
-      console.error(error);
-    }
-  }
-
-  async _makeWallsFromMulti(multi) {
-    for (let i = 0; i < multi.getNumGeometries(); i++) {
-      const poly = multi.getGeometryN(i);
-      await this._makeWallsFromPoly(poly);
-    }
-  }
-
-  async _makeWallsFromPoly(poly) {
-    const allWalls = [];
-    const exterior = poly.getExteriorRing();
-    const coords = exterior.getCoordinates();
-    for (let i = 0; i < coords.length - 1; i++) {
-      const wallData = {
-        c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
-      };
-      allWalls.push(wallData);
-    }
-    const numHoles = poly.getNumInteriorRing();    
-    for (let i = 0; i < numHoles; i++) {
-      const hole = poly.getInteriorRingN(i);
-      const coords = hole.getCoordinates();
-      for (let i = 0; i < coords.length - 1; i++) {
-        const wallData = {
-          c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
-        };
-        allWalls.push(wallData);
-      }      
-    }
-    if (allWalls.length) {
-      await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
-    }
-  }
-
-  /** [[x1,y1,x2,y2],...] */
-  async _makeDoors(doors) {
-    const allDoors = [];
-    for (const door of doors) {
-      const doorData = {
-        c: [door[0], door[1], door[2], door[3]],
-        door: 1
-      };
-      allDoors.push(doorData);
-    }
-    if (allDoors.length) {
-      await canvas.scene.createEmbeddedDocuments("Wall", allDoors);
-    }
-  }  
+ 
 }
