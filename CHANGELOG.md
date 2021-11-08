@@ -3,10 +3,8 @@
 - Redraw map on data changes for all connected clients.
 - Dungeon config (colors, thickness) is now per dungeon/scene and persisted with the dungeon state.
 - Add door shadows.
-- Fix various bugs wrt wall recreation and client sync.
-
-# 0.2.1
 - Fix angled door drawing.
+- Fix various bugs wrt wall recreation and client sync.
 
 # 0.2.0
 - Add rectangle and door deletion tools.
