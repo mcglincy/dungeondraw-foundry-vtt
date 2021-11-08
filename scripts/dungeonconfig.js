@@ -81,9 +81,9 @@ export class DungeonConfig extends FormApplication {
    */
   _onResetDefaults(event) {
     event.preventDefault();
-    game.settings.set(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING, DungeonConfig.defaultConfig);
-    this.object.data.update(DungeonConfig.defaultConfig);
+    canvas.dungeon.dungeon?.setConfig(Dungeon.defaultConfig());
     canvas.dungeon.dungeon.refresh();
+    this.object.data.update(Dungeon.defaultConfig());
     this.render();
   }
 }
