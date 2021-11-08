@@ -1,3 +1,4 @@
+import { Dungeon } from "./dungeon.js";
 import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
@@ -21,14 +22,6 @@ export class DungeonConfig extends FormApplication {
     });
   }
 
-  static defaultConfig = {
-    doorThickness: 25,
-    doorColor: "#000000",
-    floorColor: "#F2EDDF",
-    wallColor: "#000000",
-    wallThickness: 8,
-  };
-
   /* -------------------------------------------- */
 
   /** @override */
@@ -41,8 +34,10 @@ export class DungeonConfig extends FormApplication {
 
   /** @override */
   getData(options) {
-    const config = game.settings.get(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING);
-    // Return data
+    let config = canvas.dungeon.dungeon?.state().config;
+    if (!config) {
+      config = Dungeon.defaultConfig();
+    }
     return {
       object: config,
       options: this.options,
@@ -53,9 +48,7 @@ export class DungeonConfig extends FormApplication {
 
   /** @override */
   async _updateObject(event, formData) {
-    // Configure the default Dungeon settings
-    game.settings.set(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING, formData);
-    canvas.dungeon.dungeon.refresh();
+    canvas.dungeon.dungeon?.setConfig(formData);
   }
 
   /* -------------------------------------------- */

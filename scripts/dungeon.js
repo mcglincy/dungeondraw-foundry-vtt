@@ -8,15 +8,17 @@ import "./lib/pixi-filters.min.js";
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
 
-  constructor(geometry, doors) {
+  constructor(geometry, doors, config) {
     this.geometry = geometry;
     this.doors = doors;
+    this.config = config;
   }
 
   clone() {
     return new DungeonState(
       this.geometry ? this.geometry.copy() : null,
-      JSON.parse(JSON.stringify(this.doors))
+      JSON.parse(JSON.stringify(this.doors)),
+      JSON.parse(JSON.stringify(this.config))
       );
   }
 
@@ -27,15 +29,17 @@ export class DungeonState {
       // serialize the geometry object as a WKT string
       wkt: geo.geometryToWkt(this.geometry),
       doors: this.doors,
+      config: this.config,
     });
   }
 
+  // TODO: implement as fromJSON?
   static fromString(s) {
     if (!s) {
       return DungeonState.startState();
     }
     const obj = JSON.parse(s);
-    return new DungeonState(geo.wktToGeometry(obj.wkt), obj.doors);
+    return new DungeonState(geo.wktToGeometry(obj.wkt), obj.doors, obj.config);
   }
 
   async saveToJournalEntry(journalEntry) {
@@ -54,7 +58,7 @@ export class DungeonState {
   }
 
   static startState() {
-    return new DungeonState(null, []);
+    return new DungeonState(null, [], Dungeon.defaultConfig());
   }
 }
 
@@ -64,15 +68,23 @@ export class DungeonState {
 // TODO: does Dungeon even need to be a PlaceableObject?
 // or could it just extend PIXI.Container?
 export class Dungeon extends PlaceableObject {
+
+  static defaultConfig() {
+    return {
+      doorThickness: 25,
+      doorColor: "#000000",
+      floorColor: "#F2EDDF",
+      wallColor: "#000000",
+      wallThickness: 8,
+    };
+  };
+
   // expects JournalEntry for constructor
   constructor(journalEntry, note) {
     // note will be saved as this.document
     super(note);
 
     this.journalEntry = journalEntry;
-
-    /** local copy of Dungeon config from settings */
-    this.config = null;
 
     /** time-ordered array of DungeonStates */
     this.history = [DungeonState.startState()];
@@ -95,6 +107,10 @@ export class Dungeon extends PlaceableObject {
     this.refresh();
   }
 
+  state() {
+    return this.history[this.historyIndex];
+  }
+
   /* -------------------------------------------- */
 
   /* -------------------------------------------- */
@@ -113,6 +129,13 @@ export class Dungeon extends PlaceableObject {
       this.pushState(savedState);
       this.refresh();
     }
+  }
+
+  /** @override */
+  async refresh() {
+    //if ( this._destroyed || this.shape._destroyed ) return;
+    await this._refreshGraphics();
+    await this._refreshWalls();
   }
 
   /* -------------------------------------------- */
@@ -138,6 +161,8 @@ export class Dungeon extends PlaceableObject {
     await this.refresh();
   };
 
+  /* -------------------------------------------- */
+
   async pushState(newState) {
     // throw away any history states after current
     for (let i = this.history.length - 1; i > this.historyIndex; i--) {
@@ -149,6 +174,12 @@ export class Dungeon extends PlaceableObject {
 
     await newState.saveToJournalEntry(this.journalEntry);
     await this.refresh();
+  }
+
+  async setConfig(config) {
+    const newState = this.state().clone();
+    newState.config = config;
+    this.pushState(newState);
   }
 
   async addDoor(x1, y1, x2, y2) {
@@ -214,7 +245,7 @@ export class Dungeon extends PlaceableObject {
 
   _rectangleForSegment(x1, y1, x2, y2) {
     const slope = geo.slope(x1, y1, x2, y2);
-    const rectDelta = this.config.doorThickness / 2.0;
+    const rectDelta = this.state().config.doorThickness / 2.0;
 
     // slope is delta y / delta x
     if (slope === 0) {
@@ -294,15 +325,8 @@ export class Dungeon extends PlaceableObject {
     const coords = exterior.getCoordinates();
     const flatCoords = coords.map(c => [c.x, c.y]).flat();
 
-    // draw outside shadow
-    // const expanded = exterior.buffer(25.0);
-    // gfx.lineStyle(0, PIXI.utils.string2hex(this.config.wallColor), 1.0);
-    // gfx.beginFill(0x000000, 0.2);
-    // gfx.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
-    // gfx.endFill();
-
     // draw floor
-    gfx.beginFill(PIXI.utils.string2hex(this.config.floorColor), 1.0);
+    gfx.beginFill(PIXI.utils.string2hex(this.state().config.floorColor), 1.0);
     gfx.drawPolygon(flatCoords);
     gfx.endFill();
 
@@ -320,7 +344,7 @@ export class Dungeon extends PlaceableObject {
 
     // draw inner wall drop shadows
     gfx.lineStyle({
-      width: this.config.wallThickness / 2.0 + 8.0,
+      width: this.state().config.wallThickness / 2.0 + 8.0,
       color: 0x000000,
       alpha: 0.2,
       alignment: 1,
@@ -337,7 +361,7 @@ export class Dungeon extends PlaceableObject {
     }
 
     // draw outer wall poly
-    gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0, 0.5);
+    gfx.lineStyle(this.state().config.wallThickness, PIXI.utils.string2hex(this.state().config.wallColor), 1.0, 0.5);
     gfx.drawPolygon(flatCoords);
 
     // draw interior hole walls/shadows
@@ -348,7 +372,7 @@ export class Dungeon extends PlaceableObject {
       const flatCoords = coords.map(c => [c.x, c.y]).flat();
 
       // draw hole wall outer drop shadows
-      gfx.lineStyle(this.config.wallThickness / 2.0 + 8.0, 0x000000, 0.2, 1);
+      gfx.lineStyle(this.state().config.wallThickness / 2.0 + 8.0, 0x000000, 0.2, 1);
       for (let i = 0; i < coords.length - 1; i++) {
         gfx.moveTo(coords[i].x, coords[i].y);
         if (this._needsShadow(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y)) {
@@ -356,7 +380,7 @@ export class Dungeon extends PlaceableObject {
         } 
       }      
       // draw hole wall poly
-      gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0);
+      gfx.lineStyle(this.state().config.wallThickness, PIXI.utils.string2hex(this.state().config.wallColor), 1.0);
       gfx.drawPolygon(flatCoords);
     }
   }
@@ -387,7 +411,7 @@ export class Dungeon extends PlaceableObject {
     const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
 
     const doorRect = this._rectangleForSegment(jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
-    gfx.lineStyle(this.config.wallThickness, PIXI.utils.string2hex(this.config.wallColor), 1.0, 0.5);    
+    gfx.lineStyle(this.state().config.wallThickness, PIXI.utils.string2hex(this.state().config.wallColor), 1.0, 0.5);    
     gfx.moveTo(door[0], door[1]);
     gfx.lineTo(jamb1End[0], jamb1End[1]);
     gfx.moveTo(rectEnd[0], rectEnd[1]);
@@ -401,18 +425,8 @@ export class Dungeon extends PlaceableObject {
       );
   }
 
-  /** @override */
-  async refresh() {
-    //if ( this._destroyed || this.shape._destroyed ) return;
-
-    // stash latest-greatest config settings
-    this.config = game.settings.get(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING);        
-    await this._refreshGraphics();
-    await this._refreshWalls();
-  }
-
   _addOuterShadow() {
-    const state = this.history[this.historyIndex];
+    const state = this.state();
     if (state.geometry instanceof jsts.geom.MultiPolygon) {
       for (let i = 0; i < state.geometry.getNumGeometries(); i++) {
         const poly = state.geometry.getGeometryN(i);
@@ -456,7 +470,8 @@ export class Dungeon extends PlaceableObject {
   }
 
   async _refreshWalls() {
-    await this._deleteAllWalls();
+    // TODO: fix update / refresh infinite loop
+    //await this._deleteAllWalls();
     const state = this.history[this.historyIndex];
     if (state.geometry) {
       if (state.geometry instanceof jsts.geom.MultiPolygon) {
@@ -469,9 +484,10 @@ export class Dungeon extends PlaceableObject {
   }
 
   async _deleteAllWalls() {
-    const ids = canvas.scene.walls.map(w => w.id);
-    try {
-      await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
+    try {   
+      // it looks like scene.update() causes a redraw, which causes a refresh
+      // and puts us in an infinite loop   
+      await canvas.scene.update({ walls: [] });
     } catch(error) {
       console.error(error);
     }
@@ -505,7 +521,7 @@ export class Dungeon extends PlaceableObject {
         allWalls.push(wallData);
       }      
     }
-    if (allWalls.length) {      
+    if (allWalls.length) {
       await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
     }
   }

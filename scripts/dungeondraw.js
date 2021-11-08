@@ -15,8 +15,8 @@ export class DungeonDraw {
 
   static init() {
     console.log("***** DUNGEON DRAW *****");
-    game.settings.register(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING, 
-      DungeonConfig.defaultConfig);
+    // game.settings.register(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING, 
+    //   DungeonConfig.defaultConfig);
   }
 
   static getSceneControlButtons(controls) {

@@ -35,8 +35,6 @@ const createDungeonEntry = async () => {
     });
   }
 
-  console.log(folder);
-
   const journalEntry = await JournalEntry.create({
     name: canvas.scene.name,
     folder: folder.id,
@@ -185,18 +183,6 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   /* -------------------------------------------- */
-
-  async OLDloadDungeon() {
-    const data = {};
-    // TODO: it seems like DungeonDocument isn't really needed here?    
-    // const document = new DungeonDocument(data, {parent: canvas.scene});
-    // this.dungeon = new Dungeon(document);
-    const document = new DungeonDocument(data, {parent: canvas.scene});
-    this.dungeon = new Dungeon(document);
-    await this.dungeon.loadFromScene();
-    // add dungeon underneath any placeables or drawing preview
-    this.addChildAt(this.dungeon, 0);
-  }
 
   async loadDungeon() {
     const {journalEntry, note} = await findDungeonEntryAndNote();
