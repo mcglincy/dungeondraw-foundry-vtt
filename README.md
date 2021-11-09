@@ -14,6 +14,7 @@ A dungeon-drawing module for Foundry VTT.
 * Undo - Undoes last change.
 * Redo - Redoes next change.
 * Config - Change various scene-specific drawing values: floor and wall color, wall width, etc.
+* Delete all - Nuke everything on the current dungeon/scene.
 
 
 ## How it works
