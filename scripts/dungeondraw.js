@@ -36,8 +36,7 @@ export class DungeonDraw {
       layer: DungeonLayer.LAYER_NAME,
       icon: "fas fa-dungeon",
       // TODO: use module-specific perms?
-      //visible: game.user.can("DRAWING_CREATE"),
-      visible: true,
+      visible: game.user.can("DRAWING_CREATE"),
       tools: [
         {
           name: "addrect",
