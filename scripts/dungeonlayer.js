@@ -1,6 +1,7 @@
-import { Dungeon, DungeonState } from "./dungeon.js";
+import { Dungeon } from "./dungeon.js";
+import { DungeonState } from "./dungeonstate.js";
 import { DungeonConfig } from "./dungeonconfig.js";
-import { DungeonDocument } from "./dungeondocument.js";
+//import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonDraw } from "./dungeondraw.js";
 
 
@@ -159,9 +160,9 @@ export class DungeonLayer extends PlaceablesLayer {
    * Render a configuration sheet to configure the Dungeon settings
    */
   configureSettings() {
-    const defaults = {};
-    const d = new DungeonDocument(defaults);
-    new DungeonConfig(d, {}).render(true);
+    // const defaults = {};
+    // const d = new DungeonDocument(defaults);
+    new DungeonConfig().render(true);
   }  
 
   /** @override */

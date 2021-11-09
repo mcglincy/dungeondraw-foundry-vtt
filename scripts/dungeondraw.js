@@ -1,5 +1,4 @@
 import { DungeonConfig } from "./dungeonconfig.js";
-import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 
 
@@ -26,7 +25,7 @@ export class DungeonDraw {
 
     CONFIG.Canvas.layers.dungeon = DungeonLayer;
     CONFIG.Dungeon = {
-      documentClass: DungeonDocument,
+      //documentClass: DungeonDocument,
       layerClass: DungeonLayer,
       sheetClass: DungeonConfig
     };
@@ -40,15 +39,6 @@ export class DungeonDraw {
       //visible: game.user.can("DRAWING_CREATE"),
       visible: true,
       tools: [
-        // TODO: implement
-        // {
-        //   name: "select",
-        //   title: "DD.ButtonTitleSelect",
-        //   icon: "fas fa-expand",
-        //   onClick: () => {
-        //     notImplementedYet();
-        //   },
-        // },
         {
           name: "addrect",
           title: "DD.ButtonTitleAddRect",

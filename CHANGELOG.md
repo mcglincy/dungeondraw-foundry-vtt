@@ -1,3 +1,6 @@
+# 0.3.1
+- Fix reset defaults.
+
 # 0.3.0
 - Dungeon is now persisted in a JournalEntry, tied to a scene via a Note.
 - Redraw map on data changes for all connected clients.
