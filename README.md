@@ -2,6 +2,7 @@
 
 A dungeon-drawing module for Foundry VTT.
 
+![Screen Shot 2021-11-08 at 9 55 54 PM](https://user-images.githubusercontent.com/189172/140859282-ca8e78bc-0d9c-4c06-8b0d-e6d876a8cb5f.png)
 
 ## Tools
 
