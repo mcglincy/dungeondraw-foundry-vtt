@@ -12,7 +12,7 @@ A dungeon-drawing module for Foundry VTT.
 * Remove doors - Remove all doors within an area.
 * Undo - Undoes last change.
 * Redo - Redoes next change.
-* Config - Change various drawing values: floor and wall color, wall width, etc.
+* Config - Change various scene-specific drawing values: floor and wall color, wall width, etc.
 
 
 ## How it works
@@ -28,4 +28,4 @@ A dungeon-drawing module for Foundry VTT.
 ## Known issues
 
 * Simultaneous map editors can trample each other's changes and cause save errors. It's best to stick to one map-maker at a time (either the GM or a single player).
-
+* The geometry library used (JSTS) is ~500kb. I'm looking at ways to reduce the size.
