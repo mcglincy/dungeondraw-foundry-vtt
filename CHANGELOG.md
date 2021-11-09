@@ -1,5 +1,6 @@
 # 0.3.1
 - Fix reset defaults.
+- Code refactoring.
 
 # 0.3.0
 - Dungeon is now persisted in a JournalEntry, tied to a scene via a Note.
