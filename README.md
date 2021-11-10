@@ -28,7 +28,12 @@ A dungeon-drawing module for Foundry VTT.
   * To delete: delete the Note and/or the JournalEntry. 
 
 
-### Using floor textures
+## Wall and Door Creation
+
+Dungeon Draw automatically creates Foundry lighting walls and doors from what you've drawn. Warning: every time you draw, Dungeon Draw deletes ALL EXISTING WALLS and recreates them. That means that using Dungeon Draw on a scene that already has manually placed walls WILL DELETE THOSE WALLS.
+
+
+## Using floor textures
 
 If you choose a floor texture it will be used in preference to the floor fill color.
 
