@@ -46,11 +46,13 @@ const addTiledBackground = async (container, mask, state) => {
     return;
   }
 
-  // const textureSize = state.config.floorTextureSize ? state.config.floorTextureSize : 100;
   // assume square textures
   const textureSize = texture.width;
-  const rows = Math.ceil(canvas.scene.data.height / textureSize);
-  const cols = Math.ceil(canvas.scene.data.width / textureSize);
+  // allow for scene padding in our total height/width
+  const height = canvas.scene.data.height * (1 + 2 * canvas.scene.data.padding);
+  const width = canvas.scene.data.width * (1 + 2 * canvas.scene.data.padding);
+  const rows = Math.ceil(height / textureSize);
+  const cols = Math.ceil(width / textureSize);
 
   const bg = new PIXI.Container();
   for (let row = 0; row < rows; row++) {
@@ -64,11 +66,10 @@ const addTiledBackground = async (container, mask, state) => {
         [col * textureSize, row * textureSize],
       ]);
       if (state.geometry.intersects(rect) && !state.geometry.touches(rect)) {
-        // console.log(`sprite at row ${row}, col ${col}`);
         const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
         sprite.x = col * textureSize;
         sprite.y = row * textureSize;
-        bg.addChild(sprite);        
+        bg.addChild(sprite);
       }
     }
   }
