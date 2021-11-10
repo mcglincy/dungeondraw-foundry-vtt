@@ -16,7 +16,8 @@ export class Dungeon extends PlaceableObject {
     return {
       doorThickness: 25,
       doorColor: "#000000",
-      doorFillColor: "",
+      doorFillColor: "#ffffff",
+      doorFillOpacity: 0,
       floorColor: "#F2EDDF",
       floorTexture: "",
       floorTextureSize: 0,

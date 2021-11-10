@@ -13,19 +13,33 @@
         <hr>
         <div class="form-group">
           <label>{{localize "DD.DoorColor"}}</label>
-          <input type="color" name="doorColor" value="{{object.doorColor}}" data-dtype="String"/>
+          <div class="form-fields">
+            <input type="color" name="doorColor" value="{{object.doorColor}}" data-dtype="String"/>
+          </div>
         </div>
         <div class="form-group">
           <label>{{localize "DD.DoorFillColor"}}</label>
-          <input type="color" name="doorFillColor" value="{{object.doorFillColor}}" data-dtype="String"/>
+          <div class="form-fields">
+            <input type="color" name="doorFillColor" value="{{object.doorFillColor}}" data-dtype="String"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{localize "DD.DoorFillOpacity"}}</label>
+          <div class="form-fields">
+            <input type="number" name="doorFillOpacity" value="{{object.doorFillOpacity}}" data-dtype="Number"/>
+          </div>
         </div>
         <div class="form-group">
           <label for="doorThickness">{{localize "DD.DoorThickness"}}</label>
-          <input type="number" name="doorThickness" value="{{object.doorThickness}}" data-dtype="Number"/>
+          <div class="form-fields">
+            <input type="number" name="doorThickness" value="{{object.doorThickness}}" data-dtype="Number"/>
+          </div>
         </div>
         <div class="form-group">
           <label>{{localize "DD.FloorColor"}}</label>
-          <input type="color" name="floorColor" value="{{object.floorColor}}" data-dtype="String"/>
+          <div class="form-fields">
+            <input type="color" name="floorColor" value="{{object.floorColor}}" data-dtype="String"/>
+          </div>
         </div>
         <div class="form-group">
           <label>{{localize "DD.FloorTexture"}}</label>
@@ -38,15 +52,21 @@
         </div>
         <div class="form-group">
           <label>{{localize "DD.FloorTextureSize"}}</label>
-          <input type="number" name="floorTextureSize" value="{{object.floorTextureSize}}" data-dtype="Number"/>
+          <div class="form-fields">
+            <input type="number" name="floorTextureSize" value="{{object.floorTextureSize}}" data-dtype="Number"/>
+          </div>
         </div>
         <div class="form-group">
           <label>{{localize "DD.WallColor"}}</label>
-          <input type="color" name="wallColor" value="{{object.wallColor}}" data-dtype="String"/>
+          <div class="form-fields">
+            <input type="color" name="wallColor" value="{{object.wallColor}}" data-dtype="String"/>
+          </div>
         </div>
         <div class="form-group">
           <label for="wallThickness">{{localize "DD.WallThickness"}}</label>
-          <input type="text" name="wallThickness" value="{{object.wallThickness}}" data-dtype="Number"/>
+          <div class="form-fields">
+            <input type="text" name="wallThickness" value="{{object.wallThickness}}" data-dtype="Number"/>
+          </div>
         </div>
       </div>
 

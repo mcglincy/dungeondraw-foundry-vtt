@@ -285,8 +285,8 @@ const drawDoor = (gfx, config, door) => {
   gfx.moveTo(rectEnd[0], rectEnd[1]);
   gfx.lineTo(door[2], door[3]);
   // door rectangle
-  if (config.doorFillColor) {
-    gfx.beginFill(PIXI.utils.string2hex(config.doorFillColor));
+  if (config.doorFillOpacity) {
+    gfx.beginFill(PIXI.utils.string2hex(config.doorFillColor), config.doorFillOpacity);
   }
   gfx.drawPolygon(
     doorRect[0], doorRect[1], 
@@ -295,7 +295,9 @@ const drawDoor = (gfx, config, door) => {
     doorRect[6], doorRect[7],
     doorRect[0], doorRect[1]
     );
-  gfx.endFill();
+  if (config.doorFillColor) {
+    gfx.endFill();
+  }
 
   // draw drop shadows
   // our needsShadow check is assuming counter-clockwise??? ordering

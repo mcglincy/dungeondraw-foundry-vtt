@@ -12,6 +12,7 @@
   "DD.ConfigTitle": "Dungeon Config",
   "DD.DoorColor": "Door Color",
   "DD.DoorFillColor": "Door Fill Color",
+  "DD.DoorFillOpacity": "Door Fill Opacity (0.0 - 1.0)",
   "DD.DoorThickness": "Door Thickness",
   "DD.FloorColor": "Floor Color",
   "DD.FloorTexture": "Floor Texture",
