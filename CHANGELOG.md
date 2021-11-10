@@ -1,3 +1,6 @@
+# 0.4.1
+- Take scene padding into account for floor texture tiling.
+
 # 0.4.0
 - Add support for floor textures.
 - Add door fill color and opacity.
