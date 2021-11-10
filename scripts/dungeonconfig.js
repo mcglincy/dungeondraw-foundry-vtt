@@ -16,7 +16,7 @@ export class DungeonConfig extends FormApplication {
       classes: ["sheet"],
       template: "modules/dungeon-draw/templates/dungeon-config.html",
       width: 480,
-      height: 360,
+      height: 420,
       tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "position"}]
     });
   }
@@ -82,7 +82,6 @@ export class DungeonConfig extends FormApplication {
     event.preventDefault();
     canvas.dungeon.dungeon?.setConfig(Dungeon.defaultConfig());
     canvas.dungeon.dungeon.refresh();
-    this.object.data.update(Dungeon.defaultConfig());
     this.render();
   }
 }

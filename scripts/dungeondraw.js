@@ -35,43 +35,32 @@ export class DungeonDraw {
       title: "DD.SceneControlTitle",
       layer: DungeonLayer.LAYER_NAME,
       icon: "fas fa-dungeon",
-      // TODO: use module-specific perms?
       visible: game.user.can("DRAWING_CREATE"),
       tools: [
         {
           name: "addrect",
           title: "DD.ButtonTitleAddRect",
           icon: "fas fa-plus-square",
-          onClick: () => {
-          },
         },
         {
           name: "subtractrect",
           title: "DD.ButtonTitleSubtractRect",
           icon: "fas fa-minus-square",
-          onClick: () => {
-          },
         },
         {
           name: "addpoly",
           title: "DD.ButtonTitleAddPoly",
           icon: "fas fa-draw-polygon",
-          onClick: () => {
-          },
         },
         {
           name: "adddoor",
           title: "DD.ButtonTitleAddDoor",
           icon: "fas fa-door-open",
-          onClick: () => {
-          },
         },
         {
           name: "subtractdoor",
           title: "DD.ButtonTitleSubtractDoor",
           icon: "fas fa-door-closed",
-          onClick: () => {
-          },
         },
         {
           name: "undo",

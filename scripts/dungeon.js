@@ -16,7 +16,10 @@ export class Dungeon extends PlaceableObject {
     return {
       doorThickness: 25,
       doorColor: "#000000",
+      doorFillColor: "",
       floorColor: "#F2EDDF",
+      floorTexture: "",
+      floorTextureSize: 0,
       wallColor: "#000000",
       wallThickness: 8,
     };
@@ -42,7 +45,11 @@ export class Dungeon extends PlaceableObject {
   /* -------------------------------------------- */
 
   deleteAll() {
-    this.history = [DungeonState.startState()];
+    // keep our most recent config around
+    const lastState = this.state();
+    const resetState = DungeonState.startState();
+    resetState.config = lastState.config;
+    this.history = [resetState];
     this.historyIndex = 0;
     this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
     this.refresh();

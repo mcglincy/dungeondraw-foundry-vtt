@@ -4,13 +4,26 @@ import "./lib/pixi-filters.min.js";
 import "./lib/jsts.min.js";
 
 
-export const render = (container, state) => {
+export const render = async (container, state) => {
   container.clear();
   const gfx = new PIXI.Graphics();
 
   if (state.geometry) {
     // draw an outer surrounding blurred shadow
     addOuterShadow(container, state.geometry);
+
+    // maybe add a tiled background
+    if (state.config.floorTexture) {
+      // use a mask to clip the tiled background
+      const clipMask = new PIXI.Graphics();
+      if (state.geometry instanceof jsts.geom.MultiPolygon) {
+        drawMultiPolygonMask(clipMask, state.geometry);
+      } else if (state.geometry instanceof jsts.geom.Polygon) {
+        drawPolygonMask(clipMask, state.geometry);
+      }
+      container.addChild(clipMask);
+      await addTiledBackground(container, clipMask, state);      
+    }
 
     // draw the dungeon geometry room(s)
     if (state.geometry instanceof jsts.geom.MultiPolygon) {
@@ -26,6 +39,44 @@ export const render = (container, state) => {
 
   container.addChild(gfx);
 }
+
+const addTiledBackground = async (container, mask, state) => {
+  const texture = await loadTexture(state.config.floorTexture);
+  if (!texture?.valid) {
+    return;
+  }
+
+  //const exterior = state.geometry.getExteriorRing();
+
+  const width = canvas.scene.data.width;
+  const height = canvas.scene.data.height;
+  const textureSize = state.config.floorTextureSize ? state.config.floorTextureSize : 100;
+  const rows = Math.ceil(height / textureSize);
+  const cols = Math.ceil(width / textureSize);
+
+  const bg = new PIXI.Container();
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      // only create a tiling sprite if this row/col intersects with our geometry
+      const rect = geo.pointsToPolygon([
+        [col * textureSize, row * textureSize],
+        [(col + 1) * textureSize, row * textureSize],
+        [(col + 1) * textureSize, (row + 1) * textureSize],
+        [col * textureSize, (row + 1) * textureSize],
+        [col * textureSize, row * textureSize],
+      ]);
+      if (state.geometry.intersects(rect) && !state.geometry.touches(rect)) {
+        console.log(`sprite at row ${row}, col ${col}`);
+        const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
+        sprite.x = col * textureSize;
+        sprite.y = row * textureSize;
+        bg.addChild(sprite);        
+      }
+    }
+  }
+  bg.mask = mask;
+  container.addChild(bg);
+};
 
 const rectangleForSegment = (config, x1, y1, x2, y2) => {
   const slope = geo.slope(x1, y1, x2, y2);
@@ -114,15 +165,44 @@ const doorNeedsShadow = (x1, y1, x2, y2) => {
   return slope < 0 && y2 > y1;
 };
 
+const drawPolygonMask = (gfx, poly) => {
+  const exterior = poly.getExteriorRing();
+  const coords = exterior.getCoordinates();
+  const flatCoords = coords.map(c => [c.x, c.y]).flat();
+  gfx.beginFill(0xFFFFFF, 1.0);
+  gfx.drawPolygon(flatCoords);
+  gfx.endFill();
+
+  const numHoles = poly.getNumInteriorRing();    
+  for (let i = 0; i < numHoles; i++) {
+    const hole = poly.getInteriorRingN(i);
+    const coords = hole.getCoordinates();
+    const flatCoords = coords.map(c => [c.x, c.y]).flat();
+    gfx.lineStyle(0, 0x000000, 1.0, 1, 0.5);
+    gfx.beginHole();
+    gfx.drawPolygon(flatCoords);
+    gfx.endHole();
+  }
+};
+
+const drawMultiPolygonMask = (gfx, multi) => {
+  for (let i = 0; i < multi.getNumGeometries(); i++) {
+    const poly = multi.getGeometryN(i);
+    drawPolygonMask(gfx, poly);
+  }
+};
+
 const drawPolygonRoom = (gfx, config, poly) => {
   const exterior = poly.getExteriorRing();
   const coords = exterior.getCoordinates();
   const flatCoords = coords.map(c => [c.x, c.y]).flat();
 
-  // draw floor
-  gfx.beginFill(PIXI.utils.string2hex(config.floorColor), 1.0);
-  gfx.drawPolygon(flatCoords);
-  gfx.endFill();
+  if (!config.floorTexture) {
+    // no texture; draw solid-color floor
+    gfx.beginFill(PIXI.utils.string2hex(config.floorColor), 1.0);
+    gfx.drawPolygon(flatCoords);
+    gfx.endFill();
+  }
 
   // cut out holes
   const numHoles = poly.getNumInteriorRing();    
@@ -196,7 +276,8 @@ const drawDoor = (gfx, config, door) => {
   const jamb1End = [door[0] + (deltaX * jambFraction), door[1] + (deltaY * jambFraction)];
   const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
   const doorRect = rectangleForSegment(config, jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
-  gfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.wallColor), 1.0, 0.5);    
+
+  gfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.doorColor), 1.0, 0.5);    
   gfx.moveTo(door[0], door[1]);
   // left jamb
   gfx.lineTo(jamb1End[0], jamb1End[1]);
@@ -204,6 +285,9 @@ const drawDoor = (gfx, config, door) => {
   gfx.moveTo(rectEnd[0], rectEnd[1]);
   gfx.lineTo(door[2], door[3]);
   // door rectangle
+  if (config.doorFillColor) {
+    gfx.beginFill(PIXI.utils.string2hex(config.doorFillColor));
+  }
   gfx.drawPolygon(
     doorRect[0], doorRect[1], 
     doorRect[2], doorRect[3],
@@ -211,6 +295,7 @@ const drawDoor = (gfx, config, door) => {
     doorRect[6], doorRect[7],
     doorRect[0], doorRect[1]
     );
+  gfx.endFill();
 
   // draw drop shadows
   // our needsShadow check is assuming counter-clockwise??? ordering
