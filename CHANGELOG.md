@@ -1,3 +1,7 @@
+# 0.4.0
+- Add support for floor textures.
+- Add door fill color and opacity.
+
 # 0.3.1
 - Fix reset defaults.
 - Code refactoring.
