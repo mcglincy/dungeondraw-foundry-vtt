@@ -13,7 +13,7 @@ A dungeon-drawing module for Foundry VTT.
 * Remove doors - Remove all doors within an area.
 * Undo - Undoes last change.
 * Redo - Redoes next change.
-* Config - Change various scene-specific drawing values: floor and wall color, wall width, etc.
+* Config - Change various scene-specific drawing values: floor and wall color, wall width, optional floor texture, etc.
 * Delete all - Nuke everything on the current dungeon/scene.
 
 
@@ -26,6 +26,17 @@ A dungeon-drawing module for Foundry VTT.
   * Map note in the upper left links the current scene to the JournalEntry.
   * JournalEntry and Note are created as soon as you start drawing a new dungeon.
   * To delete: delete the Note and/or the JournalEntry. 
+
+
+### Using floor textures
+
+If you choose a floor texture it will be used in preference to the floor fill color.
+
+Dungeon Draw currently assumes square texture files.
+
+Some care needs to be taken when choosing texture files and sizes. Using larger texture files (e.g., 400x400, 600x600, etc) will cause fewer texture sprites and should perform better. Conversely, using a 50x50 texture on a big map can make your browser crawl.
+
+Want some good floor textures? Check out this free Texture Pack 3 from Forgotten Adventures: https://www.patreon.com/posts/texture-pack-3-24886718
 
 
 ## Known issues

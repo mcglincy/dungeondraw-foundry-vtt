@@ -46,18 +46,16 @@ const addTiledBackground = async (container, mask, state) => {
     return;
   }
 
-  //const exterior = state.geometry.getExteriorRing();
-
-  const width = canvas.scene.data.width;
-  const height = canvas.scene.data.height;
-  const textureSize = state.config.floorTextureSize ? state.config.floorTextureSize : 100;
-  const rows = Math.ceil(height / textureSize);
-  const cols = Math.ceil(width / textureSize);
+  // const textureSize = state.config.floorTextureSize ? state.config.floorTextureSize : 100;
+  // assume square textures
+  const textureSize = texture.width;
+  const rows = Math.ceil(canvas.scene.data.height / textureSize);
+  const cols = Math.ceil(canvas.scene.data.width / textureSize);
 
   const bg = new PIXI.Container();
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
-      // only create a tiling sprite if this row/col intersects with our geometry
+      // only create a sprite if this row/col rectangle intersects with our map geometry
       const rect = geo.pointsToPolygon([
         [col * textureSize, row * textureSize],
         [(col + 1) * textureSize, row * textureSize],
@@ -66,7 +64,7 @@ const addTiledBackground = async (container, mask, state) => {
         [col * textureSize, row * textureSize],
       ]);
       if (state.geometry.intersects(rect) && !state.geometry.touches(rect)) {
-        console.log(`sprite at row ${row}, col ${col}`);
+        // console.log(`sprite at row ${row}, col ${col}`);
         const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
         sprite.x = col * textureSize;
         sprite.y = row * textureSize;
