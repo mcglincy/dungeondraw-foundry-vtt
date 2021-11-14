@@ -2,6 +2,7 @@ import { Dungeon } from "./dungeon.js";
 import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 
+
 /**
  * The Application responsible for configuring a single Dungeon document within a parent Scene.
  * @extends {FormApplication}

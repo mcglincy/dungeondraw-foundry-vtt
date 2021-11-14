@@ -1,6 +1,5 @@
 import * as geo from "./geo-utils.js";
 import "./lib/pixi-filters.min.js";
-// TODO: decide if we want to use turf.js instead
 import "./lib/jsts.min.js";
 
 

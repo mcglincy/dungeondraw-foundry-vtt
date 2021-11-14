@@ -1,4 +1,3 @@
-// TODO: decide if we want to use turf.js instead
 import "./lib/jsts.min.js";
 
 export const geometryToWkt = (geometry) => {

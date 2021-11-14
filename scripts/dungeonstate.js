@@ -53,8 +53,10 @@ export class DungeonState {
 
   static async loadFromJournalEntry(journalEntry) {
     if (journalEntry.data.content) {
+      console.log(`Loading dungeon from JournalEntry ${journalEntry.name}`);
       return DungeonState.fromString(journalEntry.data.content);
     } else {
+      console.log("Loading dungeon from start state");
       return DungeonState.startState();
     }
   }

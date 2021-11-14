@@ -1,7 +1,6 @@
 import { Dungeon } from "./dungeon.js";
 import { DungeonState } from "./dungeonstate.js";
 import { DungeonConfig } from "./dungeonconfig.js";
-//import { DungeonDocument } from "./dungeondocument.js";
 import { DungeonDraw } from "./dungeondraw.js";
 
 
@@ -177,6 +176,9 @@ export class DungeonLayer extends PlaceablesLayer {
       await this.dungeon.loadFromJournalEntry();
       // add dungeon underneath any placeables or drawing preview
       this.addChildAt(this.dungeon, 0);
+    } else {
+      // no journal entry and note found, so make sure dungeon is nulled on this layer
+      this.dungeon = null;
     }
   }
 

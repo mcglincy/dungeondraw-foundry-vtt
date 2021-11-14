@@ -101,7 +101,7 @@ export class DungeonDraw {
     });
   }
 
-  static async canvasReady(canvase) {
+  static async canvasReady(canvas) {
     await canvas.dungeon.loadDungeon();
   }
 
