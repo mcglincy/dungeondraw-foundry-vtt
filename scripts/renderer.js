@@ -9,8 +9,8 @@ export const render = async (container, state) => {
   const gfx = new PIXI.Graphics();
 
   if (state.geometry) {
-    // draw an outer surrounding blurred shadow
-    addOuterShadow(container, state.geometry);
+    // maybe draw an outer surrounding blurred shadow
+    addExteriorShadow(container, state.config, state.geometry);
 
     // maybe add a tiled background
     if (state.config.floorTexture) {
@@ -196,8 +196,8 @@ const drawPolygonRoom = (gfx, config, poly) => {
   const coords = exterior.getCoordinates();
   const flatCoords = coords.map(c => [c.x, c.y]).flat();
 
+  // if no floor texture is specified, draw a solid-color floor
   if (!config.floorTexture) {
-    // no texture; draw solid-color floor
     gfx.beginFill(PIXI.utils.string2hex(config.floorColor), 1.0);
     gfx.drawPolygon(flatCoords);
     gfx.endFill();
@@ -351,24 +351,24 @@ const drawDoorShadow = (gfx, config, door) => {
   gfx.lineTo(door[0], door[1]);
 };
 
-export const addOuterShadow = (container, geometry) => {
-  if (!geometry) {
+export const addExteriorShadow = (container, config, geometry) => {
+  if (!config.exteriorShadowThickness || !config.exteriorShadowOpacity || !geometry) {
     return;
   }
   if (geometry instanceof jsts.geom.MultiPolygon) {
     for (let i = 0; i < geometry.getNumGeometries(); i++) {
       const poly = geometry.getGeometryN(i);
-      addOuterShadowForPoly(container, poly);
+      addExteriorShadowForPoly(container, config, poly);
     }
   } else if (geometry instanceof jsts.geom.Polygon) {
-    addOuterShadowForPoly(container, geometry);
+    addExteriorShadowForPoly(container, config, geometry);
   }
 }
 
-const addOuterShadowForPoly = (container, poly) => {
+const addExteriorShadowForPoly = (container, config, poly) => {
   const outerShadow = new PIXI.Graphics();
-  const expanded = poly.buffer(20.0);
-  outerShadow.beginFill(0x000000, 0.5);
+  const expanded = poly.buffer(config.exteriorShadowThickness);
+  outerShadow.beginFill(PIXI.utils.string2hex(config.exteriorShadowColor), config.exteriorShadowOpacity);
   outerShadow.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
   outerShadow.endFill();
   const blurFilter = new PIXI.filters.BlurFilter();

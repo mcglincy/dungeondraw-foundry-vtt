@@ -95,7 +95,6 @@ export class DungeonLayer extends PlaceablesLayer {
       // canDragCreate: game.user.isGM,
       canDragCreate: true,
       zIndex: -1  // under tiles and background image
-//      zIndex: 0  // on top of tiles and background image
     });
   }
 
