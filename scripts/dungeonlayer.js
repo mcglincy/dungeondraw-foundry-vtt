@@ -99,19 +99,7 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   // TODO: figure out what documentName / embeddedName / type we should be using
-  // Error: Dungeon is not a valid embedded Document within the Scene Document
-  //return canvas.scene?.getEmbeddedCollection(this.constructor.documentName) || null;
-  /* in Document.mjs:
-  getEmbeddedCollection(embeddedName) {
-    const cls = this.constructor.metadata.embedded[embeddedName];
-    if ( !cls ) {
-      throw new Error(`${embeddedName} is not a valid embedded Document within the ${this.documentName} Document`);
-    }
-    return this[cls.collectionName];
-  }  
-  */
   /** @inheritdoc */
-  //static documentName = "Dungeon";
   static documentName = "Drawing";
 
   /**
@@ -159,8 +147,6 @@ export class DungeonLayer extends PlaceablesLayer {
    * Render a configuration sheet to configure the Dungeon settings
    */
   configureSettings() {
-    // const defaults = {};
-    // const d = new DungeonDocument(defaults);
     new DungeonConfig().render(true);
   }  
 

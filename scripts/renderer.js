@@ -216,20 +216,22 @@ const drawPolygonRoom = (gfx, config, poly) => {
   }
 
   // draw inner wall drop shadows
-  gfx.lineStyle({
-    width: config.wallThickness / 2.0 + 8.0,
-    color: 0x000000,
-    alpha: 0.2,
-    alignment: 1,
-    join: "round"
-  });
-  gfx.moveTo(coords[0].x, coords[0].y);
-  for (let i = 1; i < coords.length; i++) {
-    if (needsShadow(coords[i-1].x, coords[i-1].y, coords[i].x, coords[i].y)) {
-      gfx.lineTo(coords[i].x, coords[i].y);
-    } else {
-      gfx.moveTo(coords[i].x, coords[i].y);
-    }
+  if (config.interiorShadowOpacity) {
+    gfx.lineStyle({
+      width: config.wallThickness / 2.0 + config.interiorShadowThickness,
+      color: PIXI.utils.string2hex(config.interiorShadowColor),
+      alpha: config.interiorShadowOpacity,
+      alignment: 1,
+      join: "round"
+    });
+    gfx.moveTo(coords[0].x, coords[0].y);
+    for (let i = 1; i < coords.length; i++) {
+      if (needsShadow(coords[i-1].x, coords[i-1].y, coords[i].x, coords[i].y)) {
+        gfx.lineTo(coords[i].x, coords[i].y);
+      } else {
+        gfx.moveTo(coords[i].x, coords[i].y);
+      }
+    }    
   }
 
   // draw outer wall poly
@@ -242,13 +244,15 @@ const drawPolygonRoom = (gfx, config, poly) => {
     const coords = hole.getCoordinates();
     const flatCoords = coords.map(c => [c.x, c.y]).flat();
     // draw hole wall outer drop shadows
-    gfx.lineStyle(config.wallThickness / 2.0 + 8.0, 0x000000, 0.2, 1);
-    for (let i = 0; i < coords.length - 1; i++) {
-      gfx.moveTo(coords[i].x, coords[i].y);
-      if (needsShadow(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y)) {
-        gfx.lineTo(coords[i+1].x, coords[i+1].y);
-      } 
-    }      
+    if (config.interiorShadowOpacity) {
+      gfx.lineStyle(config.wallThickness / 2.0 + config.interiorShadowThickness, PIXI.utils.string2hex(config.interiorShadowColor), config.interiorShadowOpacity, 1);
+      for (let i = 0; i < coords.length - 1; i++) {
+        gfx.moveTo(coords[i].x, coords[i].y);
+        if (needsShadow(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y)) {
+          gfx.lineTo(coords[i+1].x, coords[i+1].y);
+        } 
+      }      
+    }
     // draw hole wall poly
     gfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.wallColor), 1.0);
     gfx.drawPolygon(flatCoords);
@@ -331,9 +335,9 @@ const drawDoorShadow = (gfx, config, door) => {
   const doorRect = rectangleForSegment(jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
 
   gfx.lineStyle({
-    width: config.wallThickness / 2.0 + 8.0,
-    color: 0x000000,
-    alpha: 0.2,
+    width: config.wallThickness / 2.0 + config.interiorShadowThickness,
+    color: PIXI.utils.string2hex(config.interiorShadowColor),
+    alpha: config.interiorShadowOpacity,
     alignment: 1,
     join: "round"
   });      

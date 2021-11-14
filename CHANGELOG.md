@@ -1,3 +1,6 @@
+# 0.5.0
+- Make exterior shadow configurable.
+
 # 0.4.1
 - Take scene padding into account for floor texture tiling.
 

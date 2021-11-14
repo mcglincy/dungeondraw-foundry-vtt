@@ -8,8 +8,7 @@ import * as geo from "./geo-utils.js";
 /**
  * @extends {PlaceableObject}
  */
-// TODO: does Dungeon even need to be a PlaceableObject?
-// or could it just extend PIXI.Container?
+// TODO: does Dungeon even need to be a PlaceableObject? Or could it just extend PIXI.Container?
 export class Dungeon extends PlaceableObject {
 
   static defaultConfig() {
@@ -23,6 +22,9 @@ export class Dungeon extends PlaceableObject {
       exteriorShadowOpacity: 0.5,
       floorColor: "#F2EDDF",
       floorTexture: "",
+      interiorShadowColor: "#000000",
+      interiorShadowThickness: 8,
+      interiorShadowOpacity: 0.5,
       wallColor: "#000000",
       wallThickness: 8,
     };
@@ -33,7 +35,7 @@ export class Dungeon extends PlaceableObject {
     // note will be saved as this.document
     super(note);
     this.journalEntry = journalEntry;
-    /** time-ordered array of DungeonStates */
+    // time-ordered array of DungeonStates
     this.history = [DungeonState.startState()];
     this.historyIndex = 0;
   }
@@ -42,7 +44,6 @@ export class Dungeon extends PlaceableObject {
 
   // TODO: figure out what documentName / embeddedName / type we should be using
   /** @inheritdoc */
-  // static embeddedName = "Dungeon";
   static embeddedName = "Drawing";
 
   /* -------------------------------------------- */

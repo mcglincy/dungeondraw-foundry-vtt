@@ -16,7 +16,7 @@ export class DungeonConfig extends FormApplication {
       classes: ["sheet"],
       template: "modules/dungeon-draw/templates/dungeon-config.html",
       width: 480,
-      height: 500,
+      height: 610,
       tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "position"}]
     });
   }
