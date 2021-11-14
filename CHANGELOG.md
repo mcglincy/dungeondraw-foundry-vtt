@@ -1,5 +1,6 @@
 # 0.5.0
 - Make exterior shadow configurable.
+- Fix bug where drawing on a newly-created scene could update the dungeon of the previous scene.
 
 # 0.4.1
 - Take scene padding into account for floor texture tiling.
