@@ -21,7 +21,7 @@ export const render = async (container, state) => {
         drawPolygonMask(clipMask, state.geometry);
       }
       container.addChild(clipMask);
-      await addTiledBackground(container, clipMask, state);      
+      await addTiledBackground(container, clipMask, state.config, state.geometry);
     }
 
     // draw the dungeon geometry room(s)
@@ -39,8 +39,8 @@ export const render = async (container, state) => {
   container.addChild(gfx);
 }
 
-const addTiledBackground = async (container, mask, state) => {
-  const texture = await loadTexture(state.config.floorTexture);
+const addTiledBackground = async (container, mask, config, geometry) => {
+  const texture = await loadTexture(config.floorTexture);
   if (!texture?.valid) {
     return;
   }
@@ -64,7 +64,7 @@ const addTiledBackground = async (container, mask, state) => {
         [col * textureSize, (row + 1) * textureSize],
         [col * textureSize, row * textureSize],
       ]);
-      if (state.geometry.intersects(rect) && !state.geometry.touches(rect)) {
+      if (geometry.intersects(rect) && !geometry.touches(rect)) {
         const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
         sprite.x = col * textureSize;
         sprite.y = row * textureSize;

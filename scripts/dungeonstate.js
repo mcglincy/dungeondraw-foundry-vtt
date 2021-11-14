@@ -37,7 +37,10 @@ export class DungeonState {
       return DungeonState.startState();
     }
     const obj = JSON.parse(s);
-    return new DungeonState(geo.wktToGeometry(obj.wkt), obj.doors, obj.config);
+    const geometry = geo.wktToGeometry(obj.wkt);
+    // fill in any new defaults
+    const config = foundry.utils.mergeObject(Dungeon.defaultConfig(), obj.config);
+    return new DungeonState(geometry, obj.doors, config);
   }
 
   /* -------------------------------------------- */  
