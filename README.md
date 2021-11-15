@@ -19,7 +19,7 @@ A dungeon-drawing module for Foundry VTT.
 
 ## How it works
 
-* Need "Use Drawing Tools" permission to see new Dungeon Draw scene tools.
+* Need GM or Assistant GM permission to see new Dungeon Draw scene tools.
 * New dungeon-drawing layer under the Foundry background layer.
 * Auto-creates walls and doors from what you draw.
 * Saved as a JournalEntry in a "Dungeon Draw" folder.

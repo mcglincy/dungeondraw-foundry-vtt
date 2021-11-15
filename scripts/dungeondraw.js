@@ -19,10 +19,6 @@ export class DungeonDraw {
   }
 
   static getSceneControlButtons(controls) {
-    // if (!game.user.isGM) {
-    //   return;
-    // }
-
     CONFIG.Canvas.layers.dungeon = DungeonLayer;
     CONFIG.Dungeon = {
       //documentClass: DungeonDocument,
@@ -35,7 +31,7 @@ export class DungeonDraw {
       title: "DD.SceneControlTitle",
       layer: DungeonLayer.LAYER_NAME,
       icon: "fas fa-dungeon",
-      visible: game.user.can("DRAWING_CREATE"),
+      visible: game.user.isGM,
       tools: [
         {
           name: "addrect",

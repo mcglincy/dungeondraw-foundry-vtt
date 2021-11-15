@@ -1,6 +1,7 @@
 # 0.5.1
 - Mark created walls with a dungeonVersion flag, and only delete walls with that flag.
 - Set JournalEntry dungeonVersion flag as part of initial create rather than separate setFlag call.
+- Require GM or Assistant GM permissions to see dungeon drawing tools, since this permission level is also needed to delete/create walls.
 
 # 0.5.0
 - Make exterior and interior shadows configurable.
