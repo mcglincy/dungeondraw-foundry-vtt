@@ -7,15 +7,60 @@ const notImplementedYet = () => {
 }
 
 export class DungeonDraw {
-
-  static MODULE_ID = "DD";
   // module name from module.json
   static MODULE_NAME = "dungeon-draw"
 
   static init() {
     console.log("***** DUNGEON DRAW *****");
-    // game.settings.register(DungeonDraw.MODULE_NAME, DungeonLayer.CONFIG_SETTING, 
-    //   DungeonConfig.defaultConfig);
+    game.settings.register(DungeonDraw.MODULE_NAME, "releaseNotesVersion", {
+        name: "Last version we showed release notes.",
+        scope: "client",
+        default: "",
+        type: String,
+        config: false
+    });
+  }
+
+  static ready() {
+    DungeonDraw.maybeShowReleaseNotes();
+  }
+
+  static async maybeShowReleaseNotes() {
+    const moduleVersion = game.modules.get(DungeonDraw.MODULE_NAME).data.version;
+    const settingsVersion = game.settings.get(DungeonDraw.MODULE_NAME, "releaseNotesVersion");
+    if (moduleVersion === settingsVersion) {
+      // they've already seen it
+      return;
+    }
+    const resp = await fetch("modules/dungeon-draw/CHANGELOG.md");
+    const changelog = await resp.text();
+    // keep only the most recent changelog section
+    const firstChangelog = changelog.split("#")[1];
+    // show it in a Dialog
+    const html = await renderTemplate("modules/dungeon-draw/templates/release-notes.html", {
+      data: {
+        version: moduleVersion,
+        changelog: "#" + firstChangelog
+      }
+    });
+    const dialog = new Dialog(
+      {
+        title: game.i18n.localize("DD.ReleaseNotes"),
+        content: html,
+        buttons: {
+          roll: {
+            icon: '<i class="fas fa-check"></i>',
+            label: "OK",
+          },
+        },
+      },
+      {
+        width: 600,  
+      }
+    );
+    dialog.render(true);
+    // mark this version as shown
+    await game.settings.set(DungeonDraw.MODULE_NAME, "releaseNotesVersion", moduleVersion);
   }
 
   static getSceneControlButtons(controls) {
@@ -110,6 +155,7 @@ export class DungeonDraw {
 }
 
 Hooks.on("init", DungeonDraw.init);
+Hooks.on("ready", DungeonDraw.ready);
 Hooks.on("getSceneControlButtons", DungeonDraw.getSceneControlButtons);
 Hooks.on("canvasReady", DungeonDraw.canvasReady);
 Hooks.on("updateJournalEntry", DungeonDraw.updateJournalEntry);
