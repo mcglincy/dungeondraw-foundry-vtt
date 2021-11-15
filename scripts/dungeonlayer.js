@@ -38,15 +38,13 @@ const createDungeonEntry = async () => {
   const journalEntry = await JournalEntry.create({
     name: canvas.scene.name,
     folder: folder.id,
-    // flags: {
-    //   dungeonVersion: {
-
-    //   }
-    // }
+    flags: {
+      "dungeon-draw": {
+        // extract string constant somewhere
+        "dungeonVersion": "1.0"
+      }
+    }
   });
-  // can the flag be set in the initial create data?
-  // e.g., flag.dungeonVersion
-  await journalEntry.setFlag(DungeonDraw.MODULE_NAME, "dungeonVersion", "1.0");
   return journalEntry;
 };
 
