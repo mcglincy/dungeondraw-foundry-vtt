@@ -26,6 +26,10 @@ export class DungeonDraw {
   }
 
   static async maybeShowReleaseNotes() {
+    if (!game.user.isGM) {
+      // GMs only
+      return;
+    }
     const moduleVersion = game.modules.get(DungeonDraw.MODULE_NAME).data.version;
     const settingsVersion = game.settings.get(DungeonDraw.MODULE_NAME, "releaseNotesVersion");
     if (moduleVersion === settingsVersion) {
