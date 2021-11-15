@@ -1,6 +1,6 @@
 # 0.6.0
 - NOTE: You will need to do a one-time manual delete of any scene walls created by earlier versions of Dungeon Draw!
-- Add showing of release notes dialog every time a new version is released.
+- Add showing of release notes dialog to GM every time a new version is released.
 - Mark created walls with a dungeonVersion flag, and only delete walls with that flag.
 - Require GM or Assistant GM permissions to see dungeon drawing tools, since this permission level is also needed to delete/create walls.
 - Set JournalEntry dungeonVersion flag as part of initial create rather than via a separate setFlag call.
