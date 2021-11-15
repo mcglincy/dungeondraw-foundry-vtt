@@ -318,6 +318,7 @@ const drawDoor = (gfx, config, door) => {
 };
 
 const drawDoorShadow = (gfx, config, door) => {
+  return;
   if (!doorNeedsShadow(door[2], door[3], door[0], door[1])) {
     return;
   }

@@ -1,5 +1,10 @@
+# 0.5.1
+- Mark created walls with a dungeonVersion flag, and only delete walls with that flag.
+- Set JournalEntry dungeonVersion flag as part of initial create rather than separate setFlag call.
+
 # 0.5.0
-- Make exterior shadow configurable.
+- Make exterior and interior shadows configurable.
+- Fill in any new config defaults when loading from JournalEntry.
 - Fix bug where drawing on a newly-created scene could update the dungeon of the previous scene.
 
 # 0.4.1

@@ -1,6 +1,8 @@
-
+import { DungeonDraw } from "./dungeondraw.js";
 import "./lib/jsts.min.js";
 
+
+const FLAG_NAME = ""
 
 export const makeWalls = async (state) => {
   await deleteAllWalls();
@@ -19,8 +21,21 @@ const deleteAllWalls = async () => {
     // scene.update() triggers a redraw, 
     // which causes an infinite loop of redraw/refresh.
     // so avoid it :P
-    const collection = canvas.scene.getEmbeddedCollection("Wall");
-    const ids = Array.from(collection.keys());
+    const walls = canvas.scene.getEmbeddedCollection("Wall");
+
+    const keys = Array.from(walls.keys());
+    console.log("======");
+    console.log(`${keys.length} total walls`);
+
+    const ids = [];
+    for (const wall of walls) {
+      const flag = wall.getFlag(DungeonDraw.MODULE_NAME, "dungeonVersion");
+      if (flag) {
+        ids.push(wall.id);
+      }
+    }
+//    const ids = Array.from(collection.keys());
+    console.log(`Deleting ${ids.length} walls`);
     await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
   } catch(error) {
     console.error(error);
@@ -34,27 +49,42 @@ const makeWallsFromMulti = async (multi) => {
   }
 };
 
+const wallData = (x1, y1, x2, y2) => {
+  return {
+    // From Foundry API docs:
+    // "The wall coordinates, a length-4 array of finite numbers [x0,y0,x1,y1]"
+    c: [x1, y1, x2, y2],
+    flags: {
+      "dungeon-draw": {
+        // extract string constant somewhere
+        "dungeonVersion": "1.0"
+      }
+    }
+  }
+};
+
+const doorData = (x1, y1, x2, y2) => {
+  const data = wallData(x1, y1, x2, y2);
+  data.door = 1;
+  return data;
+};
+
 const makeWallsFromPoly = async (poly) => {
   const allWalls = [];
   const exterior = poly.getExteriorRing();
   const coords = exterior.getCoordinates();
   for (let i = 0; i < coords.length - 1; i++) {
-    const wallData = {
-      // From Foundry API docs:
-      // "The wall coordinates, a length-4 array of finite numbers [x0,y0,x1,y1]"
-      c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
-    };
-    allWalls.push(wallData);
+    // DungeonDraw.MODULE_NAME
+    const data = wallData(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y);
+    allWalls.push(data);
   }
   const numHoles = poly.getNumInteriorRing();    
   for (let i = 0; i < numHoles; i++) {
     const hole = poly.getInteriorRingN(i);
     const coords = hole.getCoordinates();
     for (let i = 0; i < coords.length - 1; i++) {
-      const wallData = {
-        c: [coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y],
-      };
-      allWalls.push(wallData);
+      const data = wallData(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y);
+      allWalls.push(data);
     }      
   }
   if (allWalls.length) {
@@ -66,11 +96,8 @@ const makeWallsFromPoly = async (poly) => {
 const makeDoors = async (doors) => {
   const allDoors = [];
   for (const door of doors) {
-    const doorData = {
-      c: [door[0], door[1], door[2], door[3]],
-      door: 1
-    };
-    allDoors.push(doorData);
+    const data = doorData(door[0], door[1], door[2], door[3]);
+    allDoors.push(data);
   }
   if (allDoors.length) {
     await canvas.scene.createEmbeddedDocuments("Wall", allDoors);
