@@ -17,7 +17,7 @@ export class DungeonConfig extends FormApplication {
       classes: ["sheet"],
       template: "modules/dungeon-draw/templates/dungeon-config.html",
       width: 480,
-      height: 610,
+      height: 760,
       tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "position"}]
     });
   }
@@ -38,9 +38,11 @@ export class DungeonConfig extends FormApplication {
     if (!config) {
       config = Dungeon.defaultConfig();
     }
+    const themes = {...Dungeon.themes};
     return {
       object: config,
       options: this.options,
+      themes: Dungeon.themes,
     }
   }
 
@@ -70,6 +72,7 @@ export class DungeonConfig extends FormApplication {
   activateListeners(html) {
     super.activateListeners(html);
     html.find('button[name="resetDefault"]').click(this._onResetDefaults.bind(this));
+    html.find('select[name="theme"]').change(this._onThemeChange.bind(this));
   }
 
   /* -------------------------------------------- */
@@ -83,6 +86,24 @@ export class DungeonConfig extends FormApplication {
     event.preventDefault();
     canvas.dungeon.dungeon?.setConfig(Dungeon.defaultConfig());
     canvas.dungeon.dungeon.refresh();
+    this.render();
+  }
+
+  async _onThemeChange(event) {
+    event.preventDefault();
+    const selectValue = event.target.value;
+    if (!selectValue) {
+      return;
+    }
+    const theme = Dungeon.themes[selectValue];
+    const newConfig = {...theme.config};
+    await canvas.dungeon.dungeon?.setConfig(newConfig);
+    await canvas.scene.update({
+      backgroundColor: newConfig.sceneBackgroundColor,
+      gridAlpha: newConfig.sceneGridAlpha,
+      gridColor: newConfig.sceneGridColor,
+    })
+    // await canvas.scene.render();
     this.render();
   }
 }

@@ -9,6 +9,20 @@
     <div class="tab" data-tab="settings">
       <div class="wallfloor-section">
         <div class="form-group">
+          <label>{{localize "DD.ApplyTheme"}}</label>
+          <div class="form-fields">
+            <select name="theme" data-dtype="string">
+                <option value="" selected></option>
+                {{#select object.theme}}
+                    {{#each themes as |themeObj themeKey|}}
+                        <option value="{{themeKey}}">{{themeObj.name}}</option>
+                    {{/each}}
+                {{/select}}
+            </select>
+          </div>
+        </div>
+        <hr/>        
+        <div class="form-group">
           <label>{{localize "DD.DoorColor"}}</label>
           <div class="form-fields">
             <input type="color" name="doorColor" value="{{object.doorColor}}" data-dtype="String"/>
@@ -86,6 +100,25 @@
             <input class="image" type="text" name="floorTexture" value="{{object.floorTexture}}" data-dtype="String" placeholder="File Path" />
           </div>
         </div>
+        <hr/>
+        <div class="form-group">
+          <label>{{localize "DD.SceneBackgroundColor"}}</label>
+          <div class="form-fields">
+            <input type="color" name="sceneBackgroundColor" value="{{object.sceneBackgroundColor}}" data-dtype="String"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{localize "DD.SceneGridColor"}}</label>
+          <div class="form-fields">
+            <input type="color" name="sceneGridColor" value="{{object.sceneGridColor}}" data-dtype="String"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{localize "DD.SceneGridOpacity"}}</label>
+          <div class="form-fields">
+            <input type="number" name="sceneGridOpacity" value="{{object.sceneGridOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+          </div>
+        </div>        
         <hr/>
         <div class="form-group">
           <label>{{localize "DD.WallColor"}}</label>

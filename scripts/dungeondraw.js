@@ -39,12 +39,12 @@ export class DungeonDraw {
     const resp = await fetch("modules/dungeon-draw/CHANGELOG.md");
     const changelog = await resp.text();
     // keep only the most recent changelog section
-    const firstChangelog = changelog.split("#")[1];
+    const firstChangelog = "#" + changelog.split("#")[1];
     // show it in a Dialog
     const html = await renderTemplate("modules/dungeon-draw/templates/release-notes.html", {
       data: {
         version: moduleVersion,
-        changelog: "#" + firstChangelog
+        changelog: firstChangelog
       }
     });
     const dialog = new Dialog(

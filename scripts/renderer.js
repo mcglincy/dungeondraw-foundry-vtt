@@ -7,6 +7,8 @@ export const render = async (container, state) => {
   container.clear();
   const gfx = new PIXI.Graphics();
 
+  console.log(canvas.scene);
+  console.log(state);
   if (state.geometry) {
     // maybe draw an outer surrounding blurred shadow
     addExteriorShadow(container, state.config, state.geometry);

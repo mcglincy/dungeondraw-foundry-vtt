@@ -25,9 +25,44 @@ export class Dungeon extends PlaceableObject {
       interiorShadowColor: "#000000",
       interiorShadowThickness: 8,
       interiorShadowOpacity: 0.5,
+      sceneBackgroundColor: "#999999",
+      sceneGridColor: "#000000",
+      sceneGridOpacity: 0.2,
       wallColor: "#000000",
       wallThickness: 8,
     };
+  };
+
+  static themes = {
+    default: {
+      name: "Default",
+      config: Dungeon.defaultConfig(),
+    },
+    basicBlack: {
+      name: "Basic Black",
+      config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
+        doorColor: "#0D0D0D",
+        exteriorShadowOpacity: 0,
+        interiorShadowOpacity: 0,
+        sceneBackgroundColor: "#0D0D0D",
+        sceneGridOpacity: 1.0,
+        wallColor: "#0D0D0D",
+      })
+    },    
+    moldvayBlue: {
+      name: "Moldvay Blue",
+      config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
+        doorColor: "#3A9FF2",
+        doorThickness: 35,
+        exteriorShadowOpacity: 0,
+        floorColor: "#FFFFFF",
+        interiorShadowOpacity: 0,
+        sceneBackgroundColor: "#3A9FF2",
+        sceneGridColor: "#3A9FF2",
+        sceneGridOpacity: 1.0,        
+        wallColor: "#3A9FF2",
+      })
+    },
   };
 
   // expects JournalEntry for constructor
@@ -126,7 +161,7 @@ export class Dungeon extends PlaceableObject {
   async setConfig(config) {
     const newState = this.state().clone();
     newState.config = config;
-    this.pushState(newState);
+    await this.pushState(newState);
   }
 
   async addDoor(x1, y1, x2, y2) {

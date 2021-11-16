@@ -1,4 +1,5 @@
 {
+  "DD.ApplyTheme": "Apply a Theme",
   "DD.ButtonTitleConfig": "Configure",
   "DD.ButtonTitleClear": "Clear All",
   "DD.ButtonTitleAddDoor": "Add Doors",
@@ -22,11 +23,16 @@
   "DD.InteriorShadowColor": "Interior Shadow Color",
   "DD.InteriorShadowOpacity": "Interior Shadow Opacity",
   "DD.InteriorShadowThickness": "Interior Shadow Thickness",
+  "DD.OK": "OK",
   "DD.ReleaseNotes": "Dungeon Draw Release Notes",
+  "DD.SceneBackgroundColor": "Scene Background Color",
   "DD.SceneControlTitle": "Dungeon Draw",
+  "DD.SceneGridColor": "Scene Grid Color",
+  "DD.SceneGridOpacity": "Scene Grid Opacity",
   "DD.SubmitReset": "Reset to Defaults",
   "DD.SubmitSave": "Save",
   "DD.TabSettings": "Settings",
+  "DD.Theme": "Theme",
   "DD.WallColor": "Wall Color",
   "DD.WallThickness": "Wall Thickness"
 }
