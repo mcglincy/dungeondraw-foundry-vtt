@@ -25,13 +25,15 @@
         <div class="form-group">
           <label>{{localize "DD.DoorColor"}}</label>
           <div class="form-fields">
-            <input type="color" name="doorColor" value="{{object.doorColor}}" data-dtype="String"/>
+            <input type="text" class="color" name="doorColor" value="{{object.doorColor}}" data-dtype="String"/>
+            <input type="color" value="{{object.doorColor}}" data-dtype="String" data-edit="doorColor" />
           </div>
         </div>
         <div class="form-group">
           <label>{{localize "DD.DoorFillColor"}}</label>
           <div class="form-fields">
-            <input type="color" name="doorFillColor" value="{{object.doorFillColor}}" data-dtype="String"/>
+            <input type="text" class="color" name="doorFillColor" value="{{object.doorFillColor}}" data-dtype="String"/>
+            <input type="color" value="{{object.doorFillColor}}" data-dtype="String" data-edit="doorFillColor" />
           </div>
         </div>
         <div class="form-group">
@@ -48,28 +50,10 @@
         </div>
         <hr/>
         <div class="form-group">
-          <label>{{localize "DD.InteriorShadowColor"}}</label>
-          <div class="form-fields">
-            <input type="color" name="interiorShadowColor" value="{{object.interiorShadowColor}}" data-dtype="String"/>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>{{localize "DD.InteriorShadowOpacity"}}</label>
-          <div class="form-fields">
-            <input type="number" name="interiorShadowOpacity" value="{{object.interiorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
-          </div>
-        </div>
-        <div class="form-group">
-          <label>{{localize "DD.InteriorShadowThickness"}}</label>
-          <div class="form-fields">
-            <input type="number" name="interiorShadowThickness" value="{{object.interiorShadowThickness}}" data-dtype="Number"/>
-          </div>
-        </div>        
-        <hr/>
-        <div class="form-group">
           <label>{{localize "DD.ExteriorShadowColor"}}</label>
           <div class="form-fields">
-            <input type="color" name="exteriorShadowColor" value="{{object.exteriorShadowColor}}" data-dtype="String"/>
+            <input type="text" class="color" name="exteriorShadowColor" value="{{object.exteriorShadowColor}}" data-dtype="String"/>
+            <input type="color" value="{{object.exteriorShadowColor}}" data-dtype="String" data-edit="exteriorShadowColor" />
           </div>
         </div>
         <div class="form-group">
@@ -88,7 +72,8 @@
         <div class="form-group">
           <label>{{localize "DD.FloorColor"}}</label>
           <div class="form-fields">
-            <input type="color" name="floorColor" value="{{object.floorColor}}" data-dtype="String"/>
+            <input type="text" class="color" name="floorColor" value="{{object.floorColor}}" data-dtype="String"/>
+            <input type="color" value="{{object.floorColor}}" data-dtype="String" data-edit="floorColor" />
           </div>
         </div>
         <div class="form-group">
@@ -100,17 +85,46 @@
             <input class="image" type="text" name="floorTexture" value="{{object.floorTexture}}" data-dtype="String" placeholder="File Path" />
           </div>
         </div>
+        <div class="form-group">
+          <label>{{localize "DD.FloorTextureTint"}}</label>
+          <div class="form-fields">
+            <input type="text" class="color" name="floorTextureTint" value="{{object.floorTextureTint}}" data-dtype="String"/>
+            <input type="color" value="{{object.floorTextureTint}}" data-edit="floorTextureTint" data-dtype="String"/>
+          </div>
+        </div>
+        <hr/>        
+        <div class="form-group">
+          <label>{{localize "DD.InteriorShadowColor"}}</label>
+          <div class="form-fields">
+            <input type="text" class="color" name="interiorShadowColor" value="{{object.interiorShadowColor}}" data-dtype="String"/>
+            <input type="color" value="{{object.interiorShadowColor}}" data-dtype="String" data-edit="interiorShadowColor" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{localize "DD.InteriorShadowOpacity"}}</label>
+          <div class="form-fields">
+            <input type="number" name="interiorShadowOpacity" value="{{object.interiorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{localize "DD.InteriorShadowThickness"}}</label>
+          <div class="form-fields">
+            <input type="number" name="interiorShadowThickness" value="{{object.interiorShadowThickness}}" data-dtype="Number"/>
+          </div>
+        </div>        
         <hr/>
         <div class="form-group">
           <label>{{localize "DD.SceneBackgroundColor"}}</label>
           <div class="form-fields">
-            <input type="color" name="sceneBackgroundColor" value="{{object.sceneBackgroundColor}}" data-dtype="String"/>
+            <input type="text" class="color" name="sceneBackgroundColor" value="{{object.sceneBackgroundColor}}" data-dtype="String"/>
+            <input type="color" value="{{object.sceneBackgroundColor}}" data-dtype="String" data-edit="sceneBackgroundColor" />
           </div>
         </div>
         <div class="form-group">
           <label>{{localize "DD.SceneGridColor"}}</label>
           <div class="form-fields">
-            <input type="color" name="sceneGridColor" value="{{object.sceneGridColor}}" data-dtype="String"/>
+            <input type="text" class="color" name="sceneGridColor" value="{{object.sceneGridColor}}" data-dtype="String"/>
+            <input type="color" value="{{object.sceneGridColor}}" data-dtype="String" data-edit="sceneGridColor" />
           </div>
         </div>
         <div class="form-group">
@@ -123,7 +137,8 @@
         <div class="form-group">
           <label>{{localize "DD.WallColor"}}</label>
           <div class="form-fields">
-            <input type="color" name="wallColor" value="{{object.wallColor}}" data-dtype="String"/>
+            <input type="text" class="color" name="wallColor" value="{{object.wallColor}}" data-dtype="String"/>
+            <input type="color" value="{{object.wallColor}}" data-dtype="String" data-edit="wallColor" />
           </div>
         </div>
         <div class="form-group">

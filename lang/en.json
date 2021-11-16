@@ -20,6 +20,7 @@
   "DD.ExteriorShadowThickness": "Exterior Shadow Thickness",
   "DD.FloorColor": "Floor Color",
   "DD.FloorTexture": "Floor Texture",
+  "DD.FloorTextureTint": "Floor Texture Tint",
   "DD.InteriorShadowColor": "Interior Shadow Color",
   "DD.InteriorShadowOpacity": "Interior Shadow Opacity",
   "DD.InteriorShadowThickness": "Interior Shadow Thickness",

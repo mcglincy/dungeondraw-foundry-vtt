@@ -70,6 +70,9 @@ const addTiledBackground = async (container, mask, config, geometry) => {
         const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
         sprite.x = col * textureSize;
         sprite.y = row * textureSize;
+        if (config.floorTextureTint) {
+          sprite.tint = foundry.utils.colorStringToHex(config.floorTextureTint);
+        }
         bg.addChild(sprite);
       }
     }

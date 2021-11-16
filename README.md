@@ -48,3 +48,8 @@ Want some good floor textures? Check out this free Texture Pack 3 from Forgotten
 
 * Simultaneous map editors can trample each other's changes and cause save errors. It's best to stick to one map-maker at a time (either the GM or a single player).
 * The geometry library used (JSTS) is ~500kb. I'm looking at ways to reduce the size.
+
+
+## Credits
+
+* Red-white checkerboard texture by [llexandro](https://www.deviantart.com/llexandro/gallery/54632558/sci-fi-textures)
