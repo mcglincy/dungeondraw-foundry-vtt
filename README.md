@@ -47,11 +47,12 @@ Want some good floor textures? Check out this free Texture Pack 3 from Forgotten
 ## Known issues
 
 * Simultaneous map editors can trample each other's changes and cause save errors. It's best to stick to one map-maker at a time (either the GM or a single player).
-* The geometry library used (JSTS) is ~500kb. I'm looking at ways to reduce the size.
+* The geometry library used (JSTS) is \~500kb. I'm looking at ways to reduce the size.
+
 
 ## Credits
 
 * Floor textures by 
-  * [llexandro](https://www.deviantart.com/llexandro/gallery/54632558/sci-fi-textures) (free to use for everything)
+  * [llexandro](https://www.deviantart.com/llexandro/gallery/54632558/sci-fi-textures) (free to use for everything).
   * [João Paulo](https://3dtextures.me/about/) under CC0.
   * [the3rdsequence](https://www.the3rdsequence.com/texturedb/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
