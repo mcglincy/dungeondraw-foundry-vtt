@@ -34,65 +34,6 @@ export class Dungeon extends PlaceableObject {
     };
   };
 
-  static themes = {
-    default: {
-      name: "Default",
-      config: Dungeon.defaultConfig(),
-    },
-    basicBlack: {
-      name: "Basic Black",
-      config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
-        doorColor: "#0D0D0D",
-        exteriorShadowOpacity: 0,
-        interiorShadowOpacity: 0,
-        floorColor: "#FFFFFF",
-        sceneBackgroundColor: "#0D0D0D",
-        sceneGridOpacity: 1.0,
-        wallColor: "#0D0D0D",
-      })
-    },
-    checkerboard: {
-      name: "Checkerboard",
-      config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
-        doorFillColor: "#C2BFB0",
-        doorFillOpacity: 1.0, 
-        floorTexture: "modules/dungeon-draw/assets/textures/sci_fi_texture_150_by_llexandro_d939vk9.png",
-      })
-    },
-    metal: {
-      name: "Metal",
-      config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
-        doorFillColor: "#C0C0C0",
-        doorFillOpacity: 1.0, 
-        floorTexture: "modules/dungeon-draw/assets/textures/sci_fi_texture_212_by_llexandro_dcuxgum.png",
-      })
-    },
-    moldvayBlue: {
-      name: "Moldvay Blue",
-      config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
-        doorColor: "#3A9FF2",
-        doorThickness: 35,
-        exteriorShadowOpacity: 0,
-        floorColor: "#FFFFFF",
-        interiorShadowOpacity: 0,
-        sceneBackgroundColor: "#3A9FF2",
-        sceneGridColor: "#3A9FF2",
-        sceneGridOpacity: 1.0,
-        wallColor: "#3A9FF2",
-      })
-    },
-    wood: {
-      name: "Wood",
-      config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
-        doorColor: "#332211",
-        doorFillColor: "#FFFFFF",
-        doorFillOpacity: 1.0, 
-        floorTexture: "modules/dungeon-draw/assets/textures/Old_Wooden_Plank_Seamless_Texture_765.jpg",
-        wallColor: "#332211",
-        wallThickness: 10,
-      })
-    },
-  };
 
   // expects JournalEntry for constructor
   constructor(journalEntry, note) {

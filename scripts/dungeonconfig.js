@@ -1,6 +1,7 @@
 import { Dungeon } from "./dungeon.js";
 import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
+import { themes } from "./themes.js";
 
 
 /**
@@ -38,11 +39,10 @@ export class DungeonConfig extends FormApplication {
     if (!config) {
       config = Dungeon.defaultConfig();
     }
-    const themes = {...Dungeon.themes};
     return {
       object: config,
       options: this.options,
-      themes: Dungeon.themes,
+      themes,
     }
   }
 
@@ -95,7 +95,7 @@ export class DungeonConfig extends FormApplication {
     if (!selectValue) {
       return;
     }
-    const theme = Dungeon.themes[selectValue];
+    const theme = themes[selectValue];
     const newConfig = {...theme.config};
     await canvas.dungeon.dungeon?.setConfig(newConfig);
     await canvas.scene.update({

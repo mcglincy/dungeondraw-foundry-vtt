@@ -7,8 +7,6 @@ export const render = async (container, state) => {
   container.clear();
   const gfx = new PIXI.Graphics();
 
-  console.log(canvas.scene);
-  console.log(state);
   if (state.geometry) {
     // maybe draw an outer surrounding blurred shadow
     addExteriorShadow(container, state.config, state.geometry);
@@ -284,7 +282,7 @@ const drawDoor = (gfx, config, door) => {
   const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
   const doorRect = rectangleForSegment(config, jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
 
-  gfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.doorColor), 1.0, 0.5);    
+  gfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.wallColor), 1.0, 0.5);    
   gfx.moveTo(door[0], door[1]);
   // left jamb
   gfx.lineTo(jamb1End[0], jamb1End[1]);
@@ -295,6 +293,7 @@ const drawDoor = (gfx, config, door) => {
   if (config.doorFillOpacity) {
     gfx.beginFill(PIXI.utils.string2hex(config.doorFillColor), config.doorFillOpacity);
   }
+  gfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.doorColor), 1.0, 0.5);    
   gfx.drawPolygon(
     doorRect[0], doorRect[1], 
     doorRect[2], doorRect[3],

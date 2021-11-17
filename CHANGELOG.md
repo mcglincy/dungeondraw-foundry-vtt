@@ -1,3 +1,8 @@
+# 0.7.0
+- Add theme presets.
+- Add floorTextureTint config setting.
+- Use both textfield and color picker for all colors on Config.
+
 # 0.6.0
 - NOTE: You will need to do a one-time manual delete of any scene walls created by earlier versions of Dungeon Draw!
 - Add showing of release notes dialog to GM every time a new version is released.
