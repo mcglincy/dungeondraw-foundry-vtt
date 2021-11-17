@@ -1,7 +1,7 @@
 # 0.7.0
-- Add theme presets.
+- Themes!!! 16 new color and texture presets, available via a dropdown in the Configure/gear tool.
 - Add floorTextureTint config setting.
-- Use both textfield and color picker for all colors on Config.
+- Show both textfield and color picker for all colors in the Configure window.
 
 # 0.6.0
 - NOTE: You will need to do a one-time manual delete of any scene walls created by earlier versions of Dungeon Draw!
