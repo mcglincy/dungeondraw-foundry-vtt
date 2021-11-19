@@ -144,6 +144,21 @@ export const themes = {
       wallColor: "#3A9FF2",
     })
   },
+  neonBlueprint: {
+    name: "Neon Blueprint",
+    config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
+      doorColor: "#3A9FF2",
+      doorThickness: 35,
+      exteriorShadowColor: "#18495E",
+      floorColor: "#142A3B",
+      interiorShadowColor: "#1B7FAB",
+      sceneBackgroundColor: "#171008",
+      sceneGridColor: "#4C89A1",
+      sceneGridOpacity: 1.0,
+      wallColor: "#63C9E6",
+      wallThickness: 4,
+    })
+  },
   ruddyPaper: {
     name: "Ruddy Paper",
     config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
@@ -159,7 +174,7 @@ export const themes = {
       sceneGridOpacity: 1.0,
       wallColor: "#9A6D54",
     })
-  },  
+  },
   water: {
     name: "Water",
     config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
