@@ -1,3 +1,6 @@
+# 0.7.1
+- Add Neon Blueprint theme.
+
 # 0.7.0
 - Themes!!! 16 new color and texture presets, available via a dropdown in the Configure/gear tool.
 - Add floorTextureTint config setting.

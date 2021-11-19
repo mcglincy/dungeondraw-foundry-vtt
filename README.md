@@ -13,7 +13,7 @@ A dungeon-drawing module for Foundry VTT.
 * Remove doors - Remove all doors within an area.
 * Undo - Undoes last change.
 * Redo - Redoes next change.
-* Config - Change various scene-specific drawing values: floor and wall color, wall width, optional floor texture, etc.
+* Config - Change various scene-specific drawing values: floor and wall color, wall width, optional floor texture and tint, etc. Or, apply a preset theme.
 * Delete all - Nuke everything on the current dungeon/scene.
 
 
