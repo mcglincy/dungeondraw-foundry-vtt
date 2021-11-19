@@ -138,7 +138,7 @@ export const themes = {
       doorColor: "#24201C",
       doorFillColor: "#C0C0C0",
       doorFillOpacity: 1.0, 
-      floorTexture: "modules/dungeon-draw/assets/textures/Metal_Grill_005a_Base_Color.jpg",
+      floorTexture: "modules/dungeon-draw/assets/textures/Metal_Plate_046_basecolor.jpg",
       wallColor: "#24201C",
     })
   },  
