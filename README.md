@@ -19,6 +19,11 @@ A dungeon-drawing module for Foundry VTT.
 * Delete all - Nuke everything on the current dungeon/scene.
 
 
+## Themes
+(and growing)
+![DungeonDraw-themes](https://user-images.githubusercontent.com/189172/142642421-173836b1-c97b-422d-9bfb-9a7b808d1421.jpg)
+
+
 ## How it works
 
 * Need GM or Assistant GM permission to see new Dungeon Draw scene tools.
@@ -44,11 +49,6 @@ Dungeon Draw currently assumes square texture files.
 Some care needs to be taken when choosing texture files and sizes. Using larger texture files (e.g., 400x400, 600x600, etc) will cause fewer texture sprites and should perform better. Conversely, using a 50x50 texture on a big map can make your browser crawl.
 
 Want some good floor textures? Check out this free Texture Pack 3 from Forgotten Adventures: https://www.patreon.com/posts/texture-pack-3-24886718
-
-
-## Themes
-(and growing)
-![DungeonDraw-themes](https://user-images.githubusercontent.com/189172/142642421-173836b1-c97b-422d-9bfb-9a7b808d1421.jpg)
 
 
 ## Known issues
