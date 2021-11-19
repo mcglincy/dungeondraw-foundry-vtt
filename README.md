@@ -20,8 +20,7 @@ A dungeon-drawing module for Foundry VTT.
 
 
 ## Themes
-(and growing)
-![DungeonDraw-themes](https://user-images.githubusercontent.com/189172/142642421-173836b1-c97b-422d-9bfb-9a7b808d1421.jpg)
+![DungeonDraw-themes](https://user-images.githubusercontent.com/189172/142654535-cd797a63-c2b3-4c7a-8613-fa6b49baca33.jpg)
 
 
 ## How it works
