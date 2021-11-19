@@ -86,7 +86,8 @@ export class Dungeon extends PlaceableObject {
   async maybeRefresh(journalEntry) {
     if (journalEntry.id === this.journalEntry.id) {
       const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
-      await this.pushState(savedState);
+      // update state, but don't save to journal
+      await this.pushState(savedState, false);
     }
   }
 
@@ -115,7 +116,7 @@ export class Dungeon extends PlaceableObject {
 
   /* -------------------------------------------- */
 
-  async pushState(newState) {
+  async pushState(newState, saveToJournalEntry=true) {
     // throw away any history states after current
     for (let i = this.history.length - 1; i > this.historyIndex; i--) {
       this.history.pop();
@@ -124,7 +125,9 @@ export class Dungeon extends PlaceableObject {
     this.history.push(newState);
     this.historyIndex++;
 
-    await newState.saveToJournalEntry(this.journalEntry);
+    if (saveToJournalEntry) {
+      await newState.saveToJournalEntry(this.journalEntry);      
+    }
     await this.refresh();
   }
 

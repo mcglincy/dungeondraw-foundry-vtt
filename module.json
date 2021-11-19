@@ -14,7 +14,9 @@
     ],
     "packs": [],
     "scripts": [],
-    "styles": [],
+    "styles": [
+        "./styles/dungeondraw.css"
+    ],
     "languages": [
         {
             "lang": "en",

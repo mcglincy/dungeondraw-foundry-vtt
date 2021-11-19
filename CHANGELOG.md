@@ -1,4 +1,5 @@
 # 0.7.1
+- Fix "User X lacks permission to create Wall" errors appearing for players.
 - Add Neon Blueprint theme.
 
 # 0.7.0
