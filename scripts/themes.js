@@ -122,6 +122,26 @@ export const themes = {
       wallColor: "#686882",
     })
   },
+  metalGrid: {
+    name: "Metal Grid",
+    config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
+      doorColor: "#27251A",
+      doorFillColor: "#AAAAAA",
+      doorFillOpacity: 1.0, 
+      floorTexture: "modules/dungeon-draw/assets/textures/Sci-fi_Floor_002_basecolor.jpg",
+      wallColor: "#27251A",
+    })
+  },  
+  metalGrill: {
+    name: "Metal Grill",       
+    config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
+      doorColor: "#24201C",
+      doorFillColor: "#C0C0C0",
+      doorFillOpacity: 1.0, 
+      floorTexture: "modules/dungeon-draw/assets/textures/Metal_Grill_005a_Base_Color.jpg",
+      wallColor: "#24201C",
+    })
+  },  
   metalSquares: {
     name: "Metal Squares",
     config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
@@ -174,17 +194,7 @@ export const themes = {
       sceneGridOpacity: 1.0,
       wallColor: "#9A6D54",
     })
-  },
-  scifiGrid: {
-    name: "Sci-fi Grid",
-    config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
-      doorColor: "#27251A",
-      doorFillColor: "#AAAAAA",
-      doorFillOpacity: 1.0, 
-      floorTexture: "modules/dungeon-draw/assets/textures/Sci-fi_Floor_002_basecolor.jpg",
-      wallColor: "#27251A",
-    })
-  },  
+  }, 
   water: {
     name: "Water",
     config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
