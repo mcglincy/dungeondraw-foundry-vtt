@@ -41,9 +41,11 @@ export class DungeonState {
     }
     const obj = JSON.parse(s);
     const geometry = geo.wktToGeometry(obj.wkt);
+    const doors = obj.doors ? obj.doors : [];
+    const interiorWalls = obj.interiorWalls ? obj.interiorWalls : [];
     // fill in any new defaults
     const config = foundry.utils.mergeObject(Dungeon.defaultConfig(), obj.config);
-    return new DungeonState(geometry, obj.doors, obj.interiorWalls, config);
+    return new DungeonState(geometry, doors, interiorWalls, config);
   }
 
   /* -------------------------------------------- */  
