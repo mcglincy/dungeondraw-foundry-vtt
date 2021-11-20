@@ -6,9 +6,10 @@ import * as geo from "./geo-utils.js";
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
 
-  constructor(geometry, doors, config) {
+  constructor(geometry, doors, interiorWalls, config) {
     this.geometry = geometry;
     this.doors = doors;
+    this.interiorWalls = interiorWalls;
     this.config = config;
   }
 
@@ -16,6 +17,7 @@ export class DungeonState {
     return new DungeonState(
       this.geometry ? this.geometry.copy() : null,
       JSON.parse(JSON.stringify(this.doors)),
+      this.interiorWalls ? [...this.interiorWalls] : [],
       JSON.parse(JSON.stringify(this.config))
       );
   }
@@ -27,6 +29,7 @@ export class DungeonState {
       // serialize the geometry object as a WKT string
       wkt: geo.geometryToWkt(this.geometry),
       doors: this.doors,
+      interiorWalls: this.interiorWalls,
       config: this.config,
     });
   }
@@ -40,7 +43,7 @@ export class DungeonState {
     const geometry = geo.wktToGeometry(obj.wkt);
     // fill in any new defaults
     const config = foundry.utils.mergeObject(Dungeon.defaultConfig(), obj.config);
-    return new DungeonState(geometry, obj.doors, config);
+    return new DungeonState(geometry, obj.doors, obj.interiorWalls, config);
   }
 
   /* -------------------------------------------- */  
@@ -65,6 +68,6 @@ export class DungeonState {
   }
 
   static startState() {
-    return new DungeonState(null, [], Dungeon.defaultConfig());
+    return new DungeonState(null, [], [], Dungeon.defaultConfig());
   }
 }

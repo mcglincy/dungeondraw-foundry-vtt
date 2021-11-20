@@ -17,6 +17,7 @@ export const makeWalls = async (state) => {
       await makeWallsFromPoly(state.geometry);
     }
   }
+  await makeInteriorWalls(state.interiorWalls);
   await makeDoors(state.doors);
 };
 
@@ -38,7 +39,6 @@ const deleteAllWalls = async () => {
         ids.push(wall.id);
       }
     }
-//    const ids = Array.from(collection.keys());
     console.log(`Deleting ${ids.length} walls`);
     await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
   } catch(error) {
@@ -90,6 +90,18 @@ const makeWallsFromPoly = async (poly) => {
       const data = wallData(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y);
       allWalls.push(data);
     }      
+  }
+  if (allWalls.length) {
+    await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
+  }
+};
+
+/** [[x1,y1,x2,y2],...] */
+const makeInteriorWalls = async (walls) => {
+  const allWalls = [];
+  for (const wall of walls) {
+    const data = wallData(wall[0], wall[1], wall[2], wall[3]);
+    allWalls.push(data);
   }
   if (allWalls.length) {
     await canvas.scene.createEmbeddedDocuments("Wall", allWalls);

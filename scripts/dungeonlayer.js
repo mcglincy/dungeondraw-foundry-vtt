@@ -125,16 +125,14 @@ export class DungeonLayer extends PlaceablesLayer {
         data.points = [];
         break;
       case "adddoor":
+      case "addpoly":
+      case "addwall":
         data.type = CONST.DRAWING_TYPES.POLYGON;
         data.points = [[0, 0]];
         break;        
       case "ellipse":
         data.type = CONST.DRAWING_TYPES.ELLIPSE;
         data.points = [];
-        break;
-      case "addpoly":
-        data.type = CONST.DRAWING_TYPES.POLYGON;
-        data.points = [[0, 0]];
         break;
     }
     return data;
@@ -253,7 +251,9 @@ export class DungeonLayer extends PlaceablesLayer {
     }
     if (createState >= 1) {
       preview._onMouseDraw(event);
-      if (preview.data.type !== CONST.DRAWING_TYPES.POLYGON || game.activeTool === "adddoor") {
+      if (preview.data.type !== CONST.DRAWING_TYPES.POLYGON 
+        || game.activeTool === "adddoor"
+        || game.activeTool === "addwall") {
         event.data.createState = 2;
       }
     }    
@@ -279,6 +279,12 @@ export class DungeonLayer extends PlaceablesLayer {
         const data = preview.data.toObject(false);
         preview._chain = false;
         await this.dungeon.addDoor(data.x, data.y,
+          data.x + data.points[1][0], data.y + data.points[1][1]);
+      } else if (game.activeTool === "addwall") {
+        event.data.createState = 0;
+        const data = preview.data.toObject(false);
+        preview._chain = false;
+        await this.dungeon.addInteriorWall(data.x, data.y,
           data.x + data.points[1][0], data.y + data.points[1][1]);
       } else if (minDistance || completePolygon) {
 
@@ -310,6 +316,7 @@ export class DungeonLayer extends PlaceablesLayer {
             height: createData.height,
             width: createData.width
           };
+          await this.dungeon.subtractInteriorWalls(rect);
           await this.dungeon.subtractDoors(rect);
         } else if (game.activeTool === "addpoly") {
           const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);

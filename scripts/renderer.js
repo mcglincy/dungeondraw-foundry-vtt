@@ -31,6 +31,12 @@ export const render = async (container, state) => {
       drawPolygonRoom(gfx, state.config, state.geometry);
     }
   }
+
+  // draw interior walls
+  for (let wall of state.interiorWalls) {
+    drawInteriorWall(gfx, state.config, wall);
+  }
+
   // draw doors
   for (let door of state.doors) {
     drawDoor(gfx, state.config, door);
@@ -269,6 +275,38 @@ const drawMultiPolygonRoom = (gfx, config, multi) => {
 };
 
 // [x1, y1, x2, y2]
+const drawInteriorWall = (gfx, config, wall) => {
+  gfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.wallColor), 1.0, 0.5);    
+  gfx.moveTo(wall[0], wall[1]);
+  gfx.lineTo(wall[2], wall[3]);
+
+  // TODO: refactor and clean up with door logic
+  if (wall[2] < wall[0]) {
+    drawInteriorWallShadow(gfx, config, [wall[2], wall[3], wall[0], wall[1]]);
+  } else if (wall[2] === wall[0] && wall[3] >= wall[1]) {
+    drawInteriorWallShadow(gfx, config, [wall[2], wall[3], wall[0], wall[1]]);
+  } else {
+    drawInteriorWallShadow(gfx, config, wall);
+  }  
+};
+
+const drawInteriorWallShadow = (gfx, config, wall) => {
+  // TODO: refactor
+  if (!doorNeedsShadow(wall[2], wall[3], wall[0], wall[1])) {
+    return;
+  }
+  gfx.lineStyle({
+    width: config.wallThickness / 2.0 + config.interiorShadowThickness,
+    color: PIXI.utils.string2hex(config.interiorShadowColor),
+    alpha: config.interiorShadowOpacity,
+    alignment: 1,
+    join: "round"
+  });      
+  gfx.moveTo(wall[2], wall[3]);
+  gfx.lineTo(wall[0], wall[1]);
+};
+
+// [x1, y1, x2, y2]
 const drawDoor = (gfx, config, door) => {
   const totalLength = geo.distanceBetweenPoints(door[0], door[1], door[2], door[3]);
   const jambLength = 20;
@@ -282,7 +320,7 @@ const drawDoor = (gfx, config, door) => {
   const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
   const doorRect = rectangleForSegment(config, jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
 
-  gfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.wallColor), 1.0, 0.5);    
+  gfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.wallColor), 1.0, 0.5);
   gfx.moveTo(door[0], door[1]);
   // left jamb
   gfx.lineTo(jamb1End[0], jamb1End[1]);
@@ -322,7 +360,6 @@ const drawDoor = (gfx, config, door) => {
 };
 
 const drawDoorShadow = (gfx, config, door) => {
-  return;
   if (!doorNeedsShadow(door[2], door[3], door[0], door[1])) {
     return;
   }

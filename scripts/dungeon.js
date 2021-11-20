@@ -156,6 +156,25 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  async addInteriorWall(x1, y1, x2, y2) {
+    const newState = this.history[this.historyIndex].clone();
+    newState.interiorWalls.push([x1, y1, x2, y2]);
+    await this.pushState(newState);
+  }
+
+  async subtractInteriorWalls(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(w => {
+      const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
+      return !rectPoly.intersects(wallPoly);
+    });
+    if (wallsToKeep.length != this.history[this.historyIndex].interiorWalls.length) {
+      const newState = this.history[this.historyIndex].clone();
+      newState.interiorWalls = wallsToKeep;
+      await this.pushState(newState);      
+    }
+  }
+
   async _addPoly(poly) {
     const newState = this.history[this.historyIndex].clone();    
     if (newState.geometry) {

@@ -98,14 +98,19 @@ export class DungeonDraw {
           icon: "fas fa-draw-polygon",
         },
         {
+          name: "addwall",
+          title: "DD.ButtonTitleAddWall",
+          icon: "fas fa-bars",
+        },
+        {
           name: "adddoor",
           title: "DD.ButtonTitleAddDoor",
           icon: "fas fa-door-open",
         },
         {
           name: "subtractdoor",
-          title: "DD.ButtonTitleSubtractDoor",
-          icon: "fas fa-door-closed",
+          title: "DD.ButtonTitleSubtractDoorsAndWalls",
+          icon: "fas fa-window-close",
         },
         {
           name: "undo",

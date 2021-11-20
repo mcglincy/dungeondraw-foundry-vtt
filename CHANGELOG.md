@@ -1,3 +1,10 @@
+# 0.8.0
+- Add new Draw Interior Walls tool.
+- Change Remove Doors tool to remove both doors and interior walls.
+- Render interior door shadows.
+- Allow Trusted Player to see tools and draw dungeons, but only try to update walls and scene for GM.
+- Add missing title for Add Polygon button.
+
 # 0.7.1
 - Fix "User X lacks permission to create Wall" errors appearing for players.
 - Add Neon Blueprint theme.
