@@ -4,6 +4,7 @@
 - Render interior door shadows.
 - Allow Trusted Player to see tools and draw dungeons, but only try to update walls and scene for GM.
 - Add missing title for Add Polygon button.
+- Fix release notes popup showing "#undefined".
 
 # 0.7.1
 - Fix "User X lacks permission to create Wall" errors appearing for players.
