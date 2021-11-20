@@ -132,16 +132,6 @@ export const themes = {
       wallColor: "#27251A",
     })
   },  
-  metalGrill: {
-    name: "Metal Grill",       
-    config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {
-      doorColor: "#24201C",
-      doorFillColor: "#C0C0C0",
-      doorFillOpacity: 1.0, 
-      floorTexture: "modules/dungeon-draw/assets/textures/Metal_Plate_046_basecolor.jpg",
-      wallColor: "#24201C",
-    })
-  },  
   metalSquares: {
     name: "Metal Squares",
     config: foundry.utils.mergeObject(Dungeon.defaultConfig(), {

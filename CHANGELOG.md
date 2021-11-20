@@ -1,9 +1,10 @@
 # 0.8.0
-- Add new Draw Interior Walls tool.
+- Allow Trusted Players to use Dungeon Draw tools. NOTE: updating lighting walls and scene settings still needs GM permissions. You may need to give Trusted Player owner permissions to GM-created dungeon Journal Entries.
+- Add new "Add Interior Walls" tool.
 - Change Remove Doors tool to remove both doors and interior walls.
 - Render interior door shadows.
-- Allow Trusted Player to see tools and draw dungeons, but only try to update walls and scene for GM.
-- Add missing title for Add Polygon button.
+- Add Metal Grid theme.
+- Fix missing title for Add Polygon button.
 - Fix release notes popup showing "#undefined".
 
 # 0.7.1
