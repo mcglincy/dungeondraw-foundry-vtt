@@ -5,6 +5,10 @@ import "./lib/jsts.min.js";
 const FLAG_NAME = ""
 
 export const makeWalls = async (state) => {
+  if (!game.user.isGM) {
+    // need GM privs to delete/create walls
+    return;
+  }
   await deleteAllWalls();
   if (state.geometry) {
     if (state.geometry instanceof jsts.geom.MultiPolygon) {

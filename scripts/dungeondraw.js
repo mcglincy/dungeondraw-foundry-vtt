@@ -80,7 +80,7 @@ export class DungeonDraw {
       title: "DD.SceneControlTitle",
       layer: DungeonLayer.LAYER_NAME,
       icon: "fas fa-dungeon",
-      visible: game.user.isGM,
+      visible: game.user.isTrusted,
       tools: [
         {
           name: "addrect",

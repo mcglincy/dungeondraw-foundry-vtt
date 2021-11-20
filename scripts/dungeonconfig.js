@@ -98,12 +98,14 @@ export class DungeonConfig extends FormApplication {
     const theme = themes[selectValue];
     const newConfig = {...theme.config};
     await canvas.dungeon.dungeon?.setConfig(newConfig);
-    await canvas.scene.update({
-      backgroundColor: newConfig.sceneBackgroundColor,
-      gridAlpha: newConfig.sceneGridAlpha,
-      gridColor: newConfig.sceneGridColor,
-    })
-    // await canvas.scene.render();
+    if (game.user.isGM) {
+      // need GM privs to update scene
+      await canvas.scene.update({
+        backgroundColor: newConfig.sceneBackgroundColor,
+        gridAlpha: newConfig.sceneGridAlpha,
+        gridColor: newConfig.sceneGridColor,
+      })
+    }
     this.render();
   }
 }
