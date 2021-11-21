@@ -25,18 +25,13 @@ A dungeon-drawing module for Foundry VTT.
 
 ## How it works
 
-* Need GM or Assistant GM permission to see new Dungeon Draw scene tools.
 * New dungeon-drawing layer under the Foundry background layer.
-* Auto-creates walls and doors from what you draw.
+* Players need at least Trusted Player permission to see and use the new Dungeon Draw scene tools. GM or Assistant DM permission will allow Dungeon Draw to automatically update lighting walls, as well as update scene settings (background color, grid) from theme selection.
 * Saved as a JournalEntry in a "Dungeon Draw" folder.
   * Map note in the upper left links the current scene to the JournalEntry.
   * JournalEntry and Note are created as soon as you start drawing a new dungeon.
   * To delete: delete the Note and/or the JournalEntry. 
-
-
-## Wall and Door Creation
-
-Dungeon Draw automatically creates Foundry lighting walls and doors from what you've drawn. Warning: every time you draw, Dungeon Draw deletes ALL EXISTING WALLS and recreates them. That means that using Dungeon Draw on a scene that already has manually placed walls WILL DELETE THOSE WALLS.
+  * For Trusted Player: to allow editing, you may need to them as the owner of Journal Entries that were previously created by the GM.
 
 
 ## Using floor textures
