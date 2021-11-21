@@ -275,7 +275,12 @@ const drawPolygonRoom = (floorGfx, interiorShadowGfx, wallGfx, config, poly) => 
 const drawInteriorWall = (interiorShadowGfx, wallGfx, config, wall) => {
   drawInteriorWallShadow(interiorShadowGfx, config, wall);
 
-  wallGfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.wallColor), 1.0, 0.5);    
+  wallGfx.lineStyle({
+    width: config.wallThickness,
+    color: PIXI.utils.string2hex(config.wallColor),
+    alpha: 1.0,
+    alignment: 0.5,  // middle
+  });
   wallGfx.moveTo(wall[0], wall[1]);
   wallGfx.lineTo(wall[2], wall[3]);
 };
@@ -312,10 +317,11 @@ const drawDoor = (interiorShadowGfx, wallGfx, config, door) => {
 
   // draw door
   wallGfx.lineStyle({
-    width: config.wallThickness, 
-    color: PIXI.utils.string2hex(config.wallColor), 
-    alpha: 1.0, 
+    width: config.wallThickness,
+    color: PIXI.utils.string2hex(config.wallColor),
+    alpha: 1.0,
     alignment: 0.5, // middle
+    cap: "round",
   });
   wallGfx.moveTo(door[0], door[1]);
   // left jamb
