@@ -1,8 +1,9 @@
 # 0.8.0
-- Allow Trusted Players to use Dungeon Draw tools. NOTE: updating lighting walls and scene settings still needs GM permissions. You may need to give Trusted Player owner permissions to GM-created dungeon Journal Entries.
+- Allow Trusted Players to use Dungeon Draw tools. NOTE: updating lighting walls and scene settings still needs GM permissions. You may also need to give Trusted Player owner permissions to GM-created dungeon Journal Entries to allow editing.
 - Add new "Add Interior Walls" tool.
-- Change Remove Doors tool to remove both doors and interior walls.
-- Render interior door shadows.
+- Change Remove Doors tool to select and remove both doors and interior walls.
+- Reorganize render graphics/layering/clipping so that interior shadows and walls look correct.
+- Add blur to interior shadows.
 - Add Metal Grid theme.
 - Fix missing title for Add Polygon button.
 - Fix release notes popup showing "#undefined".
