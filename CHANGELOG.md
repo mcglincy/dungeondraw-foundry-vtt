@@ -1,8 +1,9 @@
 # 0.9.0
 - Adding a rectangle alongside an existing room/wall will now preserve the interior wall.
 - Adding a door within an interior wall will now split the interior wall.
-- Add interior shadow on all exterior walls, interior walls, and doors.
-- Reorganize floor/shadow/wall render and graphics objects for better layering and to fix some visual artifacts.
+- Draw interior shadows for on all exterior walls, interior walls, and doors.
+- Reorganize floor/shadow/wall render and graphics objects for better layering and to fix some shadow overlap issues.
+- Fix code typo causing render errors.
 
 # 0.8.0
 - Allow Trusted Players to use Dungeon Draw tools. NOTE: updating lighting walls and scene settings still needs GM permissions. You may also need to give Trusted Player owner permissions to GM-created dungeon Journal Entries to allow editing.

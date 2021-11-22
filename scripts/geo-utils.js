@@ -74,3 +74,30 @@ export const inverseSlope = (slope) => {
 export const distanceBetweenPoints = (x1, y1, x2, y2) => {
   return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 };
+
+export const comparePoints = (x1, y1, x2, y2) => {
+  if (x1 < x2 || (x1 === x2 && y1 < y2)) {
+    // less than
+    return -1;
+  } else if (x1 === x2 && y1 === y2) {
+    // equal
+    return 0;
+  } else {
+    // greater than
+    return 1;
+  }
+};
+
+export const lesserPoint = (x1, y1, x2, y2) => {
+  if (comparePoints(x1, y1, x2, y2) === -1) {
+    return [x1, y1];
+  }
+  return [x2, y2];
+};
+
+export const greaterPoint = (x1, y1, x2, y2) => {
+  if (comparePoints(x1, y1, x2, y2) !== -1) {
+    return [x1, y1];
+  }
+  return [x2, y2];
+};

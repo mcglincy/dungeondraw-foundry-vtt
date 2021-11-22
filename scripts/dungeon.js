@@ -151,10 +151,14 @@ export class Dungeon extends PlaceableObject {
         wallsToDelete.push(wall);
         // TODO: how should we handle coordinate ordering? Does JTS do this for us?
         // TODO: apparently not, and we have to do the reordering ourselves
-        const wallCoords = wallPoly.getCoordinates();
-        const doorCoords = doorPoly.getCoordinates();
-        wallsToAdd.push([wallCoords[0].x, wallCoords[0].y, doorCoords[0].x, doorCoords[0].y]);
-        wallsToAdd.push([doorCoords[1].x, doorCoords[1].y, wallCoords[1].x, wallCoords[1].y]);
+
+        const w1 = geo.lesserPoint(wall[0], wall[1], wall[2], wall[3]);
+        const w2 = geo.greaterPoint(wall[0], wall[1], wall[2], wall[3]);
+        const d1 = geo.lesserPoint(x1, y1, x2, y2);
+        const d2 = geo.greaterPoint(x1, y1, x2, y2);
+
+        wallsToAdd.push([w1[0], w1[1], d1[0], d1[1]]);
+        wallsToAdd.push([d2[0], d2[1], w2[0], w2[1]]);
       }
     }
     newState.interiorWalls = newState.interiorWalls.filter(w => wallsToDelete.indexOf(w) === -1);
