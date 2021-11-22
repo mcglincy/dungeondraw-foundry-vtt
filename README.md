@@ -11,8 +11,9 @@ A dungeon-drawing module for Foundry VTT.
 * Add rectangle - Draw a rectangular room or corridor.
 * Remove rectangle - Remove rooms/corridors, or remove inner chunks of rooms.
 * Add polygon - Draw a polygon; works like Foundry's polygon Drawing tool.
+* Add interior wall - Draw a new interior wall.
 * Add door - Draw a new door.
-* Remove doors - Remove all doors within an area.
+* Remove interior walls and doors - Remove all interior walls and doors within a rectangle you draw.
 * Undo - Undoes last change.
 * Redo - Redoes next change.
 * Config - Change various scene-specific drawing values: floor and wall color, wall width, optional floor texture and tint, etc. Or, apply a preset theme.
