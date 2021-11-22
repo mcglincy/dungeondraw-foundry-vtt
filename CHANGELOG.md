@@ -1,3 +1,8 @@
+# 0.8.1
+- Blur interior shadows.
+- Add interior shadow on all exterior walls, interior walls, and doors.
+- Reorganize floor/shadow/wall render and graphics objects for better layering and to fix some visual artifacts.
+
 # 0.8.0
 - Allow Trusted Players to use Dungeon Draw tools. NOTE: updating lighting walls and scene settings still needs GM permissions. You may also need to give Trusted Player owner permissions to GM-created dungeon Journal Entries to allow editing.
 - Add new "Add Interior Walls" tool.
