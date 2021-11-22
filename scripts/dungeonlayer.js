@@ -316,8 +316,7 @@ export class DungeonLayer extends PlaceablesLayer {
             height: createData.height,
             width: createData.width
           };
-          await this.dungeon.subtractInteriorWalls(rect);
-          await this.dungeon.subtractDoors(rect);
+          await this.dungeon.subtractDoorsAndInteriorWalls(rect);
         } else if (game.activeTool === "addpoly") {
           const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
           await this.dungeon.addPolygon(offsetPoints);

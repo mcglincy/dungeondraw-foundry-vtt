@@ -187,13 +187,32 @@ export class Dungeon extends PlaceableObject {
   }
 
   async subtractInteriorWalls(rect) {
-    const poly = geo.rectToPolygon(rect);
+    const rectPoly = geo.rectToPolygon(rect);
     const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(w => {
       const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
-      return !poly.intersects(wallPoly);
+      return !rectPoly.intersects(wallPoly);
     });
     if (wallsToKeep.length != this.history[this.historyIndex].interiorWalls.length) {
       const newState = this.history[this.historyIndex].clone();
+      newState.interiorWalls = wallsToKeep;
+      await this.pushState(newState);      
+    }
+  }
+
+  async subtractDoorsAndInteriorWalls(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const oldState = this.history[this.historyIndex];
+    const doorsToKeep = oldState.doors.filter(d => {
+      const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
+      return !rectPoly.intersects(doorPoly);
+    });
+    const wallsToKeep = oldState.interiorWalls.filter(w => {
+      const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
+      return !rectPoly.intersects(wallPoly);
+    });
+    if (doorsToKeep.length != oldState.doors.length || wallsToKeep.length != oldState.interiorWalls.length) {
+      const newState = oldState.clone();
+      newState.doors = doorsToKeep;
       newState.interiorWalls = wallsToKeep;
       await this.pushState(newState);      
     }
