@@ -280,6 +280,7 @@ const drawInteriorWall = (interiorShadowGfx, wallGfx, config, wall) => {
     color: PIXI.utils.string2hex(config.wallColor),
     alpha: 1.0,
     alignment: 0.5,  // middle
+    cap: "round"
   });
   wallGfx.moveTo(wall[0], wall[1]);
   wallGfx.lineTo(wall[2], wall[3]);
