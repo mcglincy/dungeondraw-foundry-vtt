@@ -4,6 +4,7 @@
 - Draw interior shadows for on all exterior walls, interior walls, and doors.
 - Reorganize floor/shadow/wall render and graphics objects for better layering and to fix some shadow overlap issues.
 - Fix code typo causing render errors.
+- Fix interior wall / door removal happening as two separate undo steps.
 
 # 0.8.0
 - Allow Trusted Players to use Dungeon Draw tools. NOTE: updating lighting walls and scene settings still needs GM permissions. You may also need to give Trusted Player owner permissions to GM-created dungeon Journal Entries to allow editing.
