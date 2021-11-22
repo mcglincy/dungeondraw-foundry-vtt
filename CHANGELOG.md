@@ -3,6 +3,7 @@
 - Adding a door within an interior wall will now split the interior wall.
 - Draw interior shadows for on all exterior walls, interior walls, and doors.
 - Reorganize floor/shadow/wall render and graphics objects for better layering and to fix some shadow overlap issues.
+- Set interior wall line cap to prevent obvious breaks/overlaps where walls join.
 - Fix code typo causing render errors.
 - Fix interior wall / door removal happening as two separate undo steps.
 
