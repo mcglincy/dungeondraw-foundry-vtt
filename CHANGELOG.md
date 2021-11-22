@@ -1,5 +1,6 @@
-# 0.8.1
-- Blur interior shadows.
+# 0.9.0
+- Adding a rectangle alongside an existing room/wall will now preserve the interior wall.
+- Adding a door within an interior wall will now split the interior wall.
 - Add interior shadow on all exterior walls, interior walls, and doors.
 - Reorganize floor/shadow/wall render and graphics objects for better layering and to fix some visual artifacts.
 

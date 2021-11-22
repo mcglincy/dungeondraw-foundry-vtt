@@ -360,26 +360,6 @@ const drawDoorShadow = (gfx, config, door) => {
   const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
   const doorRect = rectangleForSegment(config, jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
 
-  // gfx.lineStyle({
-  //   width: config.wallThickness / 2.0 + config.interiorShadowThickness,
-  //   color: PIXI.utils.string2hex(config.interiorShadowColor),
-  //   alpha: config.interiorShadowOpacity,
-  //   // alignment: 1,  // outside
-  //   alignment: 0.5,
-  //   join: "round"
-  // });
-  console.log(doorRect);
-
-  // gfx.moveTo(doorRect[0], doorRect[1]);
-  // gfx.lineTo(doorRect[2], doorRect[3]);
-  // gfx.drawPolygon(
-  //   doorRect[0], doorRect[1], 
-  //   doorRect[2], doorRect[3],
-  //   doorRect[4], doorRect[5], 
-  //   doorRect[6], doorRect[7],
-  //   doorRect[0], doorRect[1]
-  //   );  
-
   gfx.lineStyle({
     // wide enough to be exposed on either side
     width: config.wallThickness + 2.0 * config.interiorShadowThickness,
@@ -396,6 +376,7 @@ const drawDoorShadow = (gfx, config, door) => {
   gfx.moveTo(jamb1End[0], jamb1End[1]);
   gfx.lineTo(door[0], door[1]);
 
+  // door rectangle
   gfx.drawPolygon(
     doorRect[0], doorRect[1], 
     doorRect[2], doorRect[3],

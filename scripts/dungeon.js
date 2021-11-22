@@ -139,6 +139,26 @@ export class Dungeon extends PlaceableObject {
 
   async addDoor(x1, y1, x2, y2) {
     const newState = this.history[this.historyIndex].clone();
+    const doorPoly = geo.twoPointsToLineString(x1, y1, x2, y2);
+
+    // possibly split interior walls
+    const wallsToDelete = [];
+    const wallsToAdd = [];
+    for (let wall of newState.interiorWalls) {
+      const wallPoly = geo.twoPointsToLineString(wall[0], wall[1], wall[2], wall[3]);
+      const contains = wallPoly.contains(doorPoly);
+      if (contains) {
+        wallsToDelete.push(wall);
+        // TODO: how should we handle coordinate ordering? Does JTS do this for us?
+        // TODO: apparently not, and we have to do the reordering ourselves
+        const wallCoords = wallPoly.getCoordinates();
+        const doorCoords = doorPoly.getCoordinates();
+        wallsToAdd.push([wallCoords[0].x, wallCoords[0].y, doorCoords[0].x, doorCoords[0].y]);
+        wallsToAdd.push([doorCoords[1].x, doorCoords[1].y, wallCoords[1].x, wallCoords[1].y]);
+      }
+    }
+    newState.interiorWalls = newState.interiorWalls.filter(w => wallsToDelete.indexOf(w) === -1);
+    newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
     newState.doors.push([x1, y1, x2, y2]);
     await this.pushState(newState);
   }
@@ -163,10 +183,10 @@ export class Dungeon extends PlaceableObject {
   }
 
   async subtractInteriorWalls(rect) {
-    const rectPoly = geo.rectToPolygon(rect);
+    const poly = geo.rectToPolygon(rect);
     const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(w => {
       const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
-      return !rectPoly.intersects(wallPoly);
+      return !poly.intersects(wallPoly);
     });
     if (wallsToKeep.length != this.history[this.historyIndex].interiorWalls.length) {
       const newState = this.history[this.historyIndex].clone();
@@ -176,9 +196,32 @@ export class Dungeon extends PlaceableObject {
   }
 
   async _addPoly(poly) {
-    const newState = this.history[this.historyIndex].clone();    
+    const oldState = this.history[this.historyIndex];
+    const newState = oldState.clone();    
     if (newState.geometry) {
       newState.geometry = newState.geometry.union(poly);
+      const touches = oldState.geometry.touches(poly);
+      if (touches) {
+        const intersection = oldState.geometry.intersection(poly);
+        const coordinates = intersection.getCoordinates();
+        // TODO: do we need to handle more complicated overlaps, GeometryCollection etc?
+        // this coordinate 2-step is flimsy
+        if (coordinates.length > 1 && coordinates.length % 2 === 0) {
+          console.log(coordinates);
+          for (let i = 0; i < coordinates.length; i+=2) {
+            newState.interiorWalls.push([coordinates[i].x, coordinates[i].y, coordinates[i+1].x, coordinates[i+1].y]);            
+          }
+        }
+      } else {
+        // also nuke any interior walls in this new poly
+        const wallsToKeep = newState.interiorWalls.filter(w => {
+          const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
+          return !poly.intersects(wallPoly);
+        });
+        if (wallsToKeep.length != newState.interiorWalls.length) {
+          newState.interiorWalls = wallsToKeep;
+        }        
+      }
     } else {
       newState.geometry = poly;
     }

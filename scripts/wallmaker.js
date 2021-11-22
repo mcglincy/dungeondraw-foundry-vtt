@@ -27,11 +27,7 @@ const deleteAllWalls = async () => {
     // which causes an infinite loop of redraw/refresh.
     // so avoid it :P
     const walls = canvas.scene.getEmbeddedCollection("Wall");
-
     const keys = Array.from(walls.keys());
-    console.log("======");
-    console.log(`${keys.length} total walls`);
-
     const ids = [];
     for (const wall of walls) {
       const flag = wall.getFlag(DungeonDraw.MODULE_NAME, "dungeonVersion");
@@ -39,7 +35,6 @@ const deleteAllWalls = async () => {
         ids.push(wall.id);
       }
     }
-    console.log(`Deleting ${ids.length} walls`);
     await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
   } catch(error) {
     console.error(error);
