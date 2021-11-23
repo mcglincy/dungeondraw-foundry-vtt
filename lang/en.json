@@ -14,6 +14,7 @@
   "DD.ConfigDefaultTitle": "Dungeon Config Default",
   "DD.ConfigTitle": "Dungeon Config",
   "DD.CustomThemes": "Custom Themes",
+  "DD.DeleteTheme": "Delete Theme",
   "DD.DoorColor": "Door Color",
   "DD.DoorFillColor": "Door Fill Color",
   "DD.DoorFillOpacity": "Door Fill Opacity",
@@ -40,6 +41,7 @@
   "DD.TabSettings": "Settings",
   "DD.TabThemes": "Themes",
   "DD.Theme": "Theme",
+  "DD.ThemeNamePlaceholder": "Enter a theme name",
   "DD.WallColor": "Wall Color",
   "DD.WallThickness": "Wall Thickness"
 }

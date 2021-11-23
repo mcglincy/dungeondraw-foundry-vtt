@@ -135,7 +135,7 @@
         <div class="form-group">
             <label>{{localize "DD.SaveAsCustomTheme"}}</label>
             <div class="form-fields">
-                <input type="text" class="saveAsThemeName" name="saveAsThemeName" value="{{saveAsThemeName}}" data-dtype="String" />
+                <input type="text" class="saveAsThemeName" name="saveAsThemeName" value="{{saveAsThemeName}}" placeholder='{{localize "DD.ThemeNamePlaceholder"}}' data-dtype="String" />
                 <button type="button" class="dd-save-as-theme-button">
                     <i class="fas fa-save fa-fw"></i>
                 </button>
@@ -161,7 +161,7 @@
               {{/with}}  
             </div>
             <div class="dd-theme-controls">
-              <a class="item-control item-delete dd-theme-delete" title="Delete Theme"><i class="fas fa-trash"></i></a>
+              <a class="item-control item-delete dd-theme-delete" title='{{localize "DD.DeleteTheme"}}'><i class="fas fa-trash"></i></a>
             </div>
           </div>
           {{/each}}
