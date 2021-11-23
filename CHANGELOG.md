@@ -1,3 +1,7 @@
+# 0.10.0
+- Add "Save as Custom Theme" to config.
+- Move themes into separate config tab.
+
 # 0.9.0
 - Adding a rectangle alongside an existing room/wall will now preserve the interior wall.
 - Adding a door within an interior wall will now split the interior wall.

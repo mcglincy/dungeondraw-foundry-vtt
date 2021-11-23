@@ -18,12 +18,10 @@ export class DungeonConfig extends FormApplication {
       classes: ["sheet"],
       template: "modules/dungeon-draw/templates/dungeon-config.html",
       width: 480,
-      height: 780,
+      height: 770,
       tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "position"}]
     });
   }
-
-  /* -------------------------------------------- */
 
   /** @override */
   get title() {
@@ -31,19 +29,40 @@ export class DungeonConfig extends FormApplication {
     return game.i18n.localize(title);
   }
 
-  /* -------------------------------------------- */
-
   /** @override */
   getData(options) {
     let config = canvas.dungeon.dungeon?.state().config;
     if (!config) {
       config = Dungeon.defaultConfig();
     }
+    const customThemes = this.getCustomThemes();
+    const customThemeKeys = Object.keys(customThemes).sort();
+    const themeKeys = Object.keys(themes).sort();
     return {
+      customThemes,
+      customThemeKeys,
       object: config,
       options: this.options,
       themes,
+      themeKeys,
     }
+  }
+
+  /* -------------------------------------------- */
+
+  getCustomThemes() {
+    try {
+      const customThemesString = game.settings.get(DungeonDraw.MODULE_NAME, "customThemes");
+      return JSON.parse(customThemesString);
+    } catch(e) {
+      console.log(e);
+      return {};
+    }
+  }
+
+  saveCustomThemes(customThemes) {
+    const themesString = JSON.stringify(customThemes);
+    game.settings.set(DungeonDraw.MODULE_NAME, "customThemes", themesString);
   }
 
   /* -------------------------------------------- */
@@ -72,7 +91,9 @@ export class DungeonConfig extends FormApplication {
   activateListeners(html) {
     super.activateListeners(html);
     html.find('button[name="resetDefault"]').click(this._onResetDefaults.bind(this));
-    html.find('select[name="theme"]').change(this._onThemeChange.bind(this));
+    html.find('.dd-theme-name').click(this._onThemeNameClick.bind(this));
+    html.find('.dd-save-as-theme-button').click(this._onSaveAsThemeClick.bind(this));
+    html.find('.dd-theme-delete').click(this._onDeleteThemeClick.bind(this));
   }
 
   /* -------------------------------------------- */
@@ -89,13 +110,18 @@ export class DungeonConfig extends FormApplication {
     this.render();
   }
 
-  async _onThemeChange(event) {
+  async _onThemeNameClick(event) {
     event.preventDefault();
-    const selectValue = event.target.value;
-    if (!selectValue) {
-      return;
+    const themeRow = $(event.currentTarget).parent(".dd-theme-row");
+    const themeKey = themeRow.data("theme");
+    const isCustom = themeRow.data("iscustom");
+    let theme;
+    if (isCustom) {
+      const customThemes = this.getCustomThemes();
+      theme = customThemes[themeKey];
+    } else {
+      theme = themes[themeKey];
     }
-    const theme = themes[selectValue];
     const newConfig = {...theme.config};
     await canvas.dungeon.dungeon?.setConfig(newConfig);
     if (game.user.isGM) {
@@ -106,6 +132,32 @@ export class DungeonConfig extends FormApplication {
         gridColor: newConfig.sceneGridColor,
       })
     }
+    this.render();
+  }
+
+  async _onSaveAsThemeClick(event) {
+    event.preventDefault();
+    const input = $(event.currentTarget).closest(".form-fields").children(".saveAsThemeName");
+    const saveAsThemeName = input.val();
+    const formData = this._getSubmitData();
+    const customThemes = this.getCustomThemes();
+    customThemes[saveAsThemeName] = {
+      name: saveAsThemeName,
+      config: formData
+    };
+    this.saveCustomThemes(customThemes);
+    canvas.dungeon.dungeon?.setConfig(formData);
+    canvas.dungeon.dungeon.refresh();
+    this.render();
+  }
+
+  async _onDeleteThemeClick(event) {
+    event.preventDefault();
+    const themeRow = $(event.currentTarget).closest(".dd-theme-row");
+    const themeKey = themeRow.data("theme");
+    const customThemes = this.getCustomThemes();
+    delete customThemes[themeKey];
+    this.saveCustomThemes(customThemes);
     this.render();
   }
 }

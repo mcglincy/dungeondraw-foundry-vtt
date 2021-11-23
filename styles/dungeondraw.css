@@ -1,0 +1,27 @@
+.dd-themes {
+  display: flex;
+  flex-direction: column;
+}
+.dd-themes .dd-theme-row {
+  border-bottom: 1px solid black;
+  display: flex;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 100%;
+}
+.dd-themes .dd-theme-row:last-child {
+  border-bottom: none;
+}
+.dd-themes .dd-theme-row .dd-theme-name {
+  flex: 1;
+}
+.dd-themes .dd-theme-row .dd-theme-name:hover {
+  cursor: pointer;
+  text-shadow: 0 0 10px red;
+}
+.dd-themes .dd-theme-row .dd-theme-controls {
+  flex: 0 0 50px;
+  text-align: right;
+}

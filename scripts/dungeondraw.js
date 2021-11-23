@@ -19,6 +19,13 @@ export class DungeonDraw {
         type: String,
         config: false
     });
+    game.settings.register(DungeonDraw.MODULE_NAME, "customThemes", {
+        name: "Custom themes.",
+        scope: "client",
+        default: "",
+        type: String,
+        config: false
+    });
   }
 
   static ready() {

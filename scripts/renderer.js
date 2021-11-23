@@ -269,7 +269,7 @@ const drawPolygonRoom = (floorGfx, interiorShadowGfx, wallGfx, config, poly) => 
     wallGfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.wallColor), 1.0);
     wallGfx.drawPolygon(flatCoords);
   }
-}
+};
 
 // [x1, y1, x2, y2]
 const drawInteriorWall = (interiorShadowGfx, wallGfx, config, wall) => {

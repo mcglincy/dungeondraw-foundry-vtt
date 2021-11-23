@@ -1,161 +1,188 @@
 <form class="flexcol" autocomplete="off" onsubmit="event.preventDefault();">
-
     <!-- Sheet Navigation Tabs -->
     <nav class="sheet-tabs tabs">
         <a class="item" data-tab="settings"><i class="fas fa-cog"></i> {{localize "DD.TabSettings"}}</a>
+        <a class="item" data-tab="themes"><i class="fas fa-palette"></i> {{localize "DD.TabThemes"}}</a>
     </nav>
-
     <!-- Settings Tab -->
     <div class="tab" data-tab="settings">
-      <div class="wallfloor-section">
         <div class="form-group">
-          <label>{{localize "DD.ApplyTheme"}}</label>
-          <div class="form-fields">
-            <select name="theme" data-dtype="string">
-                <option value="" selected></option>
-                {{#select object.theme}}
-                    {{#each themes as |themeObj themeKey|}}
-                        <option value="{{themeKey}}">{{themeObj.name}}</option>
-                    {{/each}}
-                {{/select}}
-            </select>
-          </div>
-        </div>
-        <hr/>        
-        <div class="form-group">
-          <label>{{localize "DD.DoorColor"}}</label>
-          <div class="form-fields">
-            <input type="text" class="color" name="doorColor" value="{{object.doorColor}}" data-dtype="String"/>
-            <input type="color" value="{{object.doorColor}}" data-dtype="String" data-edit="doorColor" />
-          </div>
+            <label>{{localize "DD.DoorColor"}}</label>
+            <div class="form-fields">
+                <input type="text" class="color" name="doorColor" value="{{object.doorColor}}" data-dtype="String" />
+                <input type="color" value="{{object.doorColor}}" data-dtype="String" data-edit="doorColor" />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.DoorFillColor"}}</label>
-          <div class="form-fields">
-            <input type="text" class="color" name="doorFillColor" value="{{object.doorFillColor}}" data-dtype="String"/>
-            <input type="color" value="{{object.doorFillColor}}" data-dtype="String" data-edit="doorFillColor" />
-          </div>
+            <label>{{localize "DD.DoorFillColor"}}</label>
+            <div class="form-fields">
+                <input type="text" class="color" name="doorFillColor" value="{{object.doorFillColor}}" data-dtype="String" />
+                <input type="color" value="{{object.doorFillColor}}" data-dtype="String" data-edit="doorFillColor" />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.DoorFillOpacity"}}</label>
-          <div class="form-fields">
-            <input type="number" name="doorFillOpacity" value="{{object.doorFillOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
-          </div>
+            <label>{{localize "DD.DoorFillOpacity"}}</label>
+            <div class="form-fields">
+                <input type="number" name="doorFillOpacity" value="{{object.doorFillOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.DoorThickness"}}</label>
-          <div class="form-fields">
-            <input type="number" name="doorThickness" value="{{object.doorThickness}}" data-dtype="Number"/>
-          </div>
+            <label>{{localize "DD.DoorThickness"}}</label>
+            <div class="form-fields">
+                <input type="number" name="doorThickness" value="{{object.doorThickness}}" data-dtype="Number" />
+            </div>
         </div>
-        <hr/>
+        <hr />
         <div class="form-group">
-          <label>{{localize "DD.ExteriorShadowColor"}}</label>
-          <div class="form-fields">
-            <input type="text" class="color" name="exteriorShadowColor" value="{{object.exteriorShadowColor}}" data-dtype="String"/>
-            <input type="color" value="{{object.exteriorShadowColor}}" data-dtype="String" data-edit="exteriorShadowColor" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label>{{localize "DD.ExteriorShadowOpacity"}}</label>
-          <div class="form-fields">
-            <input type="number" name="exteriorShadowOpacity" value="{{object.exteriorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
-          </div>
+            <label>{{localize "DD.ExteriorShadowColor"}}</label>
+            <div class="form-fields">
+                <input type="text" class="color" name="exteriorShadowColor" value="{{object.exteriorShadowColor}}" data-dtype="String" />
+                <input type="color" value="{{object.exteriorShadowColor}}" data-dtype="String" data-edit="exteriorShadowColor" />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.ExteriorShadowThickness"}}</label>
-          <div class="form-fields">
-            <input type="number" name="exteriorShadowThickness" value="{{object.exteriorShadowThickness}}" data-dtype="Number"/>
-          </div>
-        </div>
-        <hr/>
-        <div class="form-group">
-          <label>{{localize "DD.FloorColor"}}</label>
-          <div class="form-fields">
-            <input type="text" class="color" name="floorColor" value="{{object.floorColor}}" data-dtype="String"/>
-            <input type="color" value="{{object.floorColor}}" data-dtype="String" data-edit="floorColor" />
-          </div>
+            <label>{{localize "DD.ExteriorShadowOpacity"}}</label>
+            <div class="form-fields">
+                <input type="number" name="exteriorShadowOpacity" value="{{object.exteriorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.FloorTexture"}}</label>
-          <div class="form-fields">
-            <button type="button" class="file-picker" data-type="imagevideo" data-target="floorTexture" title="Browse Files" tabindex="-1">
-              <i class="fas fa-file-import fa-fw"></i>
-            </button>
-            <input class="image" type="text" name="floorTexture" value="{{object.floorTexture}}" data-dtype="String" placeholder="File Path" />
-          </div>
+            <label>{{localize "DD.ExteriorShadowThickness"}}</label>
+            <div class="form-fields">
+                <input type="number" name="exteriorShadowThickness" value="{{object.exteriorShadowThickness}}" data-dtype="Number" />
+            </div>
+        </div>
+        <hr />
+        <div class="form-group">
+            <label>{{localize "DD.FloorColor"}}</label>
+            <div class="form-fields">
+                <input type="text" class="color" name="floorColor" value="{{object.floorColor}}" data-dtype="String" />
+                <input type="color" value="{{object.floorColor}}" data-dtype="String" data-edit="floorColor" />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.FloorTextureTint"}}</label>
-          <div class="form-fields">
-            <input type="text" class="color" name="floorTextureTint" value="{{object.floorTextureTint}}" data-dtype="String"/>
-            <input type="color" value="{{object.floorTextureTint}}" data-edit="floorTextureTint" data-dtype="String"/>
-          </div>
-        </div>
-        <hr/>        
-        <div class="form-group">
-          <label>{{localize "DD.InteriorShadowColor"}}</label>
-          <div class="form-fields">
-            <input type="text" class="color" name="interiorShadowColor" value="{{object.interiorShadowColor}}" data-dtype="String"/>
-            <input type="color" value="{{object.interiorShadowColor}}" data-dtype="String" data-edit="interiorShadowColor" />
-          </div>
+            <label>{{localize "DD.FloorTexture"}}</label>
+            <div class="form-fields">
+                <button type="button" class="file-picker" data-type="imagevideo" data-target="floorTexture" title="Browse Files" tabindex="-1">
+                    <i class="fas fa-file-import fa-fw"></i>
+                </button>
+                <input class="image" type="text" name="floorTexture" value="{{object.floorTexture}}" data-dtype="String" placeholder="File Path" />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.InteriorShadowOpacity"}}</label>
-          <div class="form-fields">
-            <input type="number" name="interiorShadowOpacity" value="{{object.interiorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
-          </div>
+            <label>{{localize "DD.FloorTextureTint"}}</label>
+            <div class="form-fields">
+                <input type="text" class="color" name="floorTextureTint" value="{{object.floorTextureTint}}" data-dtype="String" />
+                <input type="color" value="{{object.floorTextureTint}}" data-edit="floorTextureTint" data-dtype="String" />
+            </div>
+        </div>
+        <hr />
+        <div class="form-group">
+            <label>{{localize "DD.InteriorShadowColor"}}</label>
+            <div class="form-fields">
+                <input type="text" class="color" name="interiorShadowColor" value="{{object.interiorShadowColor}}" data-dtype="String" />
+                <input type="color" value="{{object.interiorShadowColor}}" data-dtype="String" data-edit="interiorShadowColor" />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.InteriorShadowThickness"}}</label>
-          <div class="form-fields">
-            <input type="number" name="interiorShadowThickness" value="{{object.interiorShadowThickness}}" data-dtype="Number"/>
-          </div>
-        </div>        
-        <hr/>
-        <div class="form-group">
-          <label>{{localize "DD.SceneBackgroundColor"}}</label>
-          <div class="form-fields">
-            <input type="text" class="color" name="sceneBackgroundColor" value="{{object.sceneBackgroundColor}}" data-dtype="String"/>
-            <input type="color" value="{{object.sceneBackgroundColor}}" data-dtype="String" data-edit="sceneBackgroundColor" />
-          </div>
+            <label>{{localize "DD.InteriorShadowOpacity"}}</label>
+            <div class="form-fields">
+                <input type="number" name="interiorShadowOpacity" value="{{object.interiorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.SceneGridColor"}}</label>
-          <div class="form-fields">
-            <input type="text" class="color" name="sceneGridColor" value="{{object.sceneGridColor}}" data-dtype="String"/>
-            <input type="color" value="{{object.sceneGridColor}}" data-dtype="String" data-edit="sceneGridColor" />
-          </div>
+            <label>{{localize "DD.InteriorShadowThickness"}}</label>
+            <div class="form-fields">
+                <input type="number" name="interiorShadowThickness" value="{{object.interiorShadowThickness}}" data-dtype="Number" />
+            </div>
+        </div>
+        <hr />
+        <div class="form-group">
+            <label>{{localize "DD.SceneBackgroundColor"}}</label>
+            <div class="form-fields">
+                <input type="text" class="color" name="sceneBackgroundColor" value="{{object.sceneBackgroundColor}}" data-dtype="String" />
+                <input type="color" value="{{object.sceneBackgroundColor}}" data-dtype="String" data-edit="sceneBackgroundColor" />
+            </div>
         </div>
         <div class="form-group">
-          <label>{{localize "DD.SceneGridOpacity"}}</label>
-          <div class="form-fields">
-            <input type="number" name="sceneGridOpacity" value="{{object.sceneGridOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
-          </div>
-        </div>        
-        <hr/>
-        <div class="form-group">
-          <label>{{localize "DD.WallColor"}}</label>
-          <div class="form-fields">
-            <input type="text" class="color" name="wallColor" value="{{object.wallColor}}" data-dtype="String"/>
-            <input type="color" value="{{object.wallColor}}" data-dtype="String" data-edit="wallColor" />
-          </div>
+            <label>{{localize "DD.SceneGridColor"}}</label>
+            <div class="form-fields">
+                <input type="text" class="color" name="sceneGridColor" value="{{object.sceneGridColor}}" data-dtype="String" />
+                <input type="color" value="{{object.sceneGridColor}}" data-dtype="String" data-edit="sceneGridColor" />
+            </div>
         </div>
         <div class="form-group">
-          <label >{{localize "DD.WallThickness"}}</label>
-          <div class="form-fields">
-            <input type="text" name="wallThickness" value="{{object.wallThickness}}" data-dtype="Number"/>
-          </div>
+            <label>{{localize "DD.SceneGridOpacity"}}</label>
+            <div class="form-fields">
+                <input type="number" name="sceneGridOpacity" value="{{object.sceneGridOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+            </div>
         </div>
-      </div>
+        <hr />
+        <div class="form-group">
+            <label>{{localize "DD.WallColor"}}</label>
+            <div class="form-fields">
+                <input type="text" class="color" name="wallColor" value="{{object.wallColor}}" data-dtype="String" />
+                <input type="color" value="{{object.wallColor}}" data-dtype="String" data-edit="wallColor" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>{{localize "DD.WallThickness"}}</label>
+            <div class="form-fields">
+                <input type="text" name="wallThickness" value="{{object.wallThickness}}" data-dtype="Number" />
+            </div>
+        </div>
+        <hr />
+        <div class="form-group">
+            <label>{{localize "DD.SaveAsCustomTheme"}}</label>
+            <div class="form-fields">
+                <input type="text" class="saveAsThemeName" name="saveAsThemeName" value="{{saveAsThemeName}}" data-dtype="String" />
+                <button type="button" class="dd-save-as-theme-button">
+                    <i class="fas fa-save fa-fw"></i>
+                </button>
+            </div>
+        </div>
+        <br />
 
+        <div style="display: flex;">
+            <button type="button" name="resetDefault" value="1"><i class="fas fa-sync"></i> {{localize "DD.ResetToDefaults"}}</button>
+            <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "DD.Save"}} </button>
+        </div>
     </div>
 
-    <hr>
-    <div style="display: flex;">
-      <button type="button" name="resetDefault" value="1"><i class="fas fa-sync"></i> {{localize "DD.SubmitReset"}}</button>
-      <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "DD.SubmitSave"}} </button>
+    <!-- Themes Tab -->
+    <div class="tab" data-tab="themes">
+        <div class="dd-themes">
+          <h2>{{localize "DD.CustomThemes"}}</h2>
+          {{#each customThemeKeys as |themeKey|}}
+          <div class="dd-theme-row" data-iscustom="true" data-theme="{{themeKey}}">
+            <div class="dd-theme-name">
+              {{name}} {{#with (lookup ../customThemes themeKey)~}}
+                {{name}}
+              {{/with}}  
+            </div>
+            <div class="dd-theme-controls">
+              <a class="item-control item-delete dd-theme-delete" title="Delete Theme"><i class="fas fa-trash"></i></a>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        <hr />
+        <div class="dd-themes">
+          <h2>{{localize "DD.ModuleThemes"}}</h2>
+          {{#each themeKeys as |themeKey|}}
+          <div class="dd-theme-row" data-theme="{{themeKey}}">
+            <div class="dd-theme-name item-control">
+              {{name}} {{#with (lookup ../themes themeKey)~}}
+                {{name}}
+              {{/with}}   
+            </div>
+            <div class="dd-theme-controls">
+            </div>
+          </div>
+          {{/each}}
+        </div>
     </div>
+
 </form>
 <!--This is just to take up empty space after the form, helps with recalculating heights -->
 <div class="empty-space"></div>
