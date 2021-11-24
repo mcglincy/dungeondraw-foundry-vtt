@@ -1,10 +1,6 @@
-import { DungeonConfig } from "./dungeonconfig.js";
+import { ConfigSheet } from "./configsheet.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 
-
-const notImplementedYet = () => {
-  ui.notifications.info("Not implemented yet", {permanent: false});
-}
 
 export class DungeonDraw {
   // module name from module.json
@@ -79,7 +75,7 @@ export class DungeonDraw {
     CONFIG.Dungeon = {
       //documentClass: DungeonDocument,
       layerClass: DungeonLayer,
-      sheetClass: DungeonConfig
+      //sheetClass: DungeonConfig
     };
 
     controls.push({
@@ -141,7 +137,7 @@ export class DungeonDraw {
           name: "config",
           title: "DD.ButtonTitleConfig",
           icon: "fas fa-cog",
-          onClick: () => canvas.dungeon.configureSettings(),
+          onClick: () => new ConfigSheet().render(true),
           button: true
         },
         {

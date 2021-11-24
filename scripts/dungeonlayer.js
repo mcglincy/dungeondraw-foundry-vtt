@@ -1,6 +1,6 @@
+import { ConfigSheet } from "./configsheet.js";
 import { Dungeon } from "./dungeon.js";
 import { DungeonState } from "./dungeonstate.js";
-import { DungeonConfig } from "./dungeonconfig.js";
 import { DungeonDraw } from "./dungeondraw.js";
 
 
@@ -73,12 +73,6 @@ export class DungeonLayer extends PlaceablesLayer {
 
   static LAYER_NAME = "dungeon";
 
-  /**
-   * The named game setting which persists dungeon configuration for the User
-   * @type {string}
-   */
-  static CONFIG_SETTING = "dungeonConfig";  
-
   constructor() {
     super();
     this.dungeonContainer = null;
@@ -136,13 +130,6 @@ export class DungeonLayer extends PlaceablesLayer {
         break;
     }
     return data;
-  }  
-
-  /**
-   * Render a configuration sheet to configure the Dungeon settings
-   */
-  configureSettings() {
-    new DungeonConfig().render(true);
   }  
 
   /** @override */

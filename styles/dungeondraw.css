@@ -22,6 +22,7 @@
   text-shadow: 0 0 10px red;
 }
 .dd-themes .dd-theme-row .dd-theme-controls {
-  flex: 0 0 50px;
-  text-align: right;
+  display: flex;
+  flex: 0 0 80px;
+  justify-content: space-around;
 }

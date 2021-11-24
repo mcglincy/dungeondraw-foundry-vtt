@@ -7,57 +7,67 @@
     <!-- Settings Tab -->
     <div class="tab" data-tab="settings">
         <div class="form-group">
+            <label>{{localize "DD.SaveAsCustomTheme"}}</label>
+            <div class="form-fields">
+                <input type="text" class="saveAsThemeName" name="saveAsThemeName" value="" placeholder='{{localize "DD.ThemeNamePlaceholder"}}' data-dtype="String" />
+                <button type="button" class="dd-save-as-theme-button">
+                    <i class="fas fa-save"></i>
+                </button>
+            </div>
+        </div>
+        <hr />        
+        <div class="form-group">
             <label>{{localize "DD.DoorColor"}}</label>
             <div class="form-fields">
-                <input type="text" class="color" name="doorColor" value="{{object.doorColor}}" data-dtype="String" />
-                <input type="color" value="{{object.doorColor}}" data-dtype="String" data-edit="doorColor" />
+                <input type="text" class="color" name="doorColor" value="{{config.doorColor}}" data-dtype="String" />
+                <input type="color" value="{{config.doorColor}}" data-dtype="String" data-edit="doorColor" />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.DoorFillColor"}}</label>
             <div class="form-fields">
-                <input type="text" class="color" name="doorFillColor" value="{{object.doorFillColor}}" data-dtype="String" />
-                <input type="color" value="{{object.doorFillColor}}" data-dtype="String" data-edit="doorFillColor" />
+                <input type="text" class="color" name="doorFillColor" value="{{config.doorFillColor}}" data-dtype="String" />
+                <input type="color" value="{{config.doorFillColor}}" data-dtype="String" data-edit="doorFillColor" />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.DoorFillOpacity"}}</label>
             <div class="form-fields">
-                <input type="number" name="doorFillOpacity" value="{{object.doorFillOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+                <input type="number" name="doorFillOpacity" value="{{config.doorFillOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.DoorThickness"}}</label>
             <div class="form-fields">
-                <input type="number" name="doorThickness" value="{{object.doorThickness}}" data-dtype="Number" />
+                <input type="number" name="doorThickness" value="{{config.doorThickness}}" data-dtype="Number" />
             </div>
         </div>
         <hr />
         <div class="form-group">
             <label>{{localize "DD.ExteriorShadowColor"}}</label>
             <div class="form-fields">
-                <input type="text" class="color" name="exteriorShadowColor" value="{{object.exteriorShadowColor}}" data-dtype="String" />
-                <input type="color" value="{{object.exteriorShadowColor}}" data-dtype="String" data-edit="exteriorShadowColor" />
+                <input type="text" class="color" name="exteriorShadowColor" value="{{config.exteriorShadowColor}}" data-dtype="String" />
+                <input type="color" value="{{config.exteriorShadowColor}}" data-dtype="String" data-edit="exteriorShadowColor" />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.ExteriorShadowOpacity"}}</label>
             <div class="form-fields">
-                <input type="number" name="exteriorShadowOpacity" value="{{object.exteriorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+                <input type="number" name="exteriorShadowOpacity" value="{{config.exteriorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.ExteriorShadowThickness"}}</label>
             <div class="form-fields">
-                <input type="number" name="exteriorShadowThickness" value="{{object.exteriorShadowThickness}}" data-dtype="Number" />
+                <input type="number" name="exteriorShadowThickness" value="{{config.exteriorShadowThickness}}" data-dtype="Number" />
             </div>
         </div>
         <hr />
         <div class="form-group">
             <label>{{localize "DD.FloorColor"}}</label>
             <div class="form-fields">
-                <input type="text" class="color" name="floorColor" value="{{object.floorColor}}" data-dtype="String" />
-                <input type="color" value="{{object.floorColor}}" data-dtype="String" data-edit="floorColor" />
+                <input type="text" class="color" name="floorColor" value="{{config.floorColor}}" data-dtype="String" />
+                <input type="color" value="{{config.floorColor}}" data-dtype="String" data-edit="floorColor" />
             </div>
         </div>
         <div class="form-group">
@@ -66,86 +76,75 @@
                 <button type="button" class="file-picker" data-type="imagevideo" data-target="floorTexture" title="Browse Files" tabindex="-1">
                     <i class="fas fa-file-import fa-fw"></i>
                 </button>
-                <input class="image" type="text" name="floorTexture" value="{{object.floorTexture}}" data-dtype="String" placeholder="File Path" />
+                <input class="image" type="text" name="floorTexture" value="{{config.floorTexture}}" data-dtype="String" placeholder="File Path" />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.FloorTextureTint"}}</label>
             <div class="form-fields">
-                <input type="text" class="color" name="floorTextureTint" value="{{object.floorTextureTint}}" data-dtype="String" />
-                <input type="color" value="{{object.floorTextureTint}}" data-edit="floorTextureTint" data-dtype="String" />
+                <input type="text" class="color" name="floorTextureTint" value="{{config.floorTextureTint}}" data-dtype="String" />
+                <input type="color" value="{{config.floorTextureTint}}" data-edit="floorTextureTint" data-dtype="String" />
             </div>
         </div>
         <hr />
         <div class="form-group">
             <label>{{localize "DD.InteriorShadowColor"}}</label>
             <div class="form-fields">
-                <input type="text" class="color" name="interiorShadowColor" value="{{object.interiorShadowColor}}" data-dtype="String" />
-                <input type="color" value="{{object.interiorShadowColor}}" data-dtype="String" data-edit="interiorShadowColor" />
+                <input type="text" class="color" name="interiorShadowColor" value="{{config.interiorShadowColor}}" data-dtype="String" />
+                <input type="color" value="{{config.interiorShadowColor}}" data-dtype="String" data-edit="interiorShadowColor" />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.InteriorShadowOpacity"}}</label>
             <div class="form-fields">
-                <input type="number" name="interiorShadowOpacity" value="{{object.interiorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+                <input type="number" name="interiorShadowOpacity" value="{{config.interiorShadowOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.InteriorShadowThickness"}}</label>
             <div class="form-fields">
-                <input type="number" name="interiorShadowThickness" value="{{object.interiorShadowThickness}}" data-dtype="Number" />
+                <input type="number" name="interiorShadowThickness" value="{{config.interiorShadowThickness}}" data-dtype="Number" />
             </div>
         </div>
         <hr />
         <div class="form-group">
             <label>{{localize "DD.SceneBackgroundColor"}}</label>
             <div class="form-fields">
-                <input type="text" class="color" name="sceneBackgroundColor" value="{{object.sceneBackgroundColor}}" data-dtype="String" />
-                <input type="color" value="{{object.sceneBackgroundColor}}" data-dtype="String" data-edit="sceneBackgroundColor" />
+                <input type="text" class="color" name="sceneBackgroundColor" value="{{config.sceneBackgroundColor}}" data-dtype="String" />
+                <input type="color" value="{{config.sceneBackgroundColor}}" data-dtype="String" data-edit="sceneBackgroundColor" />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.SceneGridColor"}}</label>
             <div class="form-fields">
-                <input type="text" class="color" name="sceneGridColor" value="{{object.sceneGridColor}}" data-dtype="String" />
-                <input type="color" value="{{object.sceneGridColor}}" data-dtype="String" data-edit="sceneGridColor" />
+                <input type="text" class="color" name="sceneGridColor" value="{{config.sceneGridColor}}" data-dtype="String" />
+                <input type="color" value="{{config.sceneGridColor}}" data-dtype="String" data-edit="sceneGridColor" />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.SceneGridOpacity"}}</label>
             <div class="form-fields">
-                <input type="number" name="sceneGridOpacity" value="{{object.sceneGridOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
+                <input type="number" name="sceneGridOpacity" value="{{config.sceneGridOpacity}}" data-dtype="Number" min=0 max=1 step=0.05 />
             </div>
         </div>
         <hr />
         <div class="form-group">
             <label>{{localize "DD.WallColor"}}</label>
             <div class="form-fields">
-                <input type="text" class="color" name="wallColor" value="{{object.wallColor}}" data-dtype="String" />
-                <input type="color" value="{{object.wallColor}}" data-dtype="String" data-edit="wallColor" />
+                <input type="text" class="color" name="wallColor" value="{{config.wallColor}}" data-dtype="String" />
+                <input type="color" value="{{config.wallColor}}" data-dtype="String" data-edit="wallColor" />
             </div>
         </div>
         <div class="form-group">
             <label>{{localize "DD.WallThickness"}}</label>
             <div class="form-fields">
-                <input type="text" name="wallThickness" value="{{object.wallThickness}}" data-dtype="Number" />
+                <input type="text" name="wallThickness" value="{{config.wallThickness}}" data-dtype="Number" />
             </div>
         </div>
         <hr />
-        <div class="form-group">
-            <label>{{localize "DD.SaveAsCustomTheme"}}</label>
-            <div class="form-fields">
-                <input type="text" class="saveAsThemeName" name="saveAsThemeName" value="{{saveAsThemeName}}" placeholder='{{localize "DD.ThemeNamePlaceholder"}}' data-dtype="String" />
-                <button type="button" class="dd-save-as-theme-button">
-                    <i class="fas fa-save fa-fw"></i>
-                </button>
-            </div>
-        </div>
-        <br />
-
         <div style="display: flex;">
             <button type="button" name="resetDefault" value="1"><i class="fas fa-sync"></i> {{localize "DD.ResetToDefaults"}}</button>
-            <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "DD.Save"}} </button>
+            <button type="submit" name="submit" value="1"><i class="fas fa-check"></i> {{localize "DD.OK"}} </button>
         </div>
     </div>
 
@@ -154,13 +153,15 @@
         <div class="dd-themes">
           <h2>{{localize "DD.CustomThemes"}}</h2>
           {{#each customThemeKeys as |themeKey|}}
-          <div class="dd-theme-row" data-iscustom="true" data-theme="{{themeKey}}">
+          <div class="dd-theme-row" data-themetype="custom" data-theme="{{themeKey}}">
             <div class="dd-theme-name">
               {{name}} {{#with (lookup ../customThemes themeKey)~}}
                 {{name}}
               {{/with}}  
             </div>
             <div class="dd-theme-controls">
+              <a class="item-control item-edit dd-theme-edit" title='{{localize "DD.EditTheme"}}'><i class="fas fa-edit"></i></a>
+              <a class="item-control item-edit dd-theme-copy" title='{{localize "DD.CopyTheme"}}'><i class="fas fa-copy"></i></a>
               <a class="item-control item-delete dd-theme-delete" title='{{localize "DD.DeleteTheme"}}'><i class="fas fa-trash"></i></a>
             </div>
           </div>

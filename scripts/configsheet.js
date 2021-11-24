@@ -2,21 +2,25 @@ import { Dungeon } from "./dungeon.js";
 import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 import { themes } from "./themes.js";
-
+import { ThemeSheet } from "./themesheet.js";
 
 /**
- * The Application responsible for configuring a single Dungeon document within a parent Scene.
+ * Sheet for dungeon config/settings.
+ * 
  * @extends {FormApplication}
- *
- * @param {Dungeon} dungeon         The Dungeon object being configured
- * @param {object} options          Additional application rendering options
  */
-export class DungeonConfig extends FormApplication {
+export class ConfigSheet extends FormApplication {
+
+  constructor(activeTab = "settings") {
+    super()
+    this._tabs[0].active = activeTab;
+  }
+
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "dungeon-config",
+      id: "dd-config-sheet",
       classes: ["sheet"],
-      template: "modules/dungeon-draw/templates/dungeon-config.html",
+      template: "modules/dungeon-draw/templates/config-sheet.html",
       width: 480,
       height: 770,
       tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "position"}]
@@ -25,12 +29,11 @@ export class DungeonConfig extends FormApplication {
 
   /** @override */
   get title() {
-    const title = "DD.ConfigTitle";
-    return game.i18n.localize(title);
+    return game.i18n.localize("DD.ConfigSheetTitle");
   }
 
   /** @override */
-  getData(options) {
+  getData() {
     let config = canvas.dungeon.dungeon?.state().config;
     if (!config) {
       config = Dungeon.defaultConfig();
@@ -39,10 +42,9 @@ export class DungeonConfig extends FormApplication {
     const customThemeKeys = Object.keys(customThemes).sort();
     const themeKeys = Object.keys(themes).sort();
     return {
+      config,
       customThemes,
       customThemeKeys,
-      object: config,
-      options: this.options,
       themes,
       themeKeys,
     }
@@ -69,6 +71,8 @@ export class DungeonConfig extends FormApplication {
 
   /** @override */
   async _updateObject(event, formData) {
+    // TODO: handle customThemeName vs. config better
+    delete formData.customThemeName;
     canvas.dungeon.dungeon?.setConfig(formData);
   }
 
@@ -93,6 +97,8 @@ export class DungeonConfig extends FormApplication {
     html.find('button[name="resetDefault"]').click(this._onResetDefaults.bind(this));
     html.find('.dd-theme-name').click(this._onThemeNameClick.bind(this));
     html.find('.dd-save-as-theme-button').click(this._onSaveAsThemeClick.bind(this));
+    html.find('.dd-theme-edit').click(this._onEditThemeClick.bind(this));
+    html.find('.dd-theme-copy').click(this._onCopyThemeClick.bind(this));
     html.find('.dd-theme-delete').click(this._onDeleteThemeClick.bind(this));
   }
 
@@ -114,7 +120,7 @@ export class DungeonConfig extends FormApplication {
     event.preventDefault();
     const themeRow = $(event.currentTarget).parent(".dd-theme-row");
     const themeKey = themeRow.data("theme");
-    const isCustom = themeRow.data("iscustom");
+    const isCustom = themeRow.data("themetype") === "custom";
     let theme;
     if (isCustom) {
       const customThemes = this.getCustomThemes();
@@ -140,14 +146,46 @@ export class DungeonConfig extends FormApplication {
     const input = $(event.currentTarget).closest(".form-fields").children(".saveAsThemeName");
     const saveAsThemeName = input.val();
     const formData = this._getSubmitData();
+    // TODO: handle saveAsThemeName better
+    delete formData.saveAsThemeName;
     const customThemes = this.getCustomThemes();
     customThemes[saveAsThemeName] = {
       name: saveAsThemeName,
       config: formData
     };
     this.saveCustomThemes(customThemes);
-    canvas.dungeon.dungeon?.setConfig(formData);
-    canvas.dungeon.dungeon.refresh();
+    this._tabs[0].active = "themes";    
+    this.render();    
+  }
+
+  async _onEditThemeClick(event) {
+    event.preventDefault();
+    const themeRow = $(event.currentTarget).closest(".dd-theme-row");
+    const themeKey = themeRow.data("theme");
+    new ThemeSheet(themeKey).render(true)
+  }
+
+  async _onCopyThemeClick(event) {
+    event.preventDefault();
+    const themeRow = $(event.currentTarget).closest(".dd-theme-row");
+    const themeKey = themeRow.data("theme");
+    const customThemes = this.getCustomThemes();
+    const oldTheme = customThemes[themeKey];
+    const newTheme = JSON.parse(JSON.stringify(oldTheme));
+    // deal with possible name collisions
+    let num = 1;
+    let newName;
+    while (true) {
+      newName = `${oldTheme.name} (${num})`;
+      if (newName in customThemes) {
+        num++;
+      } else {
+        break;        
+      }
+    }
+    newTheme.name = newName;
+    customThemes[newName] = newTheme;
+    this.saveCustomThemes(customThemes);
     this.render();
   }
 
@@ -159,5 +197,5 @@ export class DungeonConfig extends FormApplication {
     delete customThemes[themeKey];
     this.saveCustomThemes(customThemes);
     this.render();
-  }
+  }  
 }
