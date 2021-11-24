@@ -149,14 +149,11 @@ export class Dungeon extends PlaceableObject {
       const contains = wallPoly.contains(doorPoly);
       if (contains) {
         wallsToDelete.push(wall);
-        // TODO: how should we handle coordinate ordering? Does JTS do this for us?
-        // TODO: apparently not, and we have to do the reordering ourselves
-
+        // make sure points are consistently ordered
         const w1 = geo.lesserPoint(wall[0], wall[1], wall[2], wall[3]);
         const w2 = geo.greaterPoint(wall[0], wall[1], wall[2], wall[3]);
         const d1 = geo.lesserPoint(x1, y1, x2, y2);
         const d2 = geo.greaterPoint(x1, y1, x2, y2);
-
         wallsToAdd.push([w1[0], w1[1], d1[0], d1[1]]);
         wallsToAdd.push([d2[0], d2[1], w2[0], w2[1]]);
       }
@@ -180,9 +177,37 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  /**
+   * Split the wall if it's drawn over an existing door.
+   * 
+   * @returns [[x1, y1, x2, y2], ...]
+   */
+  _maybeSplitWall(x1, y1, x2, y2, doors) {
+    // TODO: this logic doesn't handle two doors side by side
+    const wallPoly = geo.twoPointsToLineString(x1, y1, x2, y2);
+    for (let door of doors) {
+      const doorPoly = geo.twoPointsToLineString(door[0], door[1], door[2], door[3]);
+      const contains = wallPoly.contains(doorPoly);
+      if (contains) {
+        // make sure points are consistently ordered
+        const w1 = geo.lesserPoint(x1, y1, x2, y2);
+        const w2 = geo.greaterPoint(x1, y1, x2, y2);
+        const d1 = geo.lesserPoint(door[0], door[1], door[2], door[3]);
+        const d2 = geo.greaterPoint(door[0], door[1], door[2], door[3]);
+        return [
+          [w1[0], w1[1], d1[0], d1[1]],
+          [d2[0], d2[1], w2[0], w2[1]]
+        ];
+      } 
+    }
+    // wall didn't contain any door, so return as-is
+    return [[x1, y1, x2, y2]];
+  }
+
   async addInteriorWall(x1, y1, x2, y2) {
     const newState = this.history[this.historyIndex].clone();
-    newState.interiorWalls.push([x1, y1, x2, y2]);
+    const wallsToAdd = this._maybeSplitWall(x1, y1, x2, y2, newState.doors);
+    newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
     await this.pushState(newState);
   }
 
@@ -232,7 +257,8 @@ export class Dungeon extends PlaceableObject {
         if (coordinates.length > 1 && coordinates.length % 2 === 0) {
           console.log(coordinates);
           for (let i = 0; i < coordinates.length; i+=2) {
-            newState.interiorWalls.push([coordinates[i].x, coordinates[i].y, coordinates[i+1].x, coordinates[i+1].y]);            
+            const wallsToAdd = this._maybeSplitWall(coordinates[i].x, coordinates[i].y, coordinates[i+1].x, coordinates[i+1].y, newState.doors);
+            newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
           }
         }
       } else {
