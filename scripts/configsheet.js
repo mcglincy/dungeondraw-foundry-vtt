@@ -22,7 +22,7 @@ export class ConfigSheet extends FormApplication {
       classes: ["sheet"],
       template: "modules/dungeon-draw/templates/config-sheet.html",
       width: 480,
-      height: 770,
+      height: 820,
       tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "position"}]
     });
   }

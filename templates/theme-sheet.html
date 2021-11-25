@@ -6,7 +6,17 @@
                 <input type="text" class="name" name="themeName" value="{{themeName}}" data-dtype="String" />
             </div>
         </div>
-        <hr />        
+        <hr />
+        <div class="form-group">
+            <label>{{localize "DD.BackgroundImage"}}</label>
+            <div class="form-fields">
+                <button type="button" class="file-picker" data-type="imagevideo" data-target="backgroundImage" title="Browse Files" tabindex="-1">
+                    <i class="fas fa-file-import fa-fw"></i>
+                </button>
+                <input class="image" type="text" name="backgroundImage" value="{{config.backgroundImage}}" data-dtype="String" placeholder="File Path" />
+            </div>
+        </div>
+        <hr />
         <div class="form-group">
             <label>{{localize "DD.DoorColor"}}</label>
             <div class="form-fields">

@@ -6,6 +6,8 @@ import "./lib/jsts.min.js";
 export const render = async (container, state) => {
   container.clear();
 
+  await addBackgroundImage(container, state.config);
+
   const floorGfx = new PIXI.Graphics();
   const interiorShadowGfx = new PIXI.Graphics();
   const wallGfx = new PIXI.Graphics();
@@ -58,8 +60,26 @@ export const render = async (container, state) => {
   container.addChild(wallGfx);
 }
 
+/** Possibly add a background image. */
+const addBackgroundImage = async (container, config) => {
+  if (config.backgroundImage) {
+    // mimicking MapLayer._drawBackground()
+    const texture = await loadTexture(config.backgroundImage);
+    if (texture?.valid) {
+      const d = canvas.dimensions;
+      const bg = new PIXI.Sprite(texture);
+      bg.position.set(d.paddingX - d.shiftX, d.paddingY - d.shiftY);
+      // TODO: should we set the image to the scene dimensions?
+      // should we resize the scene to the image?
+      // bg.width = d.sceneWidth;
+      // bg.height = d.sceneHeight;
+      container.addChild(bg);      
+    }
+  }
+};
+
 /** Add an exterior blurred shadow. */
-export const addExteriorShadow = (container, config, geometry) => {
+const addExteriorShadow = (container, config, geometry) => {
   if (!config.exteriorShadowThickness || !config.exteriorShadowOpacity || !geometry) {
     return;
   }

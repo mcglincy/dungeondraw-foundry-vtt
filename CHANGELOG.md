@@ -1,8 +1,11 @@
+# 0.11.0
+- 
+
 # 0.10.0
 - Add "Save as Custom Theme" to config sheet.
 - Move themes into separate sheet tab.
 - Add ability to edit, copy, and delete custom themes.
-- Split interior walls when adding an interior wall on top of a door (either via Add Interior Wall tool or Add Rectangle tool) .
+- Split interior walls when adding an interior wall on top of a door (either via Add Interior Wall tool or Add Rectangle tool).
 - Tone down interior shadow thickness.
 - Tweak wall thickness for checkerboard and cobblestone themes.
 

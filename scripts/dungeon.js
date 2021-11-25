@@ -13,6 +13,7 @@ export class Dungeon extends PlaceableObject {
 
   static defaultConfig() {
     return {
+      backgroundImage: "",
       doorThickness: 25,
       doorColor: "#000000",
       doorFillColor: "#ffffff",
