@@ -6,6 +6,7 @@ import "./lib/jsts.min.js";
 export const render = async (container, state) => {
   container.clear();
 
+  // maybe add a background image
   await addBackgroundImage(container, state.config);
 
   const floorGfx = new PIXI.Graphics();
@@ -63,16 +64,15 @@ export const render = async (container, state) => {
 /** Possibly add a background image. */
 const addBackgroundImage = async (container, config) => {
   if (config.backgroundImage) {
-    // mimicking MapLayer._drawBackground()
+    // mimicking MapLayer._drawBackground() behavior
     const texture = await loadTexture(config.backgroundImage);
     if (texture?.valid) {
       const d = canvas.dimensions;
       const bg = new PIXI.Sprite(texture);
       bg.position.set(d.paddingX - d.shiftX, d.paddingY - d.shiftY);
-      // TODO: should we set the image to the scene dimensions?
-      // should we resize the scene to the image?
-      // bg.width = d.sceneWidth;
-      // bg.height = d.sceneHeight;
+      // resize the background image to match the scene dimensions
+      bg.width = d.sceneWidth;
+      bg.height = d.sceneHeight;
       container.addChild(bg);      
     }
   }
