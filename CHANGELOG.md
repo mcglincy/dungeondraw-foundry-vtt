@@ -4,6 +4,7 @@
 - Add ability to edit, copy, and delete custom themes.
 - Split interior walls when adding an interior wall on top of a door (either via Add Interior Wall tool or Add Rectangle tool) .
 - Tone down interior shadow thickness.
+- Tweak wall thickness for checkerboard and cobblestone themes.
 
 # 0.9.0
 - Adding a rectangle alongside an existing room/wall will now preserve the interior wall.
