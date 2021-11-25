@@ -244,7 +244,7 @@ const drawPolygonRoom = (floorGfx, interiorShadowGfx, wallGfx, config, poly) => 
   if (config.interiorShadowOpacity) {
     // TODO: don't need to set this multiple times... bubble up?
     interiorShadowGfx.lineStyle({
-      width: config.wallThickness / 2.0 + config.interiorShadowThickness,
+      width: config.interiorShadowThickness,
       color: PIXI.utils.string2hex(config.interiorShadowColor),
       alignment: 1,  // outside
       join: "round"
@@ -289,7 +289,7 @@ const drawInteriorWall = (interiorShadowGfx, wallGfx, config, wall) => {
 const drawInteriorWallShadow = (gfx, config, wall) => {
   gfx.lineStyle({
     // wide enough to be exposed on either side
-    width: config.wallThickness + 2.0 * config.interiorShadowThickness,
+    width: config.wallThickness + config.interiorShadowThickness,
     color: PIXI.utils.string2hex(config.interiorShadowColor),
     alignment: 0.5,  // middle
     join: "round",
@@ -363,7 +363,7 @@ const drawDoorShadow = (gfx, config, door) => {
 
   gfx.lineStyle({
     // wide enough to be exposed on either side
-    width: config.wallThickness + 2.0 * config.interiorShadowThickness,
+    width: config.wallThickness + config.interiorShadowThickness,
     color: PIXI.utils.string2hex(config.interiorShadowColor),
     alignment: 0.5,  // middle
     join: "round"
