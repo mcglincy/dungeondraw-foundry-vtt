@@ -3,6 +3,7 @@
 - Move themes into separate sheet tab.
 - Add ability to edit, copy, and delete custom themes.
 - Split interior walls when adding an interior wall on top of a door (either via Add Interior Wall tool or Add Rectangle tool) .
+- Tone down interior shadow thickness.
 
 # 0.9.0
 - Adding a rectangle alongside an existing room/wall will now preserve the interior wall.
