@@ -13,7 +13,7 @@ export const themes = {
       doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Arc_Pavement_001_basecolor.jpg",
       wallColor: "#111111",
-      wallThickness: 12,        
+      wallThickness: 12,
     })
   },    
   basicBlack: {
@@ -36,7 +36,7 @@ export const themes = {
       doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Stylized_Stone_Floor_002_bw.jpg",
       wallColor: "#2B2D2F",
-      wallThickness: 12,        
+      wallThickness: 12,
     })
   },    
   checkerboard: {
@@ -45,6 +45,7 @@ export const themes = {
       doorFillColor: "#C2BFB0",
       doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/sci_fi_texture_150_by_llexandro_d939vk9.png",
+      wallThickness: 10,
     })
   },
   cobblestone: {
@@ -110,6 +111,7 @@ export const themes = {
       doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Rocks_Hexagons_002_basecolor.jpg",
       wallColor: "#282828",
+      wallThickness: 12,      
     })
   },  
   marble: {
