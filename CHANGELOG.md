@@ -1,5 +1,6 @@
 # 0.11.0
-- 
+- Add backround image to config.
+- Fix bug with scene background color / grid settings not being applied.
 
 # 0.10.0
 - Add "Save as Custom Theme" to config sheet.

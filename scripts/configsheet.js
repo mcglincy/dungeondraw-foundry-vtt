@@ -74,6 +74,14 @@ export class ConfigSheet extends FormApplication {
     // TODO: handle customThemeName vs. config better
     delete formData.customThemeName;
     canvas.dungeon.dungeon?.setConfig(formData);
+    if (game.user.isGM) {
+      // need GM privs to update scene
+      await canvas.scene.update({
+        backgroundColor: formData.sceneBackgroundColor,
+        gridAlpha: formData.sceneGridAlpha,
+        gridColor: formData.sceneGridColor,
+      })
+    }    
   }
 
   /* -------------------------------------------- */
