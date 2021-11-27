@@ -7,7 +7,7 @@ export const render = async (container, state) => {
   container.clear();
   await addBackgroundImage(container, state.config);
   // subfloor render pass, no additional clipping
-  await renderPass(container, state, null);
+  await renderPass(container, state);
   // draw theme-painted floors as additional render passes
   await paintThemes(container, state);
 }
@@ -22,6 +22,7 @@ const paintThemes = async (container, state) => {
     // TODO: hacky way to pass down the theme to paint
     const floorState = state.clone();    
     floorState.config = theme.config;
+    floorState.config.exteriorShadowOpacity = 0.0;  // don't draw additional exterior shadows
 
     // mask for our painted rectangle
     const floorContainer = new PIXI.Container();
@@ -40,14 +41,14 @@ const paintThemes = async (container, state) => {
 
     // render the theme, clipping to our rectangle
     const clipPoly = geo.rectToPolygon(floor.rect);
-    await renderPass(floorContainer, floorState, clipPoly);
+    await renderPass(floorContainer, floorState, {clipPoly});
 
     container.addChild(floorMask);
     container.addChild(floorContainer);
   }
 }
 
-const renderPass = async (container, state, clipPoly) => {
+const renderPass = async (container, state, options={}) => {
   const subfloorGfx = new PIXI.Graphics();
   const floorGfx = new PIXI.Graphics();
   const interiorShadowGfx = new PIXI.Graphics();
@@ -75,7 +76,7 @@ const renderPass = async (container, state, clipPoly) => {
     // maybe add a tiled background
     if (state.config.floorTexture) {
       // TODO: clipMask / clipPoly is confusing. 
-      await addTiledBackground(container, clipMask, state.config, state.geometry, clipPoly);
+      await addTiledBackground(container, clipMask, state.config, state.geometry, options.clipPoly);
     }
 
     // draw the dungeon geometry room(s)
