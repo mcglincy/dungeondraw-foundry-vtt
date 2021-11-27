@@ -298,29 +298,28 @@ export class Dungeon extends PlaceableObject {
   async paintTheme(rect) {
     const oldState = this.history[this.historyIndex];
     const themeKey = getThemePainterThemeKey();
-    console.log(`got themeKey ${themeKey}`);
     // TODO: parse as type.key
     const themeType = "module";
     const newState = oldState.clone();
-    const newFloor = {
+    const newPainting = {
       rect,
       themeKey,
       themeType,
     };
-    newState.floors.push(newFloor);
+    newState.themePaintings.push(newPainting);
     await this.pushState(newState);
   }
 
   // {x:, y:, height:, width:}
   async eraseThemes(rect) {
     const rectPoly = geo.rectToPolygon(rect);
-    const floorsToKeep = this.history[this.historyIndex].floors.filter(f => {
-      const floorPoly = geo.rectToPolygon(f.rect);
-      return !rectPoly.intersects(floorPoly);
+    const paintingsToKeep = this.history[this.historyIndex].themePaintings.filter(p => {
+      const paintingPoly = geo.rectToPolygon(p.rect);
+      return !rectPoly.intersects(paintingPoly);
     });
-    if (floorsToKeep.length != this.history[this.historyIndex].floors.length) {
+    if (paintingsToKeep.length != this.history[this.historyIndex].themePaintings.length) {
       const newState = this.history[this.historyIndex].clone();
-      newState.floors = floorsToKeep;
+      newState.themePaintings = paintingsToKeep;
       await this.pushState(newState);      
     }
   }  

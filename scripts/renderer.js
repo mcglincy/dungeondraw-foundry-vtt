@@ -6,50 +6,49 @@ import { getTheme } from "./themes.js";
 export const render = async (container, state) => {
   container.clear();
   await addBackgroundImage(container, state.config);
-  // subfloor render pass, no additional clipping
+  // floor render pass, no additional clipping
   await renderPass(container, state);
-  // draw theme-painted floors as additional render passes
+  // draw theme-painted areas as additional render passes
   await paintThemes(container, state);
 }
 
 const paintThemes = async (container, state) => {
-  for (let floor of state.floors) {
-    const theme = getTheme(floor.themeKey, floor.themeType);
+  for (let p of state.themePaintings) {
+    const theme = getTheme(p.themeKey, p.themeType);
     if (!theme) {
-      console.log(`No such ${floor.themeType} theme: ${floor.themeKey}`);
+      console.log(`No such ${p.themeType} theme: ${p.themeKey}`);
       return;
     }
     // TODO: hacky way to pass down the theme to paint
-    const floorState = state.clone();    
-    floorState.config = theme.config;
-    floorState.config.exteriorShadowOpacity = 0.0;  // don't draw additional exterior shadows
+    const paintState = state.clone();    
+    paintState.config = theme.config;
+    paintState.config.exteriorShadowOpacity = 0.0;  // don't draw additional exterior shadows
 
     // mask for our painted rectangle
-    const floorContainer = new PIXI.Container();
-    const floorMask = new PIXI.Graphics();
-    const floorCoords = [
-      floor.rect.x, floor.rect.y,
-      floor.rect.x + floor.rect.width, floor.rect.y,
-      floor.rect.x + floor.rect.width, floor.rect.y + floor.rect.height,
-      floor.rect.x, floor.rect.y + floor.rect.height,
-      floor.rect.x, floor.rect.y,
+    const paintContainer = new PIXI.Container();
+    const paintMask = new PIXI.Graphics();
+    const coords = [
+      p.rect.x, p.rect.y,
+      p.rect.x + p.rect.width, p.rect.y,
+      p.rect.x + p.rect.width, p.rect.y + p.rect.height,
+      p.rect.x, p.rect.y + p.rect.height,
+      p.rect.x, p.rect.y,
     ];    
-    floorMask.beginFill(0xFFFFFF, 1.0);
-    floorMask.drawPolygon(floorCoords);
-    floorMask.endFill();
-    floorContainer.mask = floorMask;
+    paintMask.beginFill(0xFFFFFF, 1.0);
+    paintMask.drawPolygon(coords);
+    paintMask.endFill();
+    paintContainer.mask = paintMask;
 
     // render the theme, clipping to our rectangle
-    const clipPoly = geo.rectToPolygon(floor.rect);
-    await renderPass(floorContainer, floorState, {clipPoly});
+    const clipPoly = geo.rectToPolygon(p.rect);
+    await renderPass(paintContainer, paintState, {clipPoly});
 
-    container.addChild(floorMask);
-    container.addChild(floorContainer);
+    container.addChild(paintMask);
+    container.addChild(paintContainer);
   }
 }
 
 const renderPass = async (container, state, options={}) => {
-  const subfloorGfx = new PIXI.Graphics();
   const floorGfx = new PIXI.Graphics();
   const interiorShadowGfx = new PIXI.Graphics();
   const wallGfx = new PIXI.Graphics();
@@ -81,9 +80,9 @@ const renderPass = async (container, state, options={}) => {
 
     // draw the dungeon geometry room(s)
     if (state.geometry instanceof jsts.geom.MultiPolygon) {
-      drawMultiPolygonRoom(subfloorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
+      drawMultiPolygonRoom(floorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
     } else if (state.geometry instanceof jsts.geom.Polygon) {
-      drawPolygonRoom(subfloorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
+      drawPolygonRoom(floorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
     }
   }
 
@@ -98,7 +97,6 @@ const renderPass = async (container, state, options={}) => {
   }
 
   // layer everything properly
-  container.addChild(subfloorGfx);
   container.addChild(floorGfx);
   container.addChild(interiorShadowGfx);
   container.addChild(wallGfx);

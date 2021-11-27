@@ -6,9 +6,9 @@ import { defaultConfig } from "./themes.js";
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
 
-  constructor(geometry, floors, doors, interiorWalls, config) {
+  constructor(geometry, themePaintings, doors, interiorWalls, config) {
     this.geometry = geometry;
-    this.floors = floors,
+    this.themePaintings = themePaintings;
     this.doors = doors;
     this.interiorWalls = interiorWalls;
     this.config = config;
@@ -17,7 +17,7 @@ export class DungeonState {
   clone() {
     return new DungeonState(
       this.geometry ? this.geometry.copy() : null,
-      JSON.parse(JSON.stringify(this.floors)),      
+      JSON.parse(JSON.stringify(this.themePaintings)),      
       JSON.parse(JSON.stringify(this.doors)),
       this.interiorWalls ? [...this.interiorWalls] : [],
       JSON.parse(JSON.stringify(this.config))
@@ -30,8 +30,8 @@ export class DungeonState {
     return JSON.stringify({
       // serialize the geometry object as a WKT string
       wkt: geo.geometryToWkt(this.geometry),
+      themePaintings: this.themePaintings,
       doors: this.doors,
-      floors: this.floors,
       interiorWalls: this.interiorWalls,
       config: this.config,
     });
@@ -44,12 +44,12 @@ export class DungeonState {
     }
     const obj = JSON.parse(s);
     const geometry = geo.wktToGeometry(obj.wkt);
-    const floors = obj.floors ? obj.floors : [];
+    const themePaintings = obj.themePaintings ? obj.themePaintings : [];
     const doors = obj.doors ? obj.doors : [];
     const interiorWalls = obj.interiorWalls ? obj.interiorWalls : [];
     // fill in any new defaults
     const config = foundry.utils.mergeObject(defaultConfig(), obj.config);
-    return new DungeonState(geometry, floors, doors, interiorWalls, config);
+    return new DungeonState(geometry, themePaintings, doors, interiorWalls, config);
   }
 
   /* -------------------------------------------- */  
