@@ -154,20 +154,6 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
-  // {x:, y:, height:, width:}
-  async subtractFloors(rect) {
-    const rectPoly = geo.rectToPolygon(rect);
-    const floorsToKeep = this.history[this.historyIndex].floors.filter(f => {
-      const floorPoly = geo.rectToPolygon(f.rect);
-      return !rectPoly.intersects(floorPoly);
-    });
-    if (floorsToKeep.length != this.history[this.historyIndex].floors.length) {
-      const newState = this.history[this.historyIndex].clone();
-      newState.floors = floorsToKeep;
-      await this.pushState(newState);      
-    }
-  }
-
   /**
    * Split the wall if it's drawn over an existing door.
    * 
@@ -248,7 +234,6 @@ export class Dungeon extends PlaceableObject {
         // TODO: do we need to handle more complicated overlaps, GeometryCollection etc?
         // this coordinate 2-step is flimsy
         if (coordinates.length > 1 && coordinates.length % 2 === 0) {
-          console.log(coordinates);
           for (let i = 0; i < coordinates.length; i+=2) {
             const wallsToAdd = this._maybeSplitWall(coordinates[i].x, coordinates[i].y, coordinates[i+1].x, coordinates[i+1].y, newState.doors);
             newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
@@ -308,17 +293,37 @@ export class Dungeon extends PlaceableObject {
    * @param {Number} rect.y
    * @param {Number} rect.height
    * @param {Number} rect.width
-   * @param {String} themeKey 
-   * @param {String} themeType
    */
-  async addFloor(rect, themeKey, themeType) {
-    const newState = this.history[this.historyIndex].clone();
+  async paintTheme(rect) {
+    const oldState = this.history[this.historyIndex];
+    // maybe type-key as compound value?
+    const themeKey = oldState.config.themePainterTheme;
+    console.log(`got themeKey ${themeKey}`);
+    const themeType = "module";
+    const newState = oldState.clone();
+    //const newState = this.history[this.historyIndex].clone()
     const newFloor = {
       rect,
+      // themeKey: "default",
+      // themeType: "module"
       themeKey,
-      themeType
+      themeType,
     };
     newState.floors.push(newFloor);
     await this.pushState(newState);
   }
+
+  // {x:, y:, height:, width:}
+  async eraseThemes(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const floorsToKeep = this.history[this.historyIndex].floors.filter(f => {
+      const floorPoly = geo.rectToPolygon(f.rect);
+      return !rectPoly.intersects(floorPoly);
+    });
+    if (floorsToKeep.length != this.history[this.historyIndex].floors.length) {
+      const newState = this.history[this.historyIndex].clone();
+      newState.floors = floorsToKeep;
+      await this.pushState(newState);      
+    }
+  }  
 }

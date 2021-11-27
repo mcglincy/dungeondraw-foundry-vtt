@@ -31,6 +31,7 @@ export class DungeonState {
       // serialize the geometry object as a WKT string
       wkt: geo.geometryToWkt(this.geometry),
       doors: this.doors,
+      floors: this.floors,
       interiorWalls: this.interiorWalls,
       config: this.config,
     });

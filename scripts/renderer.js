@@ -4,24 +4,29 @@ import "./lib/jsts.min.js";
 import { getTheme } from "./themes.js";
 
 export const render = async (container, state) => {
+  console.log("===> render");
+  console.log(state);
   container.clear();
   await addBackgroundImage(container, state.config);
   // subfloor render pass, no additional clipping
   await renderPass(container, state, null);
   // draw theme-painted floors as additional render passes
-  await drawFloors(container, state);
+  await paintThemes(container, state);
 }
 
-const drawFloors = async (container, state) => {
+const paintThemes = async (container, state) => {
   for (let floor of state.floors) {
     const theme = getTheme(floor.themeKey, floor.themeType);
     if (!theme) {
+      console.log(`No such ${floor.themeType} theme: ${floor.themeKey}`);
       return;
     }
-
+    console.log(theme);
+    // TODO: hacky way to pass down the theme to paint
     const floorState = state.clone();    
     floorState.config = theme.config;
 
+    // mask for our painted rectangle
     const floorContainer = new PIXI.Container();
     const floorMask = new PIXI.Graphics();
     const floorCoords = [
@@ -36,12 +41,12 @@ const drawFloors = async (container, state) => {
     floorMask.endFill();
     floorContainer.mask = floorMask;
 
+    // render the theme, clipping to our rectangle
     const clipPoly = geo.rectToPolygon(floor.rect);
     await renderPass(floorContainer, floorState, clipPoly);
 
     container.addChild(floorMask);
     container.addChild(floorContainer);
-    // TODO figure out where to make clip mask and set
   }
 }
 

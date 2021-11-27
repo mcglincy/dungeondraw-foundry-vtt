@@ -17,6 +17,19 @@
         </div>
         <hr />
         <div class="form-group">
+            <label>{{localize "DD.ThemePainterTheme"}}</label>
+            <div class="form-fields">
+                <select name="themePainterTheme" data-dtype="string">
+                    {{#select config.themePainterTheme}}
+                        {{#each themes as |themeObj themeKey|}}
+                            <option value="{{themeKey}}">{{themeObj.name}}</option>
+                        {{/each}}
+                    {{/select}}
+                </select>
+            </div>
+        </div>
+        <hr />
+        <div class="form-group">
             <label>{{localize "DD.BackgroundImage"}}</label>
             <div class="form-fields">
                 <button type="button" class="file-picker" data-type="imagevideo" data-target="backgroundImage" title="Browse Files" tabindex="-1">

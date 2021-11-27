@@ -112,11 +112,11 @@ export class DungeonLayer extends PlaceablesLayer {
     data.author = game.user.id;
     // Tool-based settings
     switch ( tool ) {
-      case "addfloor":
       case "addrect":
       case "subtractdoor":
-      case "subtractfloor":
       case "subtractrect":
+      case "themeeraser":
+      case "themepainter":
         data.type = CONST.DRAWING_TYPES.RECTANGLE;
         data.points = [];
         break;
@@ -283,17 +283,7 @@ export class DungeonLayer extends PlaceablesLayer {
         const createData = this.constructor.placeableClass.normalizeShape(data);
 
         // TODO: refactor
-        if (game.activeTool === "addfloor") {
-          const rect = {
-            x: createData.x, 
-            y: createData.y,
-            height: createData.height,
-            width: createData.width
-          };
-          // TODO: need to track selected floor theme
-          // await this.dungeon.addFloor(rect, "default", "module");
-          await this.dungeon.addFloor(rect, "cavern", "module");
-        } else if (game.activeTool === "addpoly") {
+        if (game.activeTool === "addpoly") {
           const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
           await this.dungeon.addPolygon(offsetPoints);
         } else if (game.activeTool === "addrect") {
@@ -312,14 +302,22 @@ export class DungeonLayer extends PlaceablesLayer {
             width: createData.width
           };
           await this.dungeon.subtractDoorsAndInteriorWalls(rect);
-        } else if (game.activeTool === "subtractfloor") {
+        } else if (game.activeTool === "themeeraser") {
           const rect = {
             x: createData.x, 
             y: createData.y,
             height: createData.height,
             width: createData.width
           };
-          await this.dungeon.subtractFloors(rect);
+          await this.dungeon.eraseThemes(rect);
+        } else if (game.activeTool === "themepainter") {
+          const rect = {
+            x: createData.x, 
+            y: createData.y,
+            height: createData.height,
+            width: createData.width
+          };
+          await this.dungeon.paintTheme(rect);          
         } else if (game.activeTool === "subtractrect") {
           const rect = {
             x: createData.x, 

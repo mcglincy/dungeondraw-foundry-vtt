@@ -56,6 +56,8 @@ export class ConfigSheet extends FormApplication {
   async _updateObject(event, formData) {
     // TODO: handle customThemeName vs. config better
     delete formData.customThemeName;
+    console.log("Formdata");
+    console.log(formData);
     canvas.dungeon.dungeon?.setConfig(formData);
     if (game.user.isGM) {
       // need GM privs to update scene

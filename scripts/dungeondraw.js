@@ -116,13 +116,13 @@ export class DungeonDraw {
           icon: "fas fa-window-close",
         },
         {
-          name: "addfloor",
-          title: "DD.ButtonTitleAddFloor",
+          name: "themepainter",
+          title: "DD.ButtonTitleThemePainter",
           icon: "fas fa-brush",
         },
         {
-          name: "subtractfloor",
-          title: "DD.ButtonTitleSubtractFloors",
+          name: "themeeraser",
+          title: "DD.ButtonTitleThemeEraser",
           icon: "fas fa-eraser",
         },        
         {
