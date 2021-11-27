@@ -11,31 +11,6 @@ import * as geo from "./geo-utils.js";
 // TODO: does Dungeon even need to be a PlaceableObject? Or could it just extend PIXI.Container?
 export class Dungeon extends PlaceableObject {
 
-  static defaultConfig() {
-    return {
-      backgroundImage: "",
-      doorThickness: 25,
-      doorColor: "#000000",
-      doorFillColor: "#ffffff",
-      doorFillOpacity: 0.0,
-      exteriorShadowColor: "#000000",
-      exteriorShadowThickness: 20,
-      exteriorShadowOpacity: 0.5,
-      floorColor: "#F2EDDF",
-      floorTexture: "",
-      floorTextureTint: "",
-      interiorShadowColor: "#000000",
-      interiorShadowThickness: 8,
-      interiorShadowOpacity: 0.5,
-      sceneBackgroundColor: "#999999",
-      sceneGridColor: "#000000",
-      sceneGridOpacity: 0.2,
-      wallColor: "#000000",
-      wallThickness: 8,
-    };
-  };
-
-
   // expects JournalEntry for constructor
   constructor(journalEntry, note) {
     // note will be saved as this.document
@@ -165,6 +140,7 @@ export class Dungeon extends PlaceableObject {
     await this.pushState(newState);
   }
 
+  // {x:, y:, height:, width:}
   async subtractDoors(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const doorsToKeep = this.history[this.historyIndex].doors.filter(d => {
@@ -212,6 +188,7 @@ export class Dungeon extends PlaceableObject {
     await this.pushState(newState);
   }
 
+  // {x:, y:, height:, width:}
   async subtractInteriorWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(w => {
@@ -225,6 +202,7 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  // {x:, y:, height:, width:}
   async subtractDoorsAndInteriorWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const oldState = this.history[this.historyIndex];
@@ -278,13 +256,13 @@ export class Dungeon extends PlaceableObject {
     await this.pushState(newState);    
   }
 
-  // {x, y, height, width}
+  // {x:, y:, height:, width:}  
   async addRectangle(rect) {
     const poly = geo.rectToPolygon(rect);
     this._addPoly(poly);
   }
 
-  // {x, y, height, width}
+  // {x:, y:, height:, width:}
   async subtractRectangle(rect) {
     // only makes sense to subtract if we have geometry
     if (!this.history[this.historyIndex].geometry) {
@@ -308,5 +286,25 @@ export class Dungeon extends PlaceableObject {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  /**
+   * @param {Object} rect 
+   * @param {Number} rect.x
+   * @param {Number} rect.y
+   * @param {Number} rect.height
+   * @param {Number} rect.width
+   * @param {String} themeKey 
+   * @param {String} themeType
+   */
+  async addFloor(rect, themeKey, themeType) {
+    const newState = this.history[this.historyIndex].clone();
+    const newFloor = {
+      rect,
+      themeKey,
+      themeType
+    };
+    newState.floors.push(newFloor);
+    await this.pushState(newState);
   }
 }

@@ -2,7 +2,7 @@ import { ConfigSheet } from "./configsheet.js";
 import { Dungeon } from "./dungeon.js";
 import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
-import { themes } from "./themes.js";
+import { getCustomThemes, saveCustomThemes, themes } from "./themes.js";
 
 
 /**
@@ -35,7 +35,7 @@ export class ThemeSheet extends FormApplication {
 
   /** @override */
   getData() {
-    const customThemes = this.getCustomThemes();
+    const customThemes = getCustomThemes();
     const theme = customThemes[this.themeKey];
     return {      
       config: theme.config,
@@ -45,26 +45,9 @@ export class ThemeSheet extends FormApplication {
 
   /* -------------------------------------------- */
 
-  getCustomThemes() {
-    try {
-      const customThemesString = game.settings.get(DungeonDraw.MODULE_NAME, "customThemes");
-      return JSON.parse(customThemesString);
-    } catch(e) {
-      console.log(e);
-      return {};
-    }
-  }
-
-  saveCustomThemes(customThemes) {
-    const themesString = JSON.stringify(customThemes);
-    game.settings.set(DungeonDraw.MODULE_NAME, "customThemes", themesString);
-  }
-
-  /* -------------------------------------------- */
-
   /** @override */
   async _updateObject(event, formData) {
-    const customThemes = this.getCustomThemes();
+    const customThemes = getCustomThemes();
     const themeName = formData.themeName;
     delete formData.themeName;
     // overwrite the theme at our key
@@ -72,7 +55,7 @@ export class ThemeSheet extends FormApplication {
       name: themeName,
       config: formData
     };
-    this.saveCustomThemes(customThemes);
+    saveCustomThemes(customThemes);
     // force already-open config sheet to re-render
     new ConfigSheet("themes").render(true);
   }

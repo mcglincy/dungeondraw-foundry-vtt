@@ -112,8 +112,10 @@ export class DungeonLayer extends PlaceablesLayer {
     data.author = game.user.id;
     // Tool-based settings
     switch ( tool ) {
+      case "addfloor":
       case "addrect":
       case "subtractdoor":
+      case "subtractfloor":
       case "subtractrect":
         data.type = CONST.DRAWING_TYPES.RECTANGLE;
         data.points = [];
@@ -280,7 +282,21 @@ export class DungeonLayer extends PlaceablesLayer {
         preview._chain = false;
         const createData = this.constructor.placeableClass.normalizeShape(data);
 
-        if (game.activeTool === "addrect") {
+        // TODO: refactor
+        if (game.activeTool === "addfloor") {
+          const rect = {
+            x: createData.x, 
+            y: createData.y,
+            height: createData.height,
+            width: createData.width
+          };
+          // TODO: need to track selected floor theme
+          // await this.dungeon.addFloor(rect, "default", "module");
+          await this.dungeon.addFloor(rect, "cavern", "module");
+        } else if (game.activeTool === "addpoly") {
+          const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
+          await this.dungeon.addPolygon(offsetPoints);
+        } else if (game.activeTool === "addrect") {
           const rect = {
             x: createData.x, 
             y: createData.y,
@@ -288,14 +304,6 @@ export class DungeonLayer extends PlaceablesLayer {
             width: createData.width
           };
           await this.dungeon.addRectangle(rect);
-        } else if (game.activeTool === "subtractrect") {
-          const rect = {
-            x: createData.x, 
-            y: createData.y,
-            height: createData.height,
-            width: createData.width
-          };
-          await this.dungeon.subtractRectangle(rect);
         } else if (game.activeTool === "subtractdoor") {
           const rect = {
             x: createData.x, 
@@ -304,9 +312,22 @@ export class DungeonLayer extends PlaceablesLayer {
             width: createData.width
           };
           await this.dungeon.subtractDoorsAndInteriorWalls(rect);
-        } else if (game.activeTool === "addpoly") {
-          const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
-          await this.dungeon.addPolygon(offsetPoints);
+        } else if (game.activeTool === "subtractfloor") {
+          const rect = {
+            x: createData.x, 
+            y: createData.y,
+            height: createData.height,
+            width: createData.width
+          };
+          await this.dungeon.subtractFloor(rect);
+        } else if (game.activeTool === "subtractrect") {
+          const rect = {
+            x: createData.x, 
+            y: createData.y,
+            height: createData.height,
+            width: createData.width
+          };
+          await this.dungeon.subtractRectangle(rect);
         }
       }
 

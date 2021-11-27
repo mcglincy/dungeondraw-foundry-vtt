@@ -116,6 +116,16 @@ export class DungeonDraw {
           icon: "fas fa-window-close",
         },
         {
+          name: "addfloor",
+          title: "DD.ButtonTitleAddFloor",
+          icon: "fas fa-brush",
+        },
+        // {
+        //   name: "subtractfloor",
+        //   title: "DD.ButtonTitleSubtractFloor",
+        //   icon: "fas fa-eraser",
+        // },        
+        {
           name: "undo",
           title: "DD.ButtonTitleUndo",
           icon: "fas fa-undo",

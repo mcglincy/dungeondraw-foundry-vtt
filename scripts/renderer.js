@@ -1,7 +1,7 @@
 import * as geo from "./geo-utils.js";
 import "./lib/pixi-filters.min.js";
 import "./lib/jsts.min.js";
-
+import { getTheme } from "./themes.js";
 
 export const render = async (container, state) => {
   container.clear();
@@ -9,6 +9,39 @@ export const render = async (container, state) => {
   // maybe add a background image
   await addBackgroundImage(container, state.config);
 
+  await renderPass(container, state);
+
+  for (let floor of state.floors) {
+    const theme = getTheme(floor.themeKey, floor.themeType);
+    if (!theme) {
+      return;
+    }
+    const floorContainer = new PIXI.Container();
+    const floorState = state.clone();
+    floorState.config = theme.config;
+    await renderPass(floorContainer, floorState);
+
+    const floorMask = new PIXI.Graphics();
+    const floorCoords = [
+      floor.rect.x, floor.rect.y,
+      floor.rect.x + floor.rect.width, floor.rect.y,
+      floor.rect.x + floor.rect.width, floor.rect.y + floor.rect.height,
+      floor.rect.x, floor.rect.y + floor.rect.height,
+      floor.rect.x, floor.rect.y,
+    ];    
+    floorMask.beginFill(0xFFFFFF, 1.0);
+    floorMask.drawPolygon(floorCoords);
+    floorMask.endFill();
+    floorContainer.mask = floorMask;
+
+    container.addChild(floorMask);
+    container.addChild(floorContainer);
+    // TODO figure out where to make clip mask and set
+  }
+}
+
+const renderPass = async (container, state) => {
+  const subfloorGfx = new PIXI.Graphics();
   const floorGfx = new PIXI.Graphics();
   const interiorShadowGfx = new PIXI.Graphics();
   const wallGfx = new PIXI.Graphics();
@@ -24,7 +57,13 @@ export const render = async (container, state) => {
     } else if (state.geometry instanceof jsts.geom.Polygon) {
       drawPolygonMask(clipMask, state.geometry);
     }
+    // TODO: do we need to add the mask as a child?
     container.addChild(clipMask);
+
+    // floorGfx.mask = clipMask;
+    // for (let floor of state.floors) {
+    //   drawFloor(floorGfx, floor);
+    // }
 
     interiorShadowGfx.mask = clipMask;
     // apply alpha filter once for entire shadow graphics, so overlaps aren't additive
@@ -39,9 +78,9 @@ export const render = async (container, state) => {
 
     // draw the dungeon geometry room(s)
     if (state.geometry instanceof jsts.geom.MultiPolygon) {
-      drawMultiPolygonRoom(floorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
+      drawMultiPolygonRoom(subfloorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
     } else if (state.geometry instanceof jsts.geom.Polygon) {
-      drawPolygonRoom(floorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
+      drawPolygonRoom(subfloorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
     }
   }
 
@@ -56,10 +95,11 @@ export const render = async (container, state) => {
   }
 
   // layer everything properly
+  container.addChild(subfloorGfx);
   container.addChild(floorGfx);
   container.addChild(interiorShadowGfx);
   container.addChild(wallGfx);
-}
+};
 
 /** Possibly add a background image. */
 const addBackgroundImage = async (container, config) => {
@@ -288,6 +328,31 @@ const drawPolygonRoom = (floorGfx, interiorShadowGfx, wallGfx, config, poly) => 
     // draw hole wall poly
     wallGfx.lineStyle(config.wallThickness, PIXI.utils.string2hex(config.wallColor), 1.0);
     wallGfx.drawPolygon(flatCoords);
+  }
+};
+
+/**
+ * 
+ */ 
+const drawFloor = (floorGfx, floor) => {
+  console.log(floor);
+  const theme = getTheme(floor.themeKey, floor.themeType);
+  if (!theme) {
+    console.log(`Non-existent floor theme ${floor.themeKey}, skipping`);
+    return;
+  }
+  const flatCoords = [
+    floor.rect.x, floor.rect.y,
+    floor.rect.x + floor.rect.width, floor.rect.y,
+    floor.rect.x + floor.rect.width, floor.rect.y + floor.rect.height,
+    floor.rect.x, floor.rect.y + floor.rect.height,
+    floor.rect.x, floor.rect.y,
+    ];
+  // TODO: figure out texture
+  if (theme.config.floorColor) {
+    floorGfx.beginFill(PIXI.utils.string2hex(theme.config.floorColor), 1.0);
+    floorGfx.drawPolygon(flatCoords);
+    floorGfx.endFill();    
   }
 };
 
