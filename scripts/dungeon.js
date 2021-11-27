@@ -154,6 +154,20 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  // {x:, y:, height:, width:}
+  async subtractFloors(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const floorsToKeep = this.history[this.historyIndex].floors.filter(f => {
+      const floorPoly = geo.rectToPolygon(f.rect);
+      return !rectPoly.intersects(floorPoly);
+    });
+    if (floorsToKeep.length != this.history[this.historyIndex].floors.length) {
+      const newState = this.history[this.historyIndex].clone();
+      newState.floors = floorsToKeep;
+      await this.pushState(newState);      
+    }
+  }
+
   /**
    * Split the wall if it's drawn over an existing door.
    * 

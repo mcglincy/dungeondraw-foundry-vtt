@@ -5,22 +5,24 @@ import { getTheme } from "./themes.js";
 
 export const render = async (container, state) => {
   container.clear();
-
-  // maybe add a background image
   await addBackgroundImage(container, state.config);
+  // subfloor render pass, no additional clipping
+  await renderPass(container, state, null);
+  // draw theme-painted floors as additional render passes
+  await drawFloors(container, state);
+}
 
-  await renderPass(container, state);
-
+const drawFloors = async (container, state) => {
   for (let floor of state.floors) {
     const theme = getTheme(floor.themeKey, floor.themeType);
     if (!theme) {
       return;
     }
-    const floorContainer = new PIXI.Container();
-    const floorState = state.clone();
-    floorState.config = theme.config;
-    await renderPass(floorContainer, floorState);
 
+    const floorState = state.clone();    
+    floorState.config = theme.config;
+
+    const floorContainer = new PIXI.Container();
     const floorMask = new PIXI.Graphics();
     const floorCoords = [
       floor.rect.x, floor.rect.y,
@@ -34,13 +36,16 @@ export const render = async (container, state) => {
     floorMask.endFill();
     floorContainer.mask = floorMask;
 
+    const clipPoly = geo.rectToPolygon(floor.rect);
+    await renderPass(floorContainer, floorState, clipPoly);
+
     container.addChild(floorMask);
     container.addChild(floorContainer);
     // TODO figure out where to make clip mask and set
   }
 }
 
-const renderPass = async (container, state) => {
+const renderPass = async (container, state, clipPoly) => {
   const subfloorGfx = new PIXI.Graphics();
   const floorGfx = new PIXI.Graphics();
   const interiorShadowGfx = new PIXI.Graphics();
@@ -57,13 +62,7 @@ const renderPass = async (container, state) => {
     } else if (state.geometry instanceof jsts.geom.Polygon) {
       drawPolygonMask(clipMask, state.geometry);
     }
-    // TODO: do we need to add the mask as a child?
     container.addChild(clipMask);
-
-    // floorGfx.mask = clipMask;
-    // for (let floor of state.floors) {
-    //   drawFloor(floorGfx, floor);
-    // }
 
     interiorShadowGfx.mask = clipMask;
     // apply alpha filter once for entire shadow graphics, so overlaps aren't additive
@@ -73,7 +72,8 @@ const renderPass = async (container, state) => {
 
     // maybe add a tiled background
     if (state.config.floorTexture) {
-      await addTiledBackground(container, clipMask, state.config, state.geometry);
+      // TODO: clipMask / clipPoly is confusing. 
+      await addTiledBackground(container, clipMask, state.config, state.geometry, clipPoly);
     }
 
     // draw the dungeon geometry room(s)
@@ -146,7 +146,7 @@ const addExteriorShadowForPoly = (container, config, poly) => {
 }
 
 /** Add TilingSprites for floor texture. */
-const addTiledBackground = async (container, mask, config, geometry) => {
+const addTiledBackground = async (container, mask, config, geometry, clipPoly) => {
   const texture = await loadTexture(config.floorTexture);
   if (!texture?.valid) {
     return;
@@ -171,7 +171,11 @@ const addTiledBackground = async (container, mask, config, geometry) => {
         [col * textureSize, (row + 1) * textureSize],
         [col * textureSize, row * textureSize],
       ]);
-      if (geometry.intersects(rect) && !geometry.touches(rect)) {
+      if (
+        (!clipPoly || clipPoly.intersects(rect)) &&
+        geometry.intersects(rect) && 
+        !geometry.touches(rect)
+        ) {
         const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
         sprite.x = col * textureSize;
         sprite.y = row * textureSize;

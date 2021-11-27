@@ -120,11 +120,11 @@ export class DungeonDraw {
           title: "DD.ButtonTitleAddFloor",
           icon: "fas fa-brush",
         },
-        // {
-        //   name: "subtractfloor",
-        //   title: "DD.ButtonTitleSubtractFloor",
-        //   icon: "fas fa-eraser",
-        // },        
+        {
+          name: "subtractfloor",
+          title: "DD.ButtonTitleSubtractFloors",
+          icon: "fas fa-eraser",
+        },        
         {
           name: "undo",
           title: "DD.ButtonTitleUndo",

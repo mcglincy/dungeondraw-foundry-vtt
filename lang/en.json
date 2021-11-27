@@ -11,7 +11,7 @@
   "DD.ButtonTitleRedo": "Redo",
   "DD.ButtonTitleSelect": "Select",
   "DD.ButtonTitleSubtractDoorsAndWalls": "Remove Interior Walls and Doors",
-  "DD.ButtonTitleSubtractFloor": "Subtract Floor",
+  "DD.ButtonTitleSubtractFloors": "Remove Floors",
   "DD.ButtonTitleSubtractRect": "Remove Rectangles",
   "DD.ButtonTitleUndo": "Undo",
   "DD.ConfigSheetTitle": "Dungeon Config",

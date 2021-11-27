@@ -319,7 +319,7 @@ export class DungeonLayer extends PlaceablesLayer {
             height: createData.height,
             width: createData.width
           };
-          await this.dungeon.subtractFloor(rect);
+          await this.dungeon.subtractFloors(rect);
         } else if (game.activeTool === "subtractrect") {
           const rect = {
             x: createData.x, 
