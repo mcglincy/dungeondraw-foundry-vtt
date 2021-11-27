@@ -44,10 +44,18 @@ export const getCustomThemes = () => {
   }
 };
 
-export const saveCustomThemes = (customThemes) => {
+export const setCustomThemes = (customThemes) => {
   const themesString = JSON.stringify(customThemes);
   game.settings.set(DungeonDraw.MODULE_NAME, "customThemes", themesString);
 };
+
+export const getThemePainterThemeKey = () => {
+  return game.settings.get(DungeonDraw.MODULE_NAME, DungeonDraw.SETTING_THEME_PAINTER_THEME);
+}
+
+export const setThemePainterThemeKey = (themeKey) => {
+  return game.settings.set(DungeonDraw.MODULE_NAME, DungeonDraw.SETTING_THEME_PAINTER_THEME, themeKey);
+}
 
 export const themes = {
   default: {

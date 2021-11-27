@@ -6,6 +6,8 @@ export class DungeonDraw {
   // module name from module.json
   static MODULE_NAME = "dungeon-draw"
 
+  static SETTING_THEME_PAINTER_THEME = "themePainterTheme";
+
   static init() {
     console.log("***** DUNGEON DRAW *****");
     game.settings.register(DungeonDraw.MODULE_NAME, "releaseNotesVersion", {
@@ -22,6 +24,13 @@ export class DungeonDraw {
         type: String,
         config: false
     });
+    game.settings.register(DungeonDraw.MODULE_NAME, DungeonDraw.SETTING_THEME_PAINTER_THEME, {
+        name: "Theme painter theme key.",
+        scope: "client",
+        default: "default",
+        type: String,
+        config: false
+    });    
   }
 
   static ready() {

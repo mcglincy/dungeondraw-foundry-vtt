@@ -3,6 +3,7 @@ import { DungeonLayer } from "./dungeonlayer.js";
 import { DungeonState } from "./dungeonstate.js";
 import { render } from "./renderer.js";
 import * as geo from "./geo-utils.js";
+import { getThemePainterThemeKey } from "./themes.js";
 
 
 /**
@@ -296,16 +297,13 @@ export class Dungeon extends PlaceableObject {
    */
   async paintTheme(rect) {
     const oldState = this.history[this.historyIndex];
-    // maybe type-key as compound value?
-    const themeKey = oldState.config.themePainterTheme;
+    const themeKey = getThemePainterThemeKey();
     console.log(`got themeKey ${themeKey}`);
+    // TODO: parse as type.key
     const themeType = "module";
     const newState = oldState.clone();
-    //const newState = this.history[this.historyIndex].clone()
     const newFloor = {
       rect,
-      // themeKey: "default",
-      // themeType: "module"
       themeKey,
       themeType,
     };

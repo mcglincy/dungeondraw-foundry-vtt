@@ -1,7 +1,7 @@
 import { Dungeon } from "./dungeon.js";
 import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
-import { defaultConfig, getCustomThemes, saveCustomThemes, themes } from "./themes.js";
+import { defaultConfig, getCustomThemes, getThemePainterThemeKey, setCustomThemes, setThemePainterThemeKey, themes } from "./themes.js";
 import { ThemeSheet } from "./themesheet.js";
 
 /**
@@ -41,12 +41,14 @@ export class ConfigSheet extends FormApplication {
     const customThemes = getCustomThemes();
     const customThemeKeys = Object.keys(customThemes).sort();
     const themeKeys = Object.keys(themes).sort();
+    const themePainterThemeKey = getThemePainterThemeKey();
     return {
       config,
       customThemes,
       customThemeKeys,
       themes,
       themeKeys,
+      themePainterThemeKey
     }
   }
 
@@ -56,8 +58,7 @@ export class ConfigSheet extends FormApplication {
   async _updateObject(event, formData) {
     // TODO: handle customThemeName vs. config better
     delete formData.customThemeName;
-    console.log("Formdata");
-    console.log(formData);
+    delete formData.themePainterTheme;
     canvas.dungeon.dungeon?.setConfig(formData);
     if (game.user.isGM) {
       // need GM privs to update scene
@@ -93,6 +94,7 @@ export class ConfigSheet extends FormApplication {
     html.find('.dd-theme-edit').click(this._onEditThemeClick.bind(this));
     html.find('.dd-theme-copy').click(this._onCopyThemeClick.bind(this));
     html.find('.dd-theme-delete').click(this._onDeleteThemeClick.bind(this));
+    html.find('select[name="themePainterThemeKey"]').change(this._onThemePainterThemeSelect.bind(this));
   }
 
   /* -------------------------------------------- */
@@ -141,12 +143,13 @@ export class ConfigSheet extends FormApplication {
     const formData = this._getSubmitData();
     // TODO: handle saveAsThemeName better
     delete formData.saveAsThemeName;
+    delete formData.themePainterThemeKey;
     const customThemes = getCustomThemes();
     customThemes[saveAsThemeName] = {
       name: saveAsThemeName,
       config: formData
     };
-    saveCustomThemes(customThemes);
+    setCustomThemes(customThemes);
     this._tabs[0].active = "themes";    
     this.render();    
   }
@@ -158,7 +161,7 @@ export class ConfigSheet extends FormApplication {
     new ThemeSheet(themeKey).render(true)
   }
 
-  async _onCopyThemeClick(event) {
+  _onCopyThemeClick(event) {
     event.preventDefault();
     const themeRow = $(event.currentTarget).closest(".dd-theme-row");
     const themeKey = themeRow.data("theme");
@@ -178,17 +181,22 @@ export class ConfigSheet extends FormApplication {
     }
     newTheme.name = newName;
     customThemes[newName] = newTheme;
-    saveCustomThemes(customThemes);
+    setCustomThemes(customThemes);
     this.render();
   }
 
-  async _onDeleteThemeClick(event) {
+  _onDeleteThemeClick(event) {
     event.preventDefault();
     const themeRow = $(event.currentTarget).closest(".dd-theme-row");
     const themeKey = themeRow.data("theme");
     const customThemes = getCustomThemes();
     delete customThemes[themeKey];
-    saveCustomThemes(customThemes);
+    setCustomThemes(customThemes);
     this.render();
-  }  
+  } 
+
+  _onThemePainterThemeSelect(event) {
+    const themeKey = $(event.currentTarget).val();
+    setThemePainterThemeKey(themeKey);
+  } 
 }

@@ -4,8 +4,6 @@ import "./lib/jsts.min.js";
 import { getTheme } from "./themes.js";
 
 export const render = async (container, state) => {
-  console.log("===> render");
-  console.log(state);
   container.clear();
   await addBackgroundImage(container, state.config);
   // subfloor render pass, no additional clipping
@@ -21,7 +19,6 @@ const paintThemes = async (container, state) => {
       console.log(`No such ${floor.themeType} theme: ${floor.themeKey}`);
       return;
     }
-    console.log(theme);
     // TODO: hacky way to pass down the theme to paint
     const floorState = state.clone();    
     floorState.config = theme.config;

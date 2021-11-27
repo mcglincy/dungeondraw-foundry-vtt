@@ -2,7 +2,7 @@ import { ConfigSheet } from "./configsheet.js";
 import { Dungeon } from "./dungeon.js";
 import { DungeonDraw } from "./dungeondraw.js";
 import { DungeonLayer } from "./dungeonlayer.js";
-import { getCustomThemes, saveCustomThemes, themes } from "./themes.js";
+import { getCustomThemes, setCustomThemes, themes } from "./themes.js";
 
 
 /**
@@ -55,7 +55,7 @@ export class ThemeSheet extends FormApplication {
       name: themeName,
       config: formData
     };
-    saveCustomThemes(customThemes);
+    setCustomThemes(customThemes);
     // force already-open config sheet to re-render
     new ConfigSheet("themes").render(true);
   }
