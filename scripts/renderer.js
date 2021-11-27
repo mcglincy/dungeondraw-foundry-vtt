@@ -14,12 +14,13 @@ export const render = async (container, state) => {
 
 const paintThemes = async (container, state) => {
   for (let p of state.themePaintings) {
-    const theme = getTheme(p.themeKey, p.themeType);
+    console.log(p);
+    const theme = getTheme(p.themeKey);
     if (!theme) {
       console.log(`No such ${p.themeType} theme: ${p.themeKey}`);
       return;
     }
-    // TODO: hacky way to pass down the theme to paint
+    // TODO: hacky way to pass down the actual theme to paint
     const paintState = state.clone();    
     paintState.config = theme.config;
     paintState.config.exteriorShadowOpacity = 0.0;  // don't draw additional exterior shadows
@@ -74,7 +75,7 @@ const renderPass = async (container, state, options={}) => {
 
     // maybe add a tiled background
     if (state.config.floorTexture) {
-      // TODO: clipMask / clipPoly is confusing. 
+      // TODO: having both clipMask / clipPoly parameters is confusing. 
       await addTiledBackground(container, clipMask, state.config, state.geometry, options.clipPoly);
     }
 
@@ -340,7 +341,6 @@ const drawPolygonRoom = (floorGfx, interiorShadowGfx, wallGfx, config, poly) => 
  * 
  */ 
 const drawFloor = (floorGfx, floor) => {
-  console.log(floor);
   const theme = getTheme(floor.themeKey, floor.themeType);
   if (!theme) {
     console.log(`Non-existent floor theme ${floor.themeKey}, skipping`);

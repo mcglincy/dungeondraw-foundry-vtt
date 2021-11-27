@@ -298,13 +298,10 @@ export class Dungeon extends PlaceableObject {
   async paintTheme(rect) {
     const oldState = this.history[this.historyIndex];
     const themeKey = getThemePainterThemeKey();
-    // TODO: parse as type.key
-    const themeType = "module";
     const newState = oldState.clone();
     const newPainting = {
       rect,
       themeKey,
-      themeType,
     };
     newState.themePaintings.push(newPainting);
     await this.pushState(newState);

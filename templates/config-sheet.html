@@ -203,9 +203,16 @@
             <div class="form-fields">
                 <select name="themePainterThemeKey" data-dtype="string">
                     {{#select themePainterThemeKey}}
-                        {{#each themes as |themeObj themeKey|}}
-                            <option value="{{themeKey}}">{{themeObj.name}}</option>
-                        {{/each}}
+                      {{#each customThemeKeys as |themeKey|}}
+                          {{name}} {{#with (lookup ../customThemes themeKey)~}}
+                            <option value="custom.{{themeKey}}">{{name}}</option>
+                          {{/with}}   
+                      {{/each}}                    
+                      {{#each themeKeys as |themeKey|}}
+                          {{name}} {{#with (lookup ../themes themeKey)~}}
+                            <option value="module.{{themeKey}}">{{name}}</option>
+                          {{/with}}   
+                      {{/each}}                    
                     {{/select}}
                 </select>
             </div>

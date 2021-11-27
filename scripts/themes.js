@@ -26,12 +26,15 @@ export const defaultConfig = () => {
   };
 };
 
-export const getTheme = (themeKey, themeType) => {
-  if (themeType === "custom") {
+export const getTheme = (themeKey) => {  
+  const splits = themeKey.split(".");
+  const type = splits[0];
+  const key = splits[1];
+  if (type === "custom") {
     const customThemes = getCustomThemes();
-    return customThemes[themeKey];
+    return customThemes[key];
   }
-  return themes[themeKey];
+  return themes[key];
 };
 
 export const getCustomThemes = () => {
