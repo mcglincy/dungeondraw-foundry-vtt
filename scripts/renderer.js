@@ -337,30 +337,6 @@ const drawPolygonRoom = (floorGfx, interiorShadowGfx, wallGfx, config, poly) => 
   }
 };
 
-/**
- * 
- */ 
-const drawFloor = (floorGfx, floor) => {
-  const theme = getTheme(floor.themeKey, floor.themeType);
-  if (!theme) {
-    console.log(`Non-existent floor theme ${floor.themeKey}, skipping`);
-    return;
-  }
-  const flatCoords = [
-    floor.rect.x, floor.rect.y,
-    floor.rect.x + floor.rect.width, floor.rect.y,
-    floor.rect.x + floor.rect.width, floor.rect.y + floor.rect.height,
-    floor.rect.x, floor.rect.y + floor.rect.height,
-    floor.rect.x, floor.rect.y,
-    ];
-  // TODO: figure out texture
-  if (theme.config.floorColor) {
-    floorGfx.beginFill(PIXI.utils.string2hex(theme.config.floorColor), 1.0);
-    floorGfx.drawPolygon(flatCoords);
-    floorGfx.endFill();    
-  }
-};
-
 // [x1, y1, x2, y2]
 const drawInteriorWall = (interiorShadowGfx, wallGfx, config, wall) => {
   drawInteriorWallShadow(interiorShadowGfx, config, wall);
