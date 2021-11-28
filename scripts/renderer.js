@@ -135,7 +135,7 @@ const addExteriorShadow = (container, config, geometry) => {
       const poly = geometry.getGeometryN(i);      
       addExteriorShadowForPoly(container, config, poly);
     }
-  } else if (state.geometry instanceof jsts.geom.Polygon) {
+  } else if (geometry instanceof jsts.geom.Polygon) {
     addExteriorShadowForPoly(container, config, geometry);
   }
 }
