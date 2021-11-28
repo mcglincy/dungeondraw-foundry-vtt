@@ -20,7 +20,6 @@ export const defaultConfig = () => {
     sceneBackgroundColor: "#999999",
     sceneGridColor: "#000000",
     sceneGridOpacity: 0.2,
-    themePainterTheme: "default",
     wallColor: "#000000",
     wallThickness: 8,
   };

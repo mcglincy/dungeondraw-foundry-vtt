@@ -14,7 +14,6 @@ export const render = async (container, state) => {
 
 const paintThemes = async (container, state) => {
   for (let p of state.themePaintings) {
-    console.log(p);
     const theme = getTheme(p.themeKey);
     if (!theme) {
       console.log(`No such ${p.themeType} theme: ${p.themeKey}`);
@@ -22,7 +21,17 @@ const paintThemes = async (container, state) => {
     }
     // TODO: hacky way to pass down the actual theme to paint
     const paintState = state.clone();    
+    // TODO: how should we deal with different wall thicknesses, door colors, etc
+    // which look jarring/off when two different themes meet up
     paintState.config = theme.config;
+    // TODO: for now, just keep certain values from the main state config,
+    // so the dungeon walls etc look consistent at meet up areas
+    paintState.config.doorColor = state.config.doorColor;
+    paintState.config.doorFillColor = state.config.doorFillColor;
+    paintState.config.doorFillOpacity = state.config.doorFillOpacity;
+    paintState.config.doorThickness = state.config.doorThickness;
+    paintState.config.wallColor = state.config.wallColor;
+    paintState.config.wallThickness = state.config.wallThickness;
     paintState.config.exteriorShadowOpacity = 0.0;  // don't draw additional exterior shadows
 
     // mask for our painted rectangle
