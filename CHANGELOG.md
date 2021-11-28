@@ -1,6 +1,9 @@
 # 0.11.0
-- Add backround image to config.
+- Add background image to config.
+- Add theme painter / eraser tool.
+- Change default theme doors to 1.0 opacity.
 - Fix bug with scene background color / grid settings not being applied.
+- Fix exterior shadow oddities appearing for complicated geometry.
 
 # 0.10.0
 - Add "Save as Custom Theme" to config sheet.

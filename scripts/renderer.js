@@ -134,20 +134,14 @@ const addExteriorShadow = (container, config, geometry) => {
   if (!config.exteriorShadowThickness || !config.exteriorShadowOpacity || !geometry) {
     return;
   }
-  if (geometry instanceof jsts.geom.MultiPolygon) {
-    for (let i = 0; i < geometry.getNumGeometries(); i++) {
-      const poly = geometry.getGeometryN(i);
-      addExteriorShadowForPoly(container, config, poly);
-    }
-  } else if (geometry instanceof jsts.geom.Polygon) {
-    addExteriorShadowForPoly(container, config, geometry);
-  }
+  addExteriorShadowForPoly(container, config, geometry);
 }
 
 /** Add an exterior blurred shadow for the given polygon. */
 const addExteriorShadowForPoly = (container, config, poly) => {
   const outerShadow = new PIXI.Graphics();
-  const expanded = poly.buffer(config.exteriorShadowThickness);
+  // normalize the expanded buffer to remove any oddities
+  const expanded = poly.buffer(config.exteriorShadowThickness).norm();
   outerShadow.beginFill(PIXI.utils.string2hex(config.exteriorShadowColor), config.exteriorShadowOpacity);
   outerShadow.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
   outerShadow.endFill();

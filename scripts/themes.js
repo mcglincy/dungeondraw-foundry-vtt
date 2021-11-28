@@ -7,7 +7,7 @@ export const defaultConfig = () => {
     doorThickness: 25,
     doorColor: "#000000",
     doorFillColor: "#ffffff",
-    doorFillOpacity: 0.0,
+    doorFillOpacity: 1.0,
     exteriorShadowColor: "#000000",
     exteriorShadowThickness: 20,
     exteriorShadowOpacity: 0.5,
@@ -68,8 +68,6 @@ export const themes = {
     name: "Arc Pavement",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#111111",
-      doorFillColor: "#FFFFFF",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Arc_Pavement_001_basecolor.jpg",
       wallColor: "#111111",
       wallThickness: 12,
@@ -79,6 +77,7 @@ export const themes = {
     name: "Basic Black",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#0D0D0D",
+      doorFillOpacity: 0.0,
       exteriorShadowOpacity: 0,
       interiorShadowOpacity: 0,
       floorColor: "#FFFFFF",
@@ -91,8 +90,6 @@ export const themes = {
     name: "Cavern",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#2B2D2F",
-      doorFillColor: "#FFFFFF",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Stylized_Stone_Floor_002_bw.jpg",
       wallColor: "#2B2D2F",
       wallThickness: 12,
@@ -102,7 +99,6 @@ export const themes = {
     name: "Checkerboard",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorFillColor: "#C2BFB0",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/sci_fi_texture_150_by_llexandro_d939vk9.png",
       wallThickness: 10,
     })
@@ -112,7 +108,6 @@ export const themes = {
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#222222",
       doorFillColor: "#FFFFFF",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Cobblestone_001_Color.jpg",
       wallColor: "#222222",
       wallThickness: 12,        
@@ -123,7 +118,6 @@ export const themes = {
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#1a1714",
       doorFillColor: "#8d7862",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Ground_Dirt_007_basecolor.jpg",
       wallColor: "#1a1714",
       wallThickness: 10,
@@ -133,8 +127,6 @@ export const themes = {
     name: "Dungeon Squares",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#111111",
-      doorFillColor: "#FFFFFF",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/outdoor+stone+tiles+pavement.jpg",
       wallColor: "#111111",
       wallThickness: 12,        
@@ -145,7 +137,6 @@ export const themes = {
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#72471d",
       doorFillColor: "#eee8c1",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Grass_001_COLOR.jpg",
       wallColor: "#72471d",
       wallThickness: 10,      
@@ -155,8 +146,6 @@ export const themes = {
     name: "Groovy Carpet",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#2B2D2F",
-      doorFillColor: "#FFFFFF",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Fabric_Rug_006_basecolor.jpg",
       wallColor: "#2B2D2F",
       wallThickness: 12,        
@@ -167,7 +156,6 @@ export const themes = {
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#282828",
       doorFillColor: "#D1BD8A",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Rocks_Hexagons_002_basecolor.jpg",
       wallColor: "#282828",
       wallThickness: 12,      
@@ -177,8 +165,6 @@ export const themes = {
     name: "Marble",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#686882",
-      doorFillColor: "#FFFFFF",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Marble_Tiles_001_basecolor.jpg",
       wallColor: "#686882",
     })
@@ -188,7 +174,6 @@ export const themes = {
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#27251A",
       doorFillColor: "#AAAAAA",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Sci-fi_Floor_002_basecolor.jpg",
       wallColor: "#27251A",
     })
@@ -197,7 +182,6 @@ export const themes = {
     name: "Metal Squares",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorFillColor: "#C0C0C0",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/sci_fi_texture_212_by_llexandro_dcuxgum.png",
     })
   },
@@ -205,6 +189,7 @@ export const themes = {
     name: "Moldvay Blue",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#3A9FF2",
+      doorFillOpacity: 0.0,      
       doorThickness: 35,
       exteriorShadowOpacity: 0,
       floorColor: "#FFFFFF",
@@ -219,6 +204,7 @@ export const themes = {
     name: "Neon Blueprint",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#3A9FF2",
+      doorFillOpacity: 0.0,      
       doorThickness: 35,
       exteriorShadowColor: "#18495E",
       floorColor: "#142A3B",
@@ -235,7 +221,6 @@ export const themes = {
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#913B55",
       doorFillColor: "#FADEE6",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Paper_Recycled_001_COLOR.jpg",
       floorTextureTint: "#F9FAE6",
       exteriorShadowOpacity: 0,
@@ -250,8 +235,6 @@ export const themes = {
     name: "Water",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#203246",
-      doorFillColor: "#FFFFFF",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Water_001_COLOR.jpg",
       wallColor: "#203246",
       wallThickness: 5,
@@ -261,8 +244,6 @@ export const themes = {
     name: "Wood Planks",
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#332211",
-      doorFillColor: "#FFFFFF",
-      doorFillOpacity: 1.0, 
       floorTexture: "modules/dungeon-draw/assets/textures/Old_Wooden_Plank_Seamless_Texture_765.jpg",
       wallColor: "#332211",
       wallThickness: 10,
