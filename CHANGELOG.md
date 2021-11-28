@@ -1,7 +1,9 @@
 # 0.11.0
-- Add background image to config.
-- Add theme painter / eraser tool.
-- Change default theme doors to 1.0 opacity.
+- Add theme painter / eraser tool, that allows adding "theme areas" on top of the main map theme.
+- Rename config window tabs: Map Config, Themes, Theme painter.
+- Add current theme painter theme select to config window.
+- Add optional background image to map config.
+- Change default theme to 1.0 opacity doors.
 - Fix bug with scene background color / grid settings not being applied.
 - Fix exterior shadow oddities appearing for complicated geometry.
 
