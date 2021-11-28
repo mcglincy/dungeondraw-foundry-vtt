@@ -9,54 +9,54 @@ export const render = async (container, state) => {
   // floor render pass, no additional clipping
   await renderPass(container, state);
   // draw theme-painted areas as additional render passes
-  await paintThemes(container, state);
+  await drawThemeAreas(container, state);
 }
 
-const paintThemes = async (container, state) => {
-  for (let p of state.themePaintings) {
-    const theme = getTheme(p.themeKey);
+const drawThemeAreas = async (container, state) => {
+  for (let area of state.themeAreas) {
+    const theme = getTheme(area.themeKey);
     if (!theme) {
-      console.log(`No such ${p.themeType} theme: ${p.themeKey}`);
-      return;
+      console.log(`No such ${area.themeType} theme: ${area.themeKey}`);
+      continue;
     }
     // TODO: hacky way to pass down the actual theme to paint
-    const paintState = state.clone();    
+    const areaState = state.clone();    
     // TODO: how should we deal with different wall thicknesses, door colors, etc
     // which look jarring/off when two different themes meet up
-    paintState.config = theme.config;
+    areaState.config = theme.config;
     // TODO: for now, just keep certain values from the main state config,
     // so the dungeon walls etc look consistent at meet up areas
-    paintState.config.doorColor = state.config.doorColor;
-    paintState.config.doorFillColor = state.config.doorFillColor;
-    paintState.config.doorFillOpacity = state.config.doorFillOpacity;
-    paintState.config.doorThickness = state.config.doorThickness;
-    paintState.config.wallColor = state.config.wallColor;
-    paintState.config.wallThickness = state.config.wallThickness;
-    paintState.config.exteriorShadowOpacity = 0.0;  // don't draw additional exterior shadows
+    areaState.config.doorColor = state.config.doorColor;
+    areaState.config.doorFillColor = state.config.doorFillColor;
+    areaState.config.doorFillOpacity = state.config.doorFillOpacity;
+    areaState.config.doorThickness = state.config.doorThickness;
+    areaState.config.wallColor = state.config.wallColor;
+    areaState.config.wallThickness = state.config.wallThickness;
+    areaState.config.exteriorShadowOpacity = 0.0;  // don't draw additional exterior shadows
 
-    // mask for our painted rectangle
-    const paintContainer = new PIXI.Container();
-    const paintMask = new PIXI.Graphics();
+    // mask for our area rectangle
+    const areaContainer = new PIXI.Container();
+    const areaMask = new PIXI.Graphics();
     const coords = [
-      p.rect.x, p.rect.y,
-      p.rect.x + p.rect.width, p.rect.y,
-      p.rect.x + p.rect.width, p.rect.y + p.rect.height,
-      p.rect.x, p.rect.y + p.rect.height,
-      p.rect.x, p.rect.y,
+      area.rect.x, area.rect.y,
+      area.rect.x + area.rect.width, area.rect.y,
+      area.rect.x + area.rect.width, area.rect.y + area.rect.height,
+      area.rect.x, area.rect.y + area.rect.height,
+      area.rect.x, area.rect.y,
     ];    
-    paintMask.beginFill(0xFFFFFF, 1.0);
-    paintMask.drawPolygon(coords);
-    paintMask.endFill();
-    paintContainer.mask = paintMask;
+    areaMask.beginFill(0xFFFFFF, 1.0);
+    areaMask.drawPolygon(coords);
+    areaMask.endFill();
+    areaContainer.mask = areaMask;
 
     // render the theme, clipping to our rectangle
-    const clipPoly = geo.rectToPolygon(p.rect);
-    await renderPass(paintContainer, paintState, {clipPoly});
+    const clipPoly = geo.rectToPolygon(area.rect);
+    await renderPass(areaContainer, areaState, {clipPoly});
 
-    container.addChild(paintMask);
-    container.addChild(paintContainer);
+    container.addChild(areaMask);
+    container.addChild(areaContainer);
   }
-}
+};
 
 const renderPass = async (container, state, options={}) => {
   const floorGfx = new PIXI.Graphics();
@@ -99,7 +99,7 @@ const renderPass = async (container, state, options={}) => {
   // draw interior walls
   for (let wall of state.interiorWalls) {
     drawInteriorWall(interiorShadowGfx, wallGfx, state.config, wall);
-  }
+  }    
 
   // draw doors
   for (let door of state.doors) {
@@ -455,4 +455,3 @@ const drawDoorShadow = (gfx, config, door) => {
     doorRect[0], doorRect[1]
     );    
 };
-
