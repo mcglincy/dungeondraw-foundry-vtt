@@ -14,8 +14,6 @@ export const render = async (container, state) => {
 
 const drawThemeAreas = async (container, state) => {
   for (let area of state.themeAreas) {
-    console.log("Drawing area:");
-    console.log(area);
     const theme = getTheme(area.themeKey);
     if (!theme) {
       console.log(`No such ${area.themeType} theme: ${area.themeKey}`);
@@ -47,7 +45,6 @@ const drawThemeAreas = async (container, state) => {
     // render the theme, clipping to our rectangle
     const clipPoly = geo.pointsToPolygon(area.points);
     await renderPass(areaContainer, areaState, {clipPoly});
-    //await renderPass(areaContainer, areaState);
 
     container.addChild(areaMask);
     container.addChild(areaContainer);
@@ -120,8 +117,20 @@ const addBackgroundImage = async (container, config) => {
       // resize the background image to match the scene dimensions
       bg.width = d.sceneWidth;
       bg.height = d.sceneHeight;
-      container.addChild(bg);      
+      maybeStartSpriteVideo(bg);
+      container.addChild(bg); 
     }
+  }
+};
+
+const maybeStartSpriteVideo = (sprite) => {
+  // if video, start playing it
+  const source = sprite.texture.baseTexture.resource.source;
+  const isVideo = source && source.tagName === "VIDEO";
+  if (isVideo) {
+    source.loop = true;
+    source.volume = game.settings.get("core", "globalAmbientVolume");
+    game.video.play(source);   
   }
 };
 
@@ -190,6 +199,7 @@ const addTiledBackground = async (container, mask, config, geometry, clipPoly) =
         if (config.floorTextureTint) {
           sprite.tint = foundry.utils.colorStringToHex(config.floorTextureTint);
         }
+        maybeStartSpriteVideo(sprite);
         bg.addChild(sprite);
       }
     }
