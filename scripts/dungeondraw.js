@@ -27,7 +27,7 @@ export class DungeonDraw {
     game.settings.register(DungeonDraw.MODULE_NAME, DungeonDraw.SETTING_THEME_PAINTER_THEME, {
         name: "Theme painter theme key.",
         scope: "client",
-        default: "module.default",
+        default: "module.cavern",
         type: String,
         config: false
     });    
