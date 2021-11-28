@@ -14,6 +14,8 @@ export const render = async (container, state) => {
 
 const drawThemeAreas = async (container, state) => {
   for (let area of state.themeAreas) {
+    console.log("Drawing area:");
+    console.log(area);
     const theme = getTheme(area.themeKey);
     if (!theme) {
       console.log(`No such ${area.themeType} theme: ${area.themeKey}`);
@@ -34,24 +36,18 @@ const drawThemeAreas = async (container, state) => {
     areaState.config.wallThickness = state.config.wallThickness;
     areaState.config.exteriorShadowOpacity = 0.0;  // don't draw additional exterior shadows
 
-    // mask for our area rectangle
+    // mask for our area shape
     const areaContainer = new PIXI.Container();
     const areaMask = new PIXI.Graphics();
-    const coords = [
-      area.rect.x, area.rect.y,
-      area.rect.x + area.rect.width, area.rect.y,
-      area.rect.x + area.rect.width, area.rect.y + area.rect.height,
-      area.rect.x, area.rect.y + area.rect.height,
-      area.rect.x, area.rect.y,
-    ];    
     areaMask.beginFill(0xFFFFFF, 1.0);
-    areaMask.drawPolygon(coords);
+    areaMask.drawPolygon(area.points.flat());
     areaMask.endFill();
     areaContainer.mask = areaMask;
 
     // render the theme, clipping to our rectangle
-    const clipPoly = geo.rectToPolygon(area.rect);
+    const clipPoly = geo.pointsToPolygon(area.points);
     await renderPass(areaContainer, areaState, {clipPoly});
+    //await renderPass(areaContainer, areaState);
 
     container.addChild(areaMask);
     container.addChild(areaContainer);
@@ -134,7 +130,14 @@ const addExteriorShadow = (container, config, geometry) => {
   if (!config.exteriorShadowThickness || !config.exteriorShadowOpacity || !geometry) {
     return;
   }
-  addExteriorShadowForPoly(container, config, geometry);
+  if (geometry instanceof jsts.geom.MultiPolygon) {
+    for (let i = 0; i < geometry.getNumGeometries(); i++) {
+      const poly = geometry.getGeometryN(i);      
+      addExteriorShadowForPoly(container, config, poly);
+    }
+  } else if (state.geometry instanceof jsts.geom.Polygon) {
+    addExteriorShadowForPoly(container, config, geometry);
+  }
 }
 
 /** Add an exterior blurred shadow for the given polygon. */

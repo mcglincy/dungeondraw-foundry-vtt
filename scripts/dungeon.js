@@ -295,10 +295,18 @@ export class Dungeon extends PlaceableObject {
    * @param {Number} rect.height
    * @param {Number} rect.width
    */
-  async paintTheme(rect) {
+  async addThemeArea(points) {
+    try {
+      // make sure we can create a polygon from the points
+      const poly = geo.pointsToPolygon(points);
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+
     const themeKey = getThemePainterThemeKey();
     const newArea = {
-      rect,
+      points,
       themeKey,
     };
     const newState = this.history[this.historyIndex].clone();
@@ -307,11 +315,16 @@ export class Dungeon extends PlaceableObject {
   }
 
   // {x:, y:, height:, width:}
-  async eraseThemes(rect) {
+  async removeThemeAreas(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const areasToKeep = this.history[this.historyIndex].themeAreas.filter(a => {
-      const areaPoly = geo.rectToPolygon(a.rect);
-      return !rectPoly.intersects(areaPoly);
+      try {
+        const areaPoly = geo.pointsToPolygon(a.points);
+        return !rectPoly.intersects(areaPoly);
+      } catch (error) {
+        console.log(error);
+        return false;
+      } 
     });
     if (areasToKeep.length != this.history[this.historyIndex].themeAreas.length) {
       const newState = this.history[this.historyIndex].clone();

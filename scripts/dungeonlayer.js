@@ -116,13 +116,13 @@ export class DungeonLayer extends PlaceablesLayer {
       case "subtractdoor":
       case "subtractrect":
       case "themeeraser":
-      case "themepainter":
         data.type = CONST.DRAWING_TYPES.RECTANGLE;
         data.points = [];
         break;
       case "adddoor":
       case "addpoly":
       case "addwall":
+      case "themepainter":
         data.type = CONST.DRAWING_TYPES.POLYGON;
         data.points = [[0, 0]];
         break;        
@@ -309,15 +309,10 @@ export class DungeonLayer extends PlaceablesLayer {
             height: createData.height,
             width: createData.width
           };
-          await this.dungeon.eraseThemes(rect);
+          await this.dungeon.removeThemeAreas(rect);
         } else if (game.activeTool === "themepainter") {
-          const rect = {
-            x: createData.x, 
-            y: createData.y,
-            height: createData.height,
-            width: createData.width
-          };
-          await this.dungeon.paintTheme(rect);          
+          const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
+          await this.dungeon.addThemeArea(offsetPoints);
         } else if (game.activeTool === "subtractrect") {
           const rect = {
             x: createData.x, 
