@@ -1,3 +1,6 @@
+# 0.11.1
+- Change theme painter default to module.cavern theme.
+
 # 0.11.0
 - Add theme painter / eraser tool, that allows adding "theme areas" on top of the main map theme.
 - Rename config window tabs: Map Config, Themes, Theme painter.
