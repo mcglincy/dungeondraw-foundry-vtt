@@ -3,6 +3,7 @@ import { DungeonLayer } from "./dungeonlayer.js";
 import { DungeonState } from "./dungeonstate.js";
 import { render } from "./renderer.js";
 import * as geo from "./geo-utils.js";
+import { getThemePainterThemeKey } from "./themes.js";
 
 
 /**
@@ -10,31 +11,6 @@ import * as geo from "./geo-utils.js";
  */
 // TODO: does Dungeon even need to be a PlaceableObject? Or could it just extend PIXI.Container?
 export class Dungeon extends PlaceableObject {
-
-  static defaultConfig() {
-    return {
-      backgroundImage: "",
-      doorThickness: 25,
-      doorColor: "#000000",
-      doorFillColor: "#ffffff",
-      doorFillOpacity: 0.0,
-      exteriorShadowColor: "#000000",
-      exteriorShadowThickness: 20,
-      exteriorShadowOpacity: 0.5,
-      floorColor: "#F2EDDF",
-      floorTexture: "",
-      floorTextureTint: "",
-      interiorShadowColor: "#000000",
-      interiorShadowThickness: 8,
-      interiorShadowOpacity: 0.5,
-      sceneBackgroundColor: "#999999",
-      sceneGridColor: "#000000",
-      sceneGridOpacity: 0.2,
-      wallColor: "#000000",
-      wallThickness: 8,
-    };
-  };
-
 
   // expects JournalEntry for constructor
   constructor(journalEntry, note) {
@@ -165,6 +141,7 @@ export class Dungeon extends PlaceableObject {
     await this.pushState(newState);
   }
 
+  // {x:, y:, height:, width:}
   async subtractDoors(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const doorsToKeep = this.history[this.historyIndex].doors.filter(d => {
@@ -212,6 +189,7 @@ export class Dungeon extends PlaceableObject {
     await this.pushState(newState);
   }
 
+  // {x:, y:, height:, width:}
   async subtractInteriorWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(w => {
@@ -225,6 +203,7 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  // {x:, y:, height:, width:}
   async subtractDoorsAndInteriorWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const oldState = this.history[this.historyIndex];
@@ -256,7 +235,6 @@ export class Dungeon extends PlaceableObject {
         // TODO: do we need to handle more complicated overlaps, GeometryCollection etc?
         // this coordinate 2-step is flimsy
         if (coordinates.length > 1 && coordinates.length % 2 === 0) {
-          console.log(coordinates);
           for (let i = 0; i < coordinates.length; i+=2) {
             const wallsToAdd = this._maybeSplitWall(coordinates[i].x, coordinates[i].y, coordinates[i+1].x, coordinates[i+1].y, newState.doors);
             newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
@@ -278,13 +256,13 @@ export class Dungeon extends PlaceableObject {
     await this.pushState(newState);    
   }
 
-  // {x, y, height, width}
+  // {x:, y:, height:, width:}  
   async addRectangle(rect) {
     const poly = geo.rectToPolygon(rect);
     this._addPoly(poly);
   }
 
-  // {x, y, height, width}
+  // {x:, y:, height:, width:}
   async subtractRectangle(rect) {
     // only makes sense to subtract if we have geometry
     if (!this.history[this.historyIndex].geometry) {
@@ -309,4 +287,37 @@ export class Dungeon extends PlaceableObject {
       console.log(error);
     }
   }
+
+  /**
+   * @param {Object} rect 
+   * @param {Number} rect.x
+   * @param {Number} rect.y
+   * @param {Number} rect.height
+   * @param {Number} rect.width
+   */
+  async paintTheme(rect) {
+    const oldState = this.history[this.historyIndex];
+    const themeKey = getThemePainterThemeKey();
+    const newState = oldState.clone();
+    const newPainting = {
+      rect,
+      themeKey,
+    };
+    newState.themePaintings.push(newPainting);
+    await this.pushState(newState);
+  }
+
+  // {x:, y:, height:, width:}
+  async eraseThemes(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const paintingsToKeep = this.history[this.historyIndex].themePaintings.filter(p => {
+      const paintingPoly = geo.rectToPolygon(p.rect);
+      return !rectPoly.intersects(paintingPoly);
+    });
+    if (paintingsToKeep.length != this.history[this.historyIndex].themePaintings.length) {
+      const newState = this.history[this.historyIndex].clone();
+      newState.themePaintings = paintingsToKeep;
+      await this.pushState(newState);      
+    }
+  }  
 }

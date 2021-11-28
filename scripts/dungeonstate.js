@@ -1,13 +1,14 @@
 import { Dungeon } from "./dungeon.js";
 import { makeWalls } from "./wallmaker.js";
 import * as geo from "./geo-utils.js";
-
+import { defaultConfig } from "./themes.js";
 
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
 
-  constructor(geometry, doors, interiorWalls, config) {
+  constructor(geometry, themePaintings, doors, interiorWalls, config) {
     this.geometry = geometry;
+    this.themePaintings = themePaintings;
     this.doors = doors;
     this.interiorWalls = interiorWalls;
     this.config = config;
@@ -16,6 +17,7 @@ export class DungeonState {
   clone() {
     return new DungeonState(
       this.geometry ? this.geometry.copy() : null,
+      JSON.parse(JSON.stringify(this.themePaintings)),      
       JSON.parse(JSON.stringify(this.doors)),
       this.interiorWalls ? [...this.interiorWalls] : [],
       JSON.parse(JSON.stringify(this.config))
@@ -28,6 +30,7 @@ export class DungeonState {
     return JSON.stringify({
       // serialize the geometry object as a WKT string
       wkt: geo.geometryToWkt(this.geometry),
+      themePaintings: this.themePaintings,
       doors: this.doors,
       interiorWalls: this.interiorWalls,
       config: this.config,
@@ -41,11 +44,12 @@ export class DungeonState {
     }
     const obj = JSON.parse(s);
     const geometry = geo.wktToGeometry(obj.wkt);
+    const themePaintings = obj.themePaintings ? obj.themePaintings : [];
     const doors = obj.doors ? obj.doors : [];
     const interiorWalls = obj.interiorWalls ? obj.interiorWalls : [];
     // fill in any new defaults
-    const config = foundry.utils.mergeObject(Dungeon.defaultConfig(), obj.config);
-    return new DungeonState(geometry, doors, interiorWalls, config);
+    const config = foundry.utils.mergeObject(defaultConfig(), obj.config);
+    return new DungeonState(geometry, themePaintings, doors, interiorWalls, config);
   }
 
   /* -------------------------------------------- */  
@@ -70,6 +74,6 @@ export class DungeonState {
   }
 
   static startState() {
-    return new DungeonState(null, [], [], Dungeon.defaultConfig());
+    return new DungeonState(null, [], [], defaultConfig());
   }
 }

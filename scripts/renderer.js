@@ -1,14 +1,64 @@
 import * as geo from "./geo-utils.js";
 import "./lib/pixi-filters.min.js";
 import "./lib/jsts.min.js";
-
+import { getTheme } from "./themes.js";
 
 export const render = async (container, state) => {
   container.clear();
-
-  // maybe add a background image
   await addBackgroundImage(container, state.config);
+  // floor render pass, no additional clipping
+  await renderPass(container, state);
+  // draw theme-painted areas as additional render passes
+  await paintThemes(container, state);
+}
 
+const paintThemes = async (container, state) => {
+  for (let p of state.themePaintings) {
+    const theme = getTheme(p.themeKey);
+    if (!theme) {
+      console.log(`No such ${p.themeType} theme: ${p.themeKey}`);
+      return;
+    }
+    // TODO: hacky way to pass down the actual theme to paint
+    const paintState = state.clone();    
+    // TODO: how should we deal with different wall thicknesses, door colors, etc
+    // which look jarring/off when two different themes meet up
+    paintState.config = theme.config;
+    // TODO: for now, just keep certain values from the main state config,
+    // so the dungeon walls etc look consistent at meet up areas
+    paintState.config.doorColor = state.config.doorColor;
+    paintState.config.doorFillColor = state.config.doorFillColor;
+    paintState.config.doorFillOpacity = state.config.doorFillOpacity;
+    paintState.config.doorThickness = state.config.doorThickness;
+    paintState.config.wallColor = state.config.wallColor;
+    paintState.config.wallThickness = state.config.wallThickness;
+    paintState.config.exteriorShadowOpacity = 0.0;  // don't draw additional exterior shadows
+
+    // mask for our painted rectangle
+    const paintContainer = new PIXI.Container();
+    const paintMask = new PIXI.Graphics();
+    const coords = [
+      p.rect.x, p.rect.y,
+      p.rect.x + p.rect.width, p.rect.y,
+      p.rect.x + p.rect.width, p.rect.y + p.rect.height,
+      p.rect.x, p.rect.y + p.rect.height,
+      p.rect.x, p.rect.y,
+    ];    
+    paintMask.beginFill(0xFFFFFF, 1.0);
+    paintMask.drawPolygon(coords);
+    paintMask.endFill();
+    paintContainer.mask = paintMask;
+
+    // render the theme, clipping to our rectangle
+    const clipPoly = geo.rectToPolygon(p.rect);
+    await renderPass(paintContainer, paintState, {clipPoly});
+
+    container.addChild(paintMask);
+    container.addChild(paintContainer);
+  }
+}
+
+const renderPass = async (container, state, options={}) => {
   const floorGfx = new PIXI.Graphics();
   const interiorShadowGfx = new PIXI.Graphics();
   const wallGfx = new PIXI.Graphics();
@@ -34,7 +84,8 @@ export const render = async (container, state) => {
 
     // maybe add a tiled background
     if (state.config.floorTexture) {
-      await addTiledBackground(container, clipMask, state.config, state.geometry);
+      // TODO: having both clipMask / clipPoly parameters is confusing. 
+      await addTiledBackground(container, clipMask, state.config, state.geometry, options.clipPoly);
     }
 
     // draw the dungeon geometry room(s)
@@ -59,7 +110,7 @@ export const render = async (container, state) => {
   container.addChild(floorGfx);
   container.addChild(interiorShadowGfx);
   container.addChild(wallGfx);
-}
+};
 
 /** Possibly add a background image. */
 const addBackgroundImage = async (container, config) => {
@@ -106,7 +157,7 @@ const addExteriorShadowForPoly = (container, config, poly) => {
 }
 
 /** Add TilingSprites for floor texture. */
-const addTiledBackground = async (container, mask, config, geometry) => {
+const addTiledBackground = async (container, mask, config, geometry, clipPoly) => {
   const texture = await loadTexture(config.floorTexture);
   if (!texture?.valid) {
     return;
@@ -131,7 +182,11 @@ const addTiledBackground = async (container, mask, config, geometry) => {
         [col * textureSize, (row + 1) * textureSize],
         [col * textureSize, row * textureSize],
       ]);
-      if (geometry.intersects(rect) && !geometry.touches(rect)) {
+      if (
+        (!clipPoly || clipPoly.intersects(rect)) &&
+        geometry.intersects(rect) && 
+        !geometry.touches(rect)
+        ) {
         const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
         sprite.x = col * textureSize;
         sprite.y = row * textureSize;

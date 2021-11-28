@@ -6,6 +6,8 @@ export class DungeonDraw {
   // module name from module.json
   static MODULE_NAME = "dungeon-draw"
 
+  static SETTING_THEME_PAINTER_THEME = "themePainterTheme";
+
   static init() {
     console.log("***** DUNGEON DRAW *****");
     game.settings.register(DungeonDraw.MODULE_NAME, "releaseNotesVersion", {
@@ -22,6 +24,13 @@ export class DungeonDraw {
         type: String,
         config: false
     });
+    game.settings.register(DungeonDraw.MODULE_NAME, DungeonDraw.SETTING_THEME_PAINTER_THEME, {
+        name: "Theme painter theme key.",
+        scope: "client",
+        default: "module.default",
+        type: String,
+        config: false
+    });    
   }
 
   static ready() {
@@ -115,6 +124,16 @@ export class DungeonDraw {
           title: "DD.ButtonTitleSubtractDoorsAndWalls",
           icon: "fas fa-window-close",
         },
+        {
+          name: "themepainter",
+          title: "DD.ButtonTitleThemePainter",
+          icon: "fas fa-brush",
+        },
+        {
+          name: "themeeraser",
+          title: "DD.ButtonTitleThemeEraser",
+          icon: "fas fa-eraser",
+        },        
         {
           name: "undo",
           title: "DD.ButtonTitleUndo",
