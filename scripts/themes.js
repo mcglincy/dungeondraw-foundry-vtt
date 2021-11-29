@@ -108,7 +108,7 @@ export const themes = {
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorColor: "#222222",
       doorFillColor: "#FFFFFF",
-      floorTexture: "modules/dungeon-draw/assets/textures/Cobblestone_001_Color.jpg",
+      floorTexture: "modules/dungeon-draw/assets/textures/Cobblestone_001_COLOR.jpg",
       wallColor: "#222222",
       wallThickness: 12,        
     })
