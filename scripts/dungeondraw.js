@@ -20,7 +20,7 @@ export class DungeonDraw {
     game.settings.register(DungeonDraw.MODULE_NAME, "customThemes", {
         name: "Custom themes.",
         scope: "client",
-        default: "",
+        default: "{}",
         type: String,
         config: false
     });
