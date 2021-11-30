@@ -2,6 +2,7 @@
 - Change theme painter default to module.cavern theme.
 - Start playing any video textures for background or floor.
 - Fix case in cobblestone texture filename.
+- Increase rectangle/polygon drawing line width for easier visibility.
 
 # 0.11.0
 - Add theme painter / eraser tool, that allows adding "theme areas" on top of the main map theme.
