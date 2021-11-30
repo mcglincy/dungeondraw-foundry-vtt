@@ -20,6 +20,9 @@ export const defaultConfig = () => {
     sceneBackgroundColor: "#999999",
     sceneGridColor: "#000000",
     sceneGridOpacity: 0.2,
+    secretDoorSColor: "#ffffff",
+    secretDoorStyleGM: "secret",
+    secretDoorStylePlayer: "wall",
     wallColor: "#000000",
     wallThickness: 8,
   };
@@ -83,6 +86,7 @@ export const themes = {
       floorColor: "#FFFFFF",
       sceneBackgroundColor: "#0D0D0D",
       sceneGridOpacity: 1.0,
+      secretDoorSColor: "#0D0D0D",
       wallColor: "#0D0D0D",
     })
   },
@@ -100,6 +104,7 @@ export const themes = {
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorFillColor: "#C2BFB0",
       floorTexture: "modules/dungeon-draw/assets/textures/sci_fi_texture_150_by_llexandro_d939vk9.png",
+      secretDoorSColor: "#C2BFB0",
       wallThickness: 10,
     })
   },
@@ -109,6 +114,7 @@ export const themes = {
       doorColor: "#222222",
       doorFillColor: "#FFFFFF",
       floorTexture: "modules/dungeon-draw/assets/textures/Cobblestone_001_COLOR.jpg",
+      secretDoorSColor: "#FFFFFF",
       wallColor: "#222222",
       wallThickness: 12,        
     })
@@ -119,6 +125,7 @@ export const themes = {
       doorColor: "#1a1714",
       doorFillColor: "#8d7862",
       floorTexture: "modules/dungeon-draw/assets/textures/Ground_Dirt_007_basecolor.jpg",
+      secretDoorSColor: "#8d7862",
       wallColor: "#1a1714",
       wallThickness: 10,
     })
@@ -138,6 +145,7 @@ export const themes = {
       doorColor: "#72471d",
       doorFillColor: "#eee8c1",
       floorTexture: "modules/dungeon-draw/assets/textures/Grass_001_COLOR.jpg",
+      secretDoorSColor: "#eee8c1",      
       wallColor: "#72471d",
       wallThickness: 10,      
     })
@@ -157,6 +165,7 @@ export const themes = {
       doorColor: "#282828",
       doorFillColor: "#D1BD8A",
       floorTexture: "modules/dungeon-draw/assets/textures/Rocks_Hexagons_002_basecolor.jpg",
+      secretDoorSColor: "#D1BD8A",
       wallColor: "#282828",
       wallThickness: 12,      
     })
@@ -175,6 +184,7 @@ export const themes = {
       doorColor: "#27251A",
       doorFillColor: "#AAAAAA",
       floorTexture: "modules/dungeon-draw/assets/textures/Sci-fi_Floor_002_basecolor.jpg",
+      secretDoorSColor: "#AAAAAA",
       wallColor: "#27251A",
     })
   },  
@@ -183,6 +193,7 @@ export const themes = {
     config: foundry.utils.mergeObject(defaultConfig(), {
       doorFillColor: "#C0C0C0",
       floorTexture: "modules/dungeon-draw/assets/textures/sci_fi_texture_212_by_llexandro_dcuxgum.png",
+      secretDoorSColor: "#C0C0C0",
     })
   },
   moldvayBlue: {
@@ -197,6 +208,7 @@ export const themes = {
       sceneBackgroundColor: "#3A9FF2",
       sceneGridColor: "#3A9FF2",
       sceneGridOpacity: 1.0,
+      secretDoorSColor: "#3A9FF2",      
       wallColor: "#3A9FF2",
     })
   },
@@ -212,6 +224,7 @@ export const themes = {
       sceneBackgroundColor: "#171008",
       sceneGridColor: "#4C89A1",
       sceneGridOpacity: 1.0,
+      secretDoorSColor: "#3A9FF2",
       wallColor: "#63C9E6",
       wallThickness: 4,
     })
@@ -228,6 +241,7 @@ export const themes = {
       sceneBackgroundColor: "#EBD3BC",
       sceneGridColor: "#594026",
       sceneGridOpacity: 1.0,
+      secretDoorSColor: "#913B55",
       wallColor: "#9A6D54",
     })
   }, 

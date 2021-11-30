@@ -1,6 +1,4 @@
-import { ConfigSheet } from "./configsheet.js";
 import { Dungeon } from "./dungeon.js";
-import { DungeonState } from "./dungeonstate.js";
 import { DungeonDraw } from "./dungeondraw.js";
 
 
@@ -121,6 +119,7 @@ export class DungeonLayer extends PlaceablesLayer {
         break;
       case "adddoor":
       case "addpoly":
+      case "addsecretdoor":
       case "addwall":
       case "themepainter":
         data.type = CONST.DRAWING_TYPES.POLYGON;
@@ -242,6 +241,7 @@ export class DungeonLayer extends PlaceablesLayer {
       preview._onMouseDraw(event);
       if (preview.data.type !== CONST.DRAWING_TYPES.POLYGON 
         || game.activeTool === "adddoor"
+        || game.activeTool === "addsecretdoor"
         || game.activeTool === "addwall") {
         event.data.createState = 2;
       }
@@ -269,6 +269,12 @@ export class DungeonLayer extends PlaceablesLayer {
         preview._chain = false;
         await this.dungeon.addDoor(data.x, data.y,
           data.x + data.points[1][0], data.y + data.points[1][1]);
+      } if (game.activeTool === "addsecretdoor") {
+        event.data.createState = 0;
+        const data = preview.data.toObject(false);
+        preview._chain = false;
+        await this.dungeon.addSecretDoor(data.x, data.y,
+          data.x + data.points[1][0], data.y + data.points[1][1]);  
       } else if (game.activeTool === "addwall") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
@@ -282,8 +288,14 @@ export class DungeonLayer extends PlaceablesLayer {
         preview._chain = false;
         const createData = this.constructor.placeableClass.normalizeShape(data);
 
-        // TODO: refactor
         if (game.activeTool === "addpoly") {
+          const length = createData.points.length;
+          if (length > 2 && (
+            createData.points[0][0] !== createData.points[length-1][0] ||  
+            createData.points[0][1] !== createData.points[length-1][1])) {
+              // auto-close the polygon
+              createData.points.push(createData.points[0]);
+          }
           const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
           await this.dungeon.addPolygon(offsetPoints);
         } else if (game.activeTool === "addrect") {
@@ -311,6 +323,13 @@ export class DungeonLayer extends PlaceablesLayer {
           };
           await this.dungeon.removeThemeAreas(rect);
         } else if (game.activeTool === "themepainter") {
+          const length = createData.points.length;
+          if (length > 2 && (
+            createData.points[0][0] !== createData.points[length-1][0] ||  
+            createData.points[0][1] !== createData.points[length-1][1])) {
+              // auto-close the polygon
+              createData.points.push(createData.points[0]);
+          }
           const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
           await this.dungeon.addThemeArea(offsetPoints);
         } else if (game.activeTool === "subtractrect") {

@@ -120,6 +120,11 @@ export class DungeonDraw {
           icon: "fas fa-door-open",
         },
         {
+          name: "addsecretdoor",
+          title: "DD.ButtonTitleAddSecretDoor",
+          icon: "fas fa-mask",
+        },
+        {
           name: "subtractdoor",
           title: "DD.ButtonTitleSubtractDoorsAndWalls",
           icon: "fas fa-window-close",

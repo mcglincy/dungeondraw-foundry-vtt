@@ -115,6 +115,14 @@ export class Dungeon extends PlaceableObject {
   }
 
   async addDoor(x1, y1, x2, y2) {
+    await this._addDoor(x1, y1, x2, y2, "doors", );
+  }
+
+  async addSecretDoor(x1, y1, x2, y2) {
+    await this._addDoor(x1, y1, x2, y2, "secretDoors");
+  }
+
+  async _addDoor(x1, y1, x2, y2, doorProperty) {
     const newState = this.history[this.historyIndex].clone();
     const doorPoly = geo.twoPointsToLineString(x1, y1, x2, y2);
 
@@ -137,7 +145,7 @@ export class Dungeon extends PlaceableObject {
     }
     newState.interiorWalls = newState.interiorWalls.filter(w => wallsToDelete.indexOf(w) === -1);
     newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
-    newState.doors.push([x1, y1, x2, y2]);
+    newState[doorProperty].push([x1, y1, x2, y2]);
     await this.pushState(newState);
   }
 
@@ -296,8 +304,6 @@ export class Dungeon extends PlaceableObject {
    * @param {Number} rect.width
    */
   async addThemeArea(points) {
-    console.log("Attempting to add theme area with points:")
-    console.log(points);
     try {
       // make sure we can create a polygon from the points
       const poly = geo.pointsToPolygon(points);
@@ -311,8 +317,6 @@ export class Dungeon extends PlaceableObject {
       points,
       themeKey,
     };
-    console.log("Created new theme area:")
-    console.log(newArea);
     const newState = this.history[this.historyIndex].clone();
     newState.themeAreas.push(newArea);
     await this.pushState(newState);

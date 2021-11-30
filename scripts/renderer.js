@@ -14,8 +14,6 @@ export const render = async (container, state) => {
 
 const drawThemeAreas = async (container, state) => {
   for (let area of state.themeAreas) {
-    console.log("Rendering theme area:");
-    console.log(area);
     const theme = getTheme(area.themeKey);
     if (!theme) {
       console.log(`No such ${area.themeType} theme: ${area.themeKey}`);
@@ -100,6 +98,9 @@ const renderPass = async (container, state, options={}) => {
   for (let door of state.doors) {
     drawDoor(interiorShadowGfx, wallGfx, state.config, door);
   }
+  for (let secretDoor of state.secretDoors) {
+    drawSecretDoor(interiorShadowGfx, wallGfx, state.config, secretDoor);
+  }
 
   // layer everything properly
   container.addChild(floorGfx);
@@ -107,11 +108,21 @@ const renderPass = async (container, state, options={}) => {
   container.addChild(wallGfx);
 };
 
+/** Try-catch wrapper around loadTexture. */
+const getTexture = async (path) => {
+  try {
+    const texture = await loadTexture(path);
+    return texture;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 /** Possibly add a background image. */
 const addBackgroundImage = async (container, config) => {
   if (config.backgroundImage) {
     // mimicking MapLayer._drawBackground() behavior
-    const texture = await loadTexture(config.backgroundImage);
+    const texture = await getTexture(config.backgroundImage);
     if (texture?.valid) {
       const d = canvas.dimensions;
       const bg = new PIXI.Sprite(texture);
@@ -166,7 +177,7 @@ const addExteriorShadowForPoly = (container, config, poly) => {
 
 /** Add TilingSprites for floor texture. */
 const addTiledBackground = async (container, mask, config, geometry, clipPoly) => {
-  const texture = await loadTexture(config.floorTexture);
+  const texture = await getTexture(config.floorTexture);
   if (!texture?.valid) {
     return;
   }
@@ -210,9 +221,9 @@ const addTiledBackground = async (container, mask, config, geometry, clipPoly) =
   container.addChild(bg);
 };
 
-const rectangleForSegment = (config, x1, y1, x2, y2) => {
+const rectangleForSegment = (thickness, x1, y1, x2, y2) => {
   const slope = geo.slope(x1, y1, x2, y2);
-  const rectDelta = config.doorThickness / 2.0;
+  const rectDelta = thickness / 2.0;
 
   // slope is delta y / delta x
   if (slope === 0) {
@@ -395,7 +406,7 @@ const drawDoor = (interiorShadowGfx, wallGfx, config, door) => {
   const deltaY = door[3] - door[1];
   const jamb1End = [door[0] + (deltaX * jambFraction), door[1] + (deltaY * jambFraction)];
   const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
-  const doorRect = rectangleForSegment(config, jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
+  const doorRect = rectangleForSegment(config.doorThickness, jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
 
   // draw drop shadows
   drawDoorShadow(interiorShadowGfx, config, door);        
@@ -432,6 +443,65 @@ const drawDoor = (interiorShadowGfx, wallGfx, config, door) => {
   }
 };
 
+const rectangleForDoor = (thickness, door) => {
+
+};
+
+const drawSecretDoor = (interiorShadowGfx, wallGfx, config, door) => {
+  console.log(config);
+  const isGM = game.user.isGM;
+  if ((isGM && config.secretDoorStyleGM === "door") ||
+      (!isGM && config.secretDoorStylePlayer === "door")) {
+    drawDoor(interiorShadowGfx, wallGfx, config, door);
+    return;
+  }
+
+  const totalLength = geo.distanceBetweenPoints(door[0], door[1], door[2], door[3]);
+  const rectLength = 40.0;
+  const jambLength = (totalLength - rectLength) / 2.0;
+  const jambFraction = jambLength / totalLength;
+  const rectFraction = rectLength / totalLength;
+  const rectEndFraction = jambFraction + rectFraction;
+  const deltaX = door[2] - door[0];
+  const deltaY = door[3] - door[1];
+  const jamb1End = [door[0] + (deltaX * jambFraction), door[1] + (deltaY * jambFraction)];
+  const middle = [door[0] + (deltaX * 0.5), door[1] + (deltaY * 0.5)];
+  const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
+  const doorRect = rectangleForSegment(30.0, jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
+
+  // draw drop shadows
+  drawInteriorWallShadow(interiorShadowGfx, config, door);
+
+  // draw a wall across the door opening
+  wallGfx.lineStyle({
+    width: config.wallThickness,
+    color: PIXI.utils.string2hex(config.wallColor),
+    alpha: 1.0,
+    alignment: 0.5, // middle
+    cap: "round",
+  });
+  wallGfx.moveTo(door[0], door[1]);
+  wallGfx.lineTo(door[2], door[3]);
+
+  // possibly draw an additional S-shape through the wall
+  if ((isGM && config.secretDoorStyleGM === "secret") ||
+      (!isGM && config.secretDoorStylePlayer === "secret")) {
+    const midRect = rectangleForSegment(50.0, jamb1End[0], jamb1End[1], middle[0], middle[1]);
+    const midRect2 = rectangleForSegment(50.0, middle[0], middle[1], rectEnd[0], rectEnd[1]);
+    wallGfx.lineStyle({
+      width: 5.0,
+      color: PIXI.utils.string2hex(config.secretDoorSColor),
+      alpha: 1.0,
+      alignment: 0.5, // middle
+      cap: "round",
+    });
+    wallGfx.moveTo(doorRect[6], doorRect[7]);
+    wallGfx.bezierCurveTo(midRect[0], midRect[1], midRect[2], midRect[3], middle[0], middle[1]);
+    wallGfx.bezierCurveTo(midRect2[6], midRect2[7], midRect2[4], midRect2[5], doorRect[2], doorRect[3]);  
+  }
+};
+
+
 const drawDoorShadow = (gfx, config, door) => {
   const totalLength = geo.distanceBetweenPoints(door[0], door[1], door[2], door[3]);
   const jambLength = 20;
@@ -443,7 +513,7 @@ const drawDoorShadow = (gfx, config, door) => {
   const deltaY = door[3] - door[1];
   const jamb1End = [door[0] + (deltaX * jambFraction), door[1] + (deltaY * jambFraction)];
   const rectEnd = [door[0] + (deltaX * rectEndFraction), door[1] + (deltaY * rectEndFraction)]
-  const doorRect = rectangleForSegment(config, jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
+  const doorRect = rectangleForSegment(config.doorThickness, jamb1End[0], jamb1End[1], rectEnd[0], rectEnd[1]);
 
   gfx.lineStyle({
     // wide enough to be exposed on either side

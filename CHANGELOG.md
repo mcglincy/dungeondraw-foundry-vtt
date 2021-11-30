@@ -1,3 +1,9 @@
+# 0.12.0
+- Add secret door tool, along with config settings for how secret doors appear to either GM or players.
+- Auto-close drawn polygons for the Add Polygon and Theme Painter tools. This making drawing closed polygon much easier, and even lets you skip drawing the final line of the polygon.
+- Gracefully handle missing or misnamed texture files.
+- Remove debug logging for theme painter tool.
+
 # 0.11.1
 - Change theme painter default to module.cavern theme.
 - Start playing any video textures for background or floor.

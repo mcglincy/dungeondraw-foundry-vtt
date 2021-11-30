@@ -141,6 +141,38 @@
         </div>
         <hr />
         <div class="form-group">
+          <label>{{localize "DD.SecretDoorSColor"}}</label>
+          <div class="form-fields">
+              <input type="text" class="color" name="secretDoorSColor" value="{{config.secretDoorSColor}}" data-dtype="String" />
+              <input type="color" value="{{config.secretDoorSColor}}" data-dtype="String" data-edit="secretDoorSColor" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{localize "DD.SecretDoorStyleGM"}}</label>
+          <div class="form-fields">        
+            <select name="secretDoorStyleGM" data-dtype="string">
+              {{#select config.secretDoorStyleGM}}
+                <option value="door">Door</option>
+                <option value="secret">Secret</option>
+                <option value="wall">Wall</option>
+              {{/select}}
+            </select>
+            </div>
+        </div>
+        <div class="form-group">
+          <label>{{localize "DD.SecretDoorStylePlayer"}}</label>
+          <div class="form-fields">        
+            <select name="secretDoorStylePlayer" data-dtype="string">
+              {{#select config.secretDoorStylePlayer}}
+                <option value="door">Door</option>
+                <option value="secret">Secret</option>
+                <option value="wall">Wall</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+        <hr />
+        <div class="form-group">
             <label>{{localize "DD.WallColor"}}</label>
             <div class="form-fields">
                 <input type="text" class="color" name="wallColor" value="{{config.wallColor}}" data-dtype="String" />

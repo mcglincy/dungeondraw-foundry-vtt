@@ -19,6 +19,7 @@ export const makeWalls = async (state) => {
   }
   await makeInteriorWalls(state.interiorWalls);
   await makeDoors(state.doors);
+  await makeSecretDoors(state.secretDoors);
 };
 
 const deleteAllWalls = async () => {
@@ -27,7 +28,6 @@ const deleteAllWalls = async () => {
     // which causes an infinite loop of redraw/refresh.
     // so avoid it :P
     const walls = canvas.scene.getEmbeddedCollection("Wall");
-    const keys = Array.from(walls.keys());
     const ids = [];
     for (const wall of walls) {
       const flag = wall.getFlag(DungeonDraw.MODULE_NAME, "dungeonVersion");
@@ -64,7 +64,13 @@ const wallData = (x1, y1, x2, y2) => {
 
 const doorData = (x1, y1, x2, y2) => {
   const data = wallData(x1, y1, x2, y2);
-  data.door = 1;
+  data.door = 1;  // door
+  return data;
+};
+
+const secretDoorData = (x1, y1, x2, y2) => {
+  const data = wallData(x1, y1, x2, y2);
+  data.door = 2;  // secret
   return data;
 };
 
@@ -108,6 +114,18 @@ const makeDoors = async (doors) => {
   const allDoors = [];
   for (const door of doors) {
     const data = doorData(door[0], door[1], door[2], door[3]);
+    allDoors.push(data);
+  }
+  if (allDoors.length) {
+    await canvas.scene.createEmbeddedDocuments("Wall", allDoors);
+  }
+};
+
+/** [[x1,y1,x2,y2],...] */
+const makeSecretDoors = async (doors) => {
+  const allDoors = [];
+  for (const door of doors) {
+    const data = secretDoorData(door[0], door[1], door[2], door[3]);
     allDoors.push(data);
   }
   if (allDoors.length) {
