@@ -14,6 +14,8 @@ export const render = async (container, state) => {
 
 const drawThemeAreas = async (container, state) => {
   for (let area of state.themeAreas) {
+    console.log("Rendering theme area:");
+    console.log(area);
     const theme = getTheme(area.themeKey);
     if (!theme) {
       console.log(`No such ${area.themeType} theme: ${area.themeKey}`);

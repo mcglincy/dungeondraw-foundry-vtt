@@ -296,6 +296,8 @@ export class Dungeon extends PlaceableObject {
    * @param {Number} rect.width
    */
   async addThemeArea(points) {
+    console.log("Attempting to add theme area with points:")
+    console.log(points);
     try {
       // make sure we can create a polygon from the points
       const poly = geo.pointsToPolygon(points);
@@ -309,6 +311,8 @@ export class Dungeon extends PlaceableObject {
       points,
       themeKey,
     };
+    console.log("Created new theme area:")
+    console.log(newArea);
     const newState = this.history[this.historyIndex].clone();
     newState.themeAreas.push(newArea);
     await this.pushState(newState);
