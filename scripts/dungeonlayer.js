@@ -104,7 +104,7 @@ export class DungeonLayer extends PlaceablesLayer {
     const data = {
       fillColor: game.user.color,
       strokeColor: game.user.color,
-      strokeWidth: 2,
+      strokeWidth: 8,
     };
     // Mandatory additions
     data.x = origin.x;
