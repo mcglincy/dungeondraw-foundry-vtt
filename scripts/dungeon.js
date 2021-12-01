@@ -1,5 +1,3 @@
-import { DungeonDraw } from "./dungeondraw.js";
-import { DungeonLayer } from "./dungeonlayer.js";
 import { DungeonState } from "./dungeonstate.js";
 import { render } from "./renderer.js";
 import * as geo from "./geo-utils.js";
@@ -219,13 +217,20 @@ export class Dungeon extends PlaceableObject {
       const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
       return !rectPoly.intersects(doorPoly);
     });
+    const secretDoorsToKeep = oldState.secretDoors.filter(d => {
+      const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
+      return !rectPoly.intersects(doorPoly);
+    });
     const wallsToKeep = oldState.interiorWalls.filter(w => {
       const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
       return !rectPoly.intersects(wallPoly);
     });
-    if (doorsToKeep.length != oldState.doors.length || wallsToKeep.length != oldState.interiorWalls.length) {
+    if (doorsToKeep.length != oldState.doors.length 
+      || secretDoorsToKeep.length != oldState.secretDoors.length
+      || wallsToKeep.length != oldState.interiorWalls.length) {
       const newState = oldState.clone();
       newState.doors = doorsToKeep;
+      newState.secretDoors = secretDoorsToKeep;
       newState.interiorWalls = wallsToKeep;
       await this.pushState(newState);      
     }
