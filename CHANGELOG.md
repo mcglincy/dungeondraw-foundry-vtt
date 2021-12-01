@@ -1,3 +1,7 @@
+# 0.12.1
+- Allow the delete interior walls/door tool to also delete secret doors.
+- Fix doorColor not saving on Config sheet.
+
 # 0.12.0
 - Add Secret Doors tool, along with config settings for how secret doors appear to either GM or players.
 - Auto-close drawn polygons for the Add Polygon and Theme Painter tools. This makes drawing closed polygon much easier, and even lets you skip drawing the final line of the polygon (just double click at next-to-last vertex).
