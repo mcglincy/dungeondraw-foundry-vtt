@@ -1,7 +1,7 @@
 import * as geo from "./geo-utils.js";
-import "./lib/pixi-filters.min.js";
-import "./lib/jsts.min.js";
 import { getTheme } from "./themes.js";
+// importing a local copy of PIXI filters, to avoid a long chain of npm pixi dependencies
+import "./lib/pixi-filters.min.js";
 
 export const render = async (container, state) => {
   container.clear();
@@ -62,9 +62,9 @@ const renderPass = async (container, state, options={}) => {
 
     // use a mask to clip the tiled background and interior shadows
     const clipMask = new PIXI.Graphics();
-    if (state.geometry instanceof jsts.geom.MultiPolygon) {
+    if (geo.isMultiPolygon(state.geometry)) {
       drawMultiPolygonMask(clipMask, state.geometry);
-    } else if (state.geometry instanceof jsts.geom.Polygon) {
+    } else if (geo.isPolygon(state.geometry)) {
       drawPolygonMask(clipMask, state.geometry);
     }
     container.addChild(clipMask);
@@ -82,9 +82,9 @@ const renderPass = async (container, state, options={}) => {
     }
 
     // draw the dungeon geometry room(s)
-    if (state.geometry instanceof jsts.geom.MultiPolygon) {
+    if (geo.isMultiPolygon(state.geometry)) {
       drawMultiPolygonRoom(floorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
-    } else if (state.geometry instanceof jsts.geom.Polygon) {
+    } else if (geo.isPolygon(state.geometry)) {
       drawPolygonRoom(floorGfx, interiorShadowGfx, wallGfx, state.config, state.geometry);
     }
   }
@@ -152,12 +152,12 @@ const addExteriorShadow = (container, config, geometry) => {
   if (!config.exteriorShadowThickness || !config.exteriorShadowOpacity || !geometry) {
     return;
   }
-  if (geometry instanceof jsts.geom.MultiPolygon) {
+  if (geo.isMultiPolygon(geometry)) {
     for (let i = 0; i < geometry.getNumGeometries(); i++) {
       const poly = geometry.getGeometryN(i);      
       addExteriorShadowForPoly(container, config, poly);
     }
-  } else if (geometry instanceof jsts.geom.Polygon) {
+  } else if (geo.isPolygon(geometry)) {
     addExteriorShadowForPoly(container, config, geometry);
   }
 }
@@ -166,7 +166,8 @@ const addExteriorShadow = (container, config, geometry) => {
 const addExteriorShadowForPoly = (container, config, poly) => {
   const outerShadow = new PIXI.Graphics();
   // normalize the expanded buffer to remove any oddities
-  const expanded = poly.buffer(config.exteriorShadowThickness).norm();
+  //const expanded = poly.buffer(config.exteriorShadowThickness).norm();
+  const expanded = geo.expandGeometry(poly, config.exteriorShadowThickness);
   outerShadow.beginFill(PIXI.utils.string2hex(config.exteriorShadowColor), config.exteriorShadowOpacity);
   outerShadow.drawPolygon(expanded.getCoordinates().map(c => [c.x, c.y]).flat());
   outerShadow.endFill();
@@ -202,9 +203,9 @@ const addTiledBackground = async (container, mask, config, geometry, clipPoly) =
         [col * textureSize, row * textureSize],
       ]);
       if (
-        (!clipPoly || clipPoly.intersects(rect)) &&
-        geometry.intersects(rect) && 
-        !geometry.touches(rect)
+        (!clipPoly || geo.intersects(clipPoly, rect)) &&
+        geo.intersects(geometry, rect) && 
+        !geo.touches(geometry, rect)
         ) {
         const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
         sprite.x = col * textureSize;
@@ -448,7 +449,6 @@ const rectangleForDoor = (thickness, door) => {
 };
 
 const drawSecretDoor = (interiorShadowGfx, wallGfx, config, door) => {
-  console.log(config);
   const isGM = game.user.isGM;
   if ((isGM && config.secretDoorStyleGM === "door") ||
       (!isGM && config.secretDoorStylePlayer === "door")) {

@@ -1,6 +1,3 @@
-import { Dungeon } from "./dungeon.js";
-import { DungeonDraw } from "./dungeondraw.js";
-import { DungeonLayer } from "./dungeonlayer.js";
 import { defaultConfig, getCustomThemes, getThemePainterThemeKey, setCustomThemes, setThemePainterThemeKey, themes } from "./themes.js";
 import { ThemeSheet } from "./themesheet.js";
 

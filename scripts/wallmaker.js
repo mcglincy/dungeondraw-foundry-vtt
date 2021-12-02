@@ -1,6 +1,5 @@
-import { DungeonDraw } from "./dungeondraw.js";
-import "./lib/jsts.min.js";
-
+import * as constants from "./constants.js";
+import * as geo from "./geo-utils.js";
 
 const FLAG_NAME = ""
 
@@ -11,9 +10,9 @@ export const makeWalls = async (state) => {
   }
   await deleteAllWalls();
   if (state.geometry) {
-    if (state.geometry instanceof jsts.geom.MultiPolygon) {
+    if (geo.isMultiPolygon(state.geometry)) {
       await makeWallsFromMulti(state.geometry);
-    } else if (state.geometry instanceof jsts.geom.Polygon) {
+    } else if (geo.isPolygon(state.geometry)) {
       await makeWallsFromPoly(state.geometry);
     }
   }
@@ -30,7 +29,7 @@ const deleteAllWalls = async () => {
     const walls = canvas.scene.getEmbeddedCollection("Wall");
     const ids = [];
     for (const wall of walls) {
-      const flag = wall.getFlag(DungeonDraw.MODULE_NAME, "dungeonVersion");
+      const flag = wall.getFlag(constants.MODULE_NAME, "dungeonVersion");
       if (flag) {
         ids.push(wall.id);
       }
@@ -79,7 +78,7 @@ const makeWallsFromPoly = async (poly) => {
   const exterior = poly.getExteriorRing();
   const coords = exterior.getCoordinates();
   for (let i = 0; i < coords.length - 1; i++) {
-    // DungeonDraw.MODULE_NAME
+    // constants.MODULE_NAME
     const data = wallData(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y);
     allWalls.push(data);
   }

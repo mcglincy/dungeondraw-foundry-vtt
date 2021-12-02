@@ -1,5 +1,5 @@
-import { Dungeon } from "./dungeon.js";
-import { DungeonDraw } from "./dungeondraw.js";
+import * as constants from "./constants.js";
+
 
 export const defaultConfig = () => {
   return {
@@ -41,7 +41,7 @@ export const getTheme = (themeKey) => {
 
 export const getCustomThemes = () => {
   try {
-    const customThemesString = game.settings.get(DungeonDraw.MODULE_NAME, "customThemes");
+    const customThemesString = game.settings.get(constants.MODULE_NAME, "customThemes");
     return JSON.parse(customThemesString);
   } catch(e) {
     console.log(e);
@@ -51,15 +51,15 @@ export const getCustomThemes = () => {
 
 export const setCustomThemes = (customThemes) => {
   const themesString = JSON.stringify(customThemes);
-  game.settings.set(DungeonDraw.MODULE_NAME, "customThemes", themesString);
+  game.settings.set(constants.MODULE_NAME, "customThemes", themesString);
 };
 
 export const getThemePainterThemeKey = () => {
-  return game.settings.get(DungeonDraw.MODULE_NAME, DungeonDraw.SETTING_THEME_PAINTER_THEME);
+  return game.settings.get(constants.MODULE_NAME, constants.SETTING_THEME_PAINTER_THEME);
 }
 
 export const setThemePainterThemeKey = (themeKey) => {
-  return game.settings.set(DungeonDraw.MODULE_NAME, DungeonDraw.SETTING_THEME_PAINTER_THEME, themeKey);
+  return game.settings.set(constants.MODULE_NAME, constants.SETTING_THEME_PAINTER_THEME, themeKey);
 }
 
 export const themes = {

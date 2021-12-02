@@ -1,30 +1,27 @@
 import { ConfigSheet } from "./configsheet.js";
 import { DungeonLayer } from "./dungeonlayer.js";
+import * as constants from "./constants.js";
 
 
 export class DungeonDraw {
-  // module name from module.json
-  static MODULE_NAME = "dungeon-draw"
-
-  static SETTING_THEME_PAINTER_THEME = "themePainterTheme";
 
   static init() {
     console.log("***** DUNGEON DRAW *****");
-    game.settings.register(DungeonDraw.MODULE_NAME, "releaseNotesVersion", {
+    game.settings.register(constants.MODULE_NAME, "releaseNotesVersion", {
         name: "Last version we showed release notes.",
         scope: "client",
         default: "",
         type: String,
         config: false
     });
-    game.settings.register(DungeonDraw.MODULE_NAME, "customThemes", {
+    game.settings.register(constants.MODULE_NAME, "customThemes", {
         name: "Custom themes.",
         scope: "client",
         default: "{}",
         type: String,
         config: false
     });
-    game.settings.register(DungeonDraw.MODULE_NAME, DungeonDraw.SETTING_THEME_PAINTER_THEME, {
+    game.settings.register(constants.MODULE_NAME, constants.SETTING_THEME_PAINTER_THEME, {
         name: "Theme painter theme key.",
         scope: "client",
         default: "module.cavern",
@@ -42,8 +39,8 @@ export class DungeonDraw {
       // GMs only
       return;
     }
-    const moduleVersion = game.modules.get(DungeonDraw.MODULE_NAME).data.version;
-    const settingsVersion = game.settings.get(DungeonDraw.MODULE_NAME, "releaseNotesVersion");
+    const moduleVersion = game.modules.get(constants.MODULE_NAME).data.version;
+    const settingsVersion = game.settings.get(constants.MODULE_NAME, "releaseNotesVersion");
     if (moduleVersion === settingsVersion) {
       // they've already seen it
       return;
@@ -76,7 +73,7 @@ export class DungeonDraw {
     );
     dialog.render(true);
     // mark this version as shown
-    await game.settings.set(DungeonDraw.MODULE_NAME, "releaseNotesVersion", moduleVersion);
+    await game.settings.set(constants.MODULE_NAME, "releaseNotesVersion", moduleVersion);
   }
 
   static getSceneControlButtons(controls) {
