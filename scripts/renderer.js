@@ -339,10 +339,17 @@ const drawPolygonRoom = (floorGfx, interiorShadowGfx, wallGfx, config, poly) => 
   // draw inner wall drop shadows
   if (config.interiorShadowOpacity) {
     // TODO: don't need to set this multiple times... bubble up?
+    // TODO: there's a weird lag or visual artifact happening between the inner blur shadow and the solid line wall,
+    // that sometimes leaves an unshadowed or lighter pixel line/area next to the wall.
+    // To (partially) work around that, draw a wider shadow from the middle of the wall, rather than inside.
     interiorShadowGfx.lineStyle({
+<<<<<<< Updated upstream
       width: config.interiorShadowThickness,
+=======
+      width: config.wallThickness + config.interiorShadowThickness,
+>>>>>>> Stashed changes
       color: PIXI.utils.string2hex(config.interiorShadowColor),
-      alignment: 1,  // outside
+      alignment: 0.5,  // middle
       join: "round"
     });
     interiorShadowGfx.drawPolygon(flatCoords);
