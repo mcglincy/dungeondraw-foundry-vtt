@@ -8,13 +8,11 @@ export default () => {
       output: {
         file: "modules/dungeondraw-bundle.min.js",
         format: "es",
-        plugins: [ terser() ],
+        plugins: [terser()],
         preferConst: true,
         sourcemap: true,
       },
-      plugins: [
-        nodeResolve(),
-      ],
+      plugins: [nodeResolve()],
     },
   ];
 };

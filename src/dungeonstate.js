@@ -21,15 +21,15 @@ export class DungeonState {
   clone() {
     return new DungeonState(
       this.geometry ? this.geometry.copy() : null,
-      JSON.parse(JSON.stringify(this.themeAreas)),      
+      JSON.parse(JSON.stringify(this.themeAreas)),
       JSON.parse(JSON.stringify(this.doors)),
       this.secretDoors ? [...this.secretDoors] : [],
       this.interiorWalls ? [...this.interiorWalls] : [],
       JSON.parse(JSON.stringify(this.config))
-      );
+    );
   }
 
-  /* -------------------------------------------- */  
+  /* -------------------------------------------- */
 
   toString() {
     return JSON.stringify({
@@ -56,10 +56,17 @@ export class DungeonState {
     const interiorWalls = obj.interiorWalls ? obj.interiorWalls : [];
     // fill in any new defaults
     const config = foundry.utils.mergeObject(defaultConfig(), obj.config);
-    return new DungeonState(geometry, themeAreas, doors, secretDoors, interiorWalls, config);
+    return new DungeonState(
+      geometry,
+      themeAreas,
+      doors,
+      secretDoors,
+      interiorWalls,
+      config
+    );
   }
 
-  /* -------------------------------------------- */  
+  /* -------------------------------------------- */
 
   async saveToJournalEntry(journalEntry) {
     const serialized = this.toString();

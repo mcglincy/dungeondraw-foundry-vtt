@@ -1,15 +1,21 @@
-import { defaultConfig, getCustomThemes, getThemePainterThemeKey, setCustomThemes, setThemePainterThemeKey, themes } from "./themes.js";
+import {
+  defaultConfig,
+  getCustomThemes,
+  getThemePainterThemeKey,
+  setCustomThemes,
+  setThemePainterThemeKey,
+  themes,
+} from "./themes.js";
 import { ThemeSheet } from "./themesheet.js";
 
 /**
  * Sheet for dungeon config/settings.
- * 
+ *
  * @extends {FormApplication}
  */
 export class ConfigSheet extends FormApplication {
-
   constructor(activeTab = "settings") {
-    super()
+    super();
     this._tabs[0].active = activeTab;
   }
 
@@ -20,7 +26,9 @@ export class ConfigSheet extends FormApplication {
       template: "modules/dungeon-draw/templates/config-sheet.html",
       width: 480,
       height: 920,
-      tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "position"}]
+      tabs: [
+        { navSelector: ".tabs", contentSelector: "form", initial: "position" },
+      ],
     });
   }
 
@@ -45,8 +53,8 @@ export class ConfigSheet extends FormApplication {
       customThemeKeys,
       themes,
       themeKeys,
-      themePainterThemeKey
-    }
+      themePainterThemeKey,
+    };
   }
 
   /* -------------------------------------------- */
@@ -65,8 +73,8 @@ export class ConfigSheet extends FormApplication {
         backgroundColor: formData.sceneBackgroundColor,
         gridAlpha: formData.sceneGridAlpha,
         gridColor: formData.sceneGridColor,
-      })
-    }    
+      });
+    }
   }
 
   /* -------------------------------------------- */
@@ -87,13 +95,19 @@ export class ConfigSheet extends FormApplication {
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
-    html.find('button[name="resetDefault"]').click(this._onResetDefaults.bind(this));
-    html.find('.dd-theme-name').click(this._onThemeNameClick.bind(this));
-    html.find('.dd-save-as-theme-button').click(this._onSaveAsThemeClick.bind(this));
-    html.find('.dd-theme-edit').click(this._onEditThemeClick.bind(this));
-    html.find('.dd-theme-copy').click(this._onCopyThemeClick.bind(this));
-    html.find('.dd-theme-delete').click(this._onDeleteThemeClick.bind(this));
-    html.find('select[name="themePainterThemeKey"]').change(this._onThemePainterThemeSelect.bind(this));
+    html
+      .find('button[name="resetDefault"]')
+      .click(this._onResetDefaults.bind(this));
+    html.find(".dd-theme-name").click(this._onThemeNameClick.bind(this));
+    html
+      .find(".dd-save-as-theme-button")
+      .click(this._onSaveAsThemeClick.bind(this));
+    html.find(".dd-theme-edit").click(this._onEditThemeClick.bind(this));
+    html.find(".dd-theme-copy").click(this._onCopyThemeClick.bind(this));
+    html.find(".dd-theme-delete").click(this._onDeleteThemeClick.bind(this));
+    html
+      .find('select[name="themePainterThemeKey"]')
+      .change(this._onThemePainterThemeSelect.bind(this));
   }
 
   /* -------------------------------------------- */
@@ -122,7 +136,7 @@ export class ConfigSheet extends FormApplication {
     } else {
       theme = themes[themeKey];
     }
-    const newConfig = {...theme.config};
+    const newConfig = { ...theme.config };
     await canvas.dungeon.dungeon?.setConfig(newConfig);
     if (game.user.isGM) {
       // need GM privs to update scene
@@ -130,14 +144,16 @@ export class ConfigSheet extends FormApplication {
         backgroundColor: newConfig.sceneBackgroundColor,
         gridAlpha: newConfig.sceneGridAlpha,
         gridColor: newConfig.sceneGridColor,
-      })
+      });
     }
     this.render();
   }
 
   async _onSaveAsThemeClick(event) {
     event.preventDefault();
-    const input = $(event.currentTarget).closest(".form-fields").children(".saveAsThemeName");
+    const input = $(event.currentTarget)
+      .closest(".form-fields")
+      .children(".saveAsThemeName");
     const saveAsThemeName = input.val();
     const formData = this._getSubmitData();
     // TODO: handle saveAsThemeName better
@@ -146,18 +162,18 @@ export class ConfigSheet extends FormApplication {
     const customThemes = getCustomThemes();
     customThemes[saveAsThemeName] = {
       name: saveAsThemeName,
-      config: formData
+      config: formData,
     };
     setCustomThemes(customThemes);
-    this._tabs[0].active = "themes";    
-    this.render();    
+    this._tabs[0].active = "themes";
+    this.render();
   }
 
   async _onEditThemeClick(event) {
     event.preventDefault();
     const themeRow = $(event.currentTarget).closest(".dd-theme-row");
     const themeKey = themeRow.data("theme");
-    new ThemeSheet(themeKey).render(true)
+    new ThemeSheet(themeKey).render(true);
   }
 
   _onCopyThemeClick(event) {
@@ -175,7 +191,7 @@ export class ConfigSheet extends FormApplication {
       if (newName in customThemes) {
         num++;
       } else {
-        break;        
+        break;
       }
     }
     newTheme.name = newName;
@@ -192,10 +208,10 @@ export class ConfigSheet extends FormApplication {
     delete customThemes[themeKey];
     setCustomThemes(customThemes);
     this.render();
-  } 
+  }
 
   _onThemePainterThemeSelect(event) {
     const themeKey = $(event.currentTarget).val();
     setThemePainterThemeKey(themeKey);
-  } 
+  }
 }

@@ -2,16 +2,14 @@
 // import { ConfigSheet } from "./configsheet.js";
 import { getCustomThemes, setCustomThemes, themes } from "./themes.js";
 
-
 /**
  * Sheet for Theme editing.
- * 
+ *
  * @extends {FormApplication}
  */
 export class ThemeSheet extends FormApplication {
-
   constructor(themeKey) {
-    super()
+    super();
     this.themeKey = themeKey;
   }
 
@@ -22,7 +20,9 @@ export class ThemeSheet extends FormApplication {
       template: "modules/dungeon-draw/templates/theme-sheet.html",
       width: 480,
       height: 880,
-      tabs: [{navSelector: ".tabs", contentSelector: "form", initial: "position"}]
+      tabs: [
+        { navSelector: ".tabs", contentSelector: "form", initial: "position" },
+      ],
     });
   }
 
@@ -35,10 +35,10 @@ export class ThemeSheet extends FormApplication {
   getData() {
     const customThemes = getCustomThemes();
     const theme = customThemes[this.themeKey];
-    return {      
+    return {
       config: theme.config,
       themeName: theme.name,
-    }
+    };
   }
 
   /* -------------------------------------------- */
@@ -51,7 +51,7 @@ export class ThemeSheet extends FormApplication {
     // overwrite the theme at our key
     customThemes[this.themeKey] = {
       name: themeName,
-      config: formData
+      config: formData,
     };
     setCustomThemes(customThemes);
     // force already-open config sheet to re-render

@@ -2,32 +2,34 @@ import { ConfigSheet } from "./configsheet.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 import * as constants from "./constants.js";
 
-
 export class DungeonDraw {
-
   static init() {
     console.log("***** DUNGEON DRAW *****");
     game.settings.register(constants.MODULE_NAME, "releaseNotesVersion", {
-        name: "Last version we showed release notes.",
-        scope: "client",
-        default: "",
-        type: String,
-        config: false
+      name: "Last version we showed release notes.",
+      scope: "client",
+      default: "",
+      type: String,
+      config: false,
     });
     game.settings.register(constants.MODULE_NAME, "customThemes", {
-        name: "Custom themes.",
-        scope: "client",
-        default: "{}",
-        type: String,
-        config: false
+      name: "Custom themes.",
+      scope: "client",
+      default: "{}",
+      type: String,
+      config: false,
     });
-    game.settings.register(constants.MODULE_NAME, constants.SETTING_THEME_PAINTER_THEME, {
+    game.settings.register(
+      constants.MODULE_NAME,
+      constants.SETTING_THEME_PAINTER_THEME,
+      {
         name: "Theme painter theme key.",
         scope: "client",
         default: "module.cavern",
         type: String,
-        config: false
-    });    
+        config: false,
+      }
+    );
   }
 
   static ready() {
@@ -40,7 +42,10 @@ export class DungeonDraw {
       return;
     }
     const moduleVersion = game.modules.get(constants.MODULE_NAME).data.version;
-    const settingsVersion = game.settings.get(constants.MODULE_NAME, "releaseNotesVersion");
+    const settingsVersion = game.settings.get(
+      constants.MODULE_NAME,
+      "releaseNotesVersion"
+    );
     if (moduleVersion === settingsVersion) {
       // they've already seen it
       return;
@@ -50,12 +55,15 @@ export class DungeonDraw {
     // keep only the most recent changelog section
     const firstChangelog = "#" + changelog.split("#")[1];
     // show it in a Dialog
-    const html = await renderTemplate("modules/dungeon-draw/templates/release-notes.html", {
-      data: {
-        version: moduleVersion,
-        changelog: firstChangelog
+    const html = await renderTemplate(
+      "modules/dungeon-draw/templates/release-notes.html",
+      {
+        data: {
+          version: moduleVersion,
+          changelog: firstChangelog,
+        },
       }
-    });
+    );
     const dialog = new Dialog(
       {
         title: game.i18n.localize("DD.ReleaseNotes"),
@@ -68,12 +76,16 @@ export class DungeonDraw {
         },
       },
       {
-        width: 600,  
+        width: 600,
       }
     );
     dialog.render(true);
     // mark this version as shown
-    await game.settings.set(constants.MODULE_NAME, "releaseNotesVersion", moduleVersion);
+    await game.settings.set(
+      constants.MODULE_NAME,
+      "releaseNotesVersion",
+      moduleVersion
+    );
   }
 
   static getSceneControlButtons(controls) {
@@ -135,7 +147,7 @@ export class DungeonDraw {
           name: "themeeraser",
           title: "DD.ButtonTitleThemeEraser",
           icon: "fas fa-eraser",
-        },        
+        },
         {
           name: "undo",
           title: "DD.ButtonTitleUndo",
@@ -143,7 +155,7 @@ export class DungeonDraw {
           onClick: async () => {
             await canvas.dungeon.dungeon.undo();
           },
-          button: true
+          button: true,
         },
         {
           name: "redo",
@@ -151,15 +163,15 @@ export class DungeonDraw {
           icon: "fas fa-redo",
           onClick: async () => {
             await canvas.dungeon.dungeon.redo();
-          },          
-          button: true
+          },
+          button: true,
         },
         {
           name: "config",
           title: "DD.ButtonTitleConfig",
           icon: "fas fa-cog",
           onClick: () => new ConfigSheet().render(true),
-          button: true
+          button: true,
         },
         {
           name: "clear",
@@ -168,10 +180,10 @@ export class DungeonDraw {
           // visible: isGM,
           visible: true,
           onClick: () => canvas.dungeon.deleteAll(),
-          button: true
-        }
+          button: true,
+        },
       ],
-      activeTool: "addrect"
+      activeTool: "addrect",
     });
   }
 

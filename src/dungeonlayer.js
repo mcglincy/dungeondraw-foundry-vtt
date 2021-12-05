@@ -1,35 +1,38 @@
 import * as constants from "./constants.js";
 import { Dungeon } from "./dungeon.js";
 
-
 const FOLDER_NAME = "Dungeon Draw";
 
 const findDungeonEntryAndNote = () => {
   for (const [key, note] of canvas.scene.notes.entries()) {
     const journalEntry = game.journal.get(note.data.entryId);
     if (journalEntry) {
-      const flag = journalEntry.getFlag(constants.MODULE_NAME, "dungeonVersion");
+      const flag = journalEntry.getFlag(
+        constants.MODULE_NAME,
+        "dungeonVersion"
+      );
       if (flag) {
-        return {journalEntry, note};
+        return { journalEntry, note };
       }
     }
   }
-  return {journalEntry: null, note: null};
+  return { journalEntry: null, note: null };
 };
 
 const createDungeonEntryAndNote = async () => {
   const journalEntry = await createDungeonEntry();
   const note = await createDungeonNote(journalEntry);
-  return {journalEntry, note};
-}
+  return { journalEntry, note };
+};
 
 const createDungeonEntry = async () => {
-  let folder = game.folders.filter((f) =>
-    f.data.type === "JournalEntry" && f.name === FOLDER_NAME).pop();
+  let folder = game.folders
+    .filter((f) => f.data.type === "JournalEntry" && f.name === FOLDER_NAME)
+    .pop();
   if (!folder) {
     folder = await Folder.create({
       name: FOLDER_NAME,
-      type: "JournalEntry"
+      type: "JournalEntry",
     });
   }
 
@@ -39,36 +42,36 @@ const createDungeonEntry = async () => {
     flags: {
       "dungeon-draw": {
         // extract string constant somewhere
-        "dungeonVersion": "1.0"
-      }
-    }
+        dungeonVersion: "1.0",
+      },
+    },
   });
   return journalEntry;
 };
 
 const createDungeonNote = async (journalEntry) => {
-  await canvas.scene.createEmbeddedDocuments("Note", [{
-    entryId : journalEntry.id,
-    fontSize : 20,
-    icon : "icons/svg/cave.svg",
-    iconSize : 32,
-    textAnchor : 1, 
-    textColor : "#FFFFFF",
-    x : 50,
-    y : 50, 
-    iconTint : "",
-    text : "Dungeon Draw",
-    flags : {
-    } 
-  }]);    
+  await canvas.scene.createEmbeddedDocuments("Note", [
+    {
+      entryId: journalEntry.id,
+      fontSize: 20,
+      icon: "icons/svg/cave.svg",
+      iconSize: 32,
+      textAnchor: 1,
+      textColor: "#FFFFFF",
+      x: 50,
+      y: 50,
+      iconTint: "",
+      text: "Dungeon Draw",
+      flags: {},
+    },
+  ]);
 };
 
 /**
- * 
- * @extends {PlaceablesLayer} 
+ *
+ * @extends {PlaceablesLayer}
  */
 export class DungeonLayer extends PlaceablesLayer {
-
   static LAYER_NAME = "dungeon";
 
   constructor() {
@@ -83,7 +86,7 @@ export class DungeonLayer extends PlaceablesLayer {
       name: DungeonLayer.LAYER_NAME,
       // canDragCreate: game.user.isGM,
       canDragCreate: true,
-      zIndex: -1  // under tiles and background image
+      zIndex: -1, // under tiles and background image
     });
   }
 
@@ -109,7 +112,7 @@ export class DungeonLayer extends PlaceablesLayer {
     data.y = origin.y;
     data.author = game.user.id;
     // Tool-based settings
-    switch ( tool ) {
+    switch (tool) {
       case "addrect":
       case "subtractdoor":
       case "subtractrect":
@@ -124,25 +127,27 @@ export class DungeonLayer extends PlaceablesLayer {
       case "themepainter":
         data.type = CONST.DRAWING_TYPES.POLYGON;
         data.points = [[0, 0]];
-        break;        
+        break;
       case "ellipse":
         data.type = CONST.DRAWING_TYPES.ELLIPSE;
         data.points = [];
         break;
     }
     return data;
-  }  
+  }
 
   /** @override */
   async deleteAll() {
     const type = this.constructor.documentName;
-    if ( !game.user.isGM ) {
-      throw new Error(`You do not have permission to delete ${type} objects from the Scene.`);
+    if (!game.user.isGM) {
+      throw new Error(
+        `You do not have permission to delete ${type} objects from the Scene.`
+      );
     }
     return Dialog.confirm({
       title: game.i18n.localize("CONTROLS.ClearAll"),
-      content: `<p>${game.i18n.format("CONTROLS.ClearAllHint", {type})}</p>`,
-      yes: () => this._deleteAll()
+      content: `<p>${game.i18n.format("CONTROLS.ClearAllHint", { type })}</p>`,
+      yes: () => this._deleteAll(),
     });
   }
 
@@ -154,7 +159,7 @@ export class DungeonLayer extends PlaceablesLayer {
   /* -------------------------------------------- */
 
   async loadDungeon() {
-    const {journalEntry, note} = await findDungeonEntryAndNote();
+    const { journalEntry, note } = await findDungeonEntryAndNote();
     if (journalEntry) {
       this.dungeon = new Dungeon(journalEntry, note);
       await this.dungeon.loadFromJournalEntry();
@@ -167,7 +172,7 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   async createNewDungeon() {
-    const {journalEntry, note} = await createDungeonEntryAndNote();
+    const { journalEntry, note } = await createDungeonEntryAndNote();
     await this.loadDungeon();
   }
 
@@ -179,7 +184,7 @@ export class DungeonLayer extends PlaceablesLayer {
   async draw() {
     await super.draw();
     return this;
-  }  
+  }
 
   /* -------------------------------------------- */
   /*  Event Listeners and Handlers                */
@@ -187,12 +192,17 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   async _onClickLeft(event) {
-    const {preview, createState, originalEvent} = event.data;
+    const { preview, createState, originalEvent } = event.data;
 
     // Continue polygon point placement
-    if ( createState >= 1 && preview.isPolygon ) {
+    if (createState >= 1 && preview.isPolygon) {
       let point = event.data.destination;
-      if ( !originalEvent.shiftKey ) point = canvas.grid.getSnappedPosition(point.x, point.y, this.gridPrecision);
+      if (!originalEvent.shiftKey)
+        point = canvas.grid.getSnappedPosition(
+          point.x,
+          point.y,
+          this.gridPrecision
+        );
       preview._addPoint(point, false);
       preview._chain = true; // Note that we are now in chain mode
       return preview.refresh();
@@ -203,10 +213,10 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   _onClickLeft2(event) {
-    const {createState, preview} = event.data;
+    const { createState, preview } = event.data;
 
     // Conclude polygon placement with double-click
-    if ( createState >= 1 && preview.isPolygon ) {
+    if (createState >= 1 && preview.isPolygon) {
       event.data.createState = 2;
       return this._onDragLeftDrop(event);
     }
@@ -221,7 +231,7 @@ export class DungeonLayer extends PlaceablesLayer {
     // we use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
     const data = this._getNewDrawingData(event.data.origin);
-    const document = new DrawingDocument(data, {parent: canvas.scene});
+    const document = new DrawingDocument(data, { parent: canvas.scene });
     const drawing = new Drawing(document);
     event.data.preview = this.preview.addChild(drawing);
     return drawing.draw();
@@ -229,23 +239,25 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   _onDragLeftMove(event) {
-    const {preview, createState} = event.data;
+    const { preview, createState } = event.data;
     if (!preview) {
       return;
     }
-    if (preview.parent === null) { 
+    if (preview.parent === null) {
       // In theory this should never happen, but rarely does
       this.preview.addChild(preview);
     }
     if (createState >= 1) {
       preview._onMouseDraw(event);
-      if (preview.data.type !== CONST.DRAWING_TYPES.POLYGON 
-        || game.activeTool === "adddoor"
-        || game.activeTool === "addsecretdoor"
-        || game.activeTool === "addwall") {
+      if (
+        preview.data.type !== CONST.DRAWING_TYPES.POLYGON ||
+        game.activeTool === "adddoor" ||
+        game.activeTool === "addsecretdoor" ||
+        game.activeTool === "addwall"
+      ) {
         event.data.createState = 2;
       }
-    }    
+    }
   }
 
   /** @override */
@@ -259,30 +271,46 @@ export class DungeonLayer extends PlaceablesLayer {
         await this.createNewDungeon();
       }
 
-      const distance = Math.hypot(destination.x - origin.x, destination.y - origin.y);
-      const minDistance = distance >= (canvas.dimensions.size / 8);
-      const completePolygon = preview.isPolygon && (preview.data.points.length > 2);
+      const distance = Math.hypot(
+        destination.x - origin.x,
+        destination.y - origin.y
+      );
+      const minDistance = distance >= canvas.dimensions.size / 8;
+      const completePolygon =
+        preview.isPolygon && preview.data.points.length > 2;
 
       if (game.activeTool === "adddoor") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
-        await this.dungeon.addDoor(data.x, data.y,
-          data.x + data.points[1][0], data.y + data.points[1][1]);
-      } if (game.activeTool === "addsecretdoor") {
+        await this.dungeon.addDoor(
+          data.x,
+          data.y,
+          data.x + data.points[1][0],
+          data.y + data.points[1][1]
+        );
+      }
+      if (game.activeTool === "addsecretdoor") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
-        await this.dungeon.addSecretDoor(data.x, data.y,
-          data.x + data.points[1][0], data.y + data.points[1][1]);  
+        await this.dungeon.addSecretDoor(
+          data.x,
+          data.y,
+          data.x + data.points[1][0],
+          data.y + data.points[1][1]
+        );
       } else if (game.activeTool === "addwall") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
-        await this.dungeon.addInteriorWall(data.x, data.y,
-          data.x + data.points[1][0], data.y + data.points[1][1]);
+        await this.dungeon.addInteriorWall(
+          data.x,
+          data.y,
+          data.x + data.points[1][0],
+          data.y + data.points[1][1]
+        );
       } else if (minDistance || completePolygon) {
-
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
@@ -290,54 +318,64 @@ export class DungeonLayer extends PlaceablesLayer {
 
         if (game.activeTool === "addpoly") {
           const length = createData.points.length;
-          if (length > 2 && (
-            createData.points[0][0] !== createData.points[length-1][0] ||  
-            createData.points[0][1] !== createData.points[length-1][1])) {
-              // auto-close the polygon
-              createData.points.push(createData.points[0]);
+          if (
+            length > 2 &&
+            (createData.points[0][0] !== createData.points[length - 1][0] ||
+              createData.points[0][1] !== createData.points[length - 1][1])
+          ) {
+            // auto-close the polygon
+            createData.points.push(createData.points[0]);
           }
-          const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
+          const offsetPoints = createData.points.map((p) => [
+            p[0] + createData.x,
+            p[1] + createData.y,
+          ]);
           await this.dungeon.addPolygon(offsetPoints);
         } else if (game.activeTool === "addrect") {
           const rect = {
-            x: createData.x, 
+            x: createData.x,
             y: createData.y,
             height: createData.height,
-            width: createData.width
+            width: createData.width,
           };
           await this.dungeon.addRectangle(rect);
         } else if (game.activeTool === "subtractdoor") {
           const rect = {
-            x: createData.x, 
+            x: createData.x,
             y: createData.y,
             height: createData.height,
-            width: createData.width
+            width: createData.width,
           };
           await this.dungeon.subtractDoorsAndInteriorWalls(rect);
         } else if (game.activeTool === "themeeraser") {
           const rect = {
-            x: createData.x, 
+            x: createData.x,
             y: createData.y,
             height: createData.height,
-            width: createData.width
+            width: createData.width,
           };
           await this.dungeon.removeThemeAreas(rect);
         } else if (game.activeTool === "themepainter") {
           const length = createData.points.length;
-          if (length > 2 && (
-            createData.points[0][0] !== createData.points[length-1][0] ||  
-            createData.points[0][1] !== createData.points[length-1][1])) {
-              // auto-close the polygon
-              createData.points.push(createData.points[0]);
+          if (
+            length > 2 &&
+            (createData.points[0][0] !== createData.points[length - 1][0] ||
+              createData.points[0][1] !== createData.points[length - 1][1])
+          ) {
+            // auto-close the polygon
+            createData.points.push(createData.points[0]);
           }
-          const offsetPoints = createData.points.map(p => [p[0] + createData.x, p[1] + createData.y]);
+          const offsetPoints = createData.points.map((p) => [
+            p[0] + createData.x,
+            p[1] + createData.y,
+          ]);
           await this.dungeon.addThemeArea(offsetPoints);
         } else if (game.activeTool === "subtractrect") {
           const rect = {
-            x: createData.x, 
+            x: createData.x,
             y: createData.y,
             height: createData.height,
-            width: createData.width
+            width: createData.width,
           };
           await this.dungeon.subtractRectangle(rect);
         }

@@ -1,7 +1,7 @@
 import * as constants from "./constants.js";
 import * as geo from "./geo-utils.js";
 
-const FLAG_NAME = ""
+const FLAG_NAME = "";
 
 export const makeWalls = async (state) => {
   if (!game.user.isGM) {
@@ -22,8 +22,8 @@ export const makeWalls = async (state) => {
 };
 
 const deleteAllWalls = async () => {
-  try {   
-    // scene.update() triggers a redraw, 
+  try {
+    // scene.update() triggers a redraw,
     // which causes an infinite loop of redraw/refresh.
     // so avoid it :P
     const walls = canvas.scene.getEmbeddedCollection("Wall");
@@ -35,7 +35,7 @@ const deleteAllWalls = async () => {
       }
     }
     await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
-  } catch(error) {
+  } catch (error) {
     console.error(error);
   }
 };
@@ -55,21 +55,21 @@ const wallData = (x1, y1, x2, y2) => {
     flags: {
       "dungeon-draw": {
         // extract string constant somewhere
-        "dungeonVersion": "1.0"
-      }
-    }
-  }
+        dungeonVersion: "1.0",
+      },
+    },
+  };
 };
 
 const doorData = (x1, y1, x2, y2) => {
   const data = wallData(x1, y1, x2, y2);
-  data.door = 1;  // door
+  data.door = 1; // door
   return data;
 };
 
 const secretDoorData = (x1, y1, x2, y2) => {
   const data = wallData(x1, y1, x2, y2);
-  data.door = 2;  // secret
+  data.door = 2; // secret
   return data;
 };
 
@@ -79,17 +79,27 @@ const makeWallsFromPoly = async (poly) => {
   const coords = exterior.getCoordinates();
   for (let i = 0; i < coords.length - 1; i++) {
     // constants.MODULE_NAME
-    const data = wallData(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y);
+    const data = wallData(
+      coords[i].x,
+      coords[i].y,
+      coords[i + 1].x,
+      coords[i + 1].y
+    );
     allWalls.push(data);
   }
-  const numHoles = poly.getNumInteriorRing();    
+  const numHoles = poly.getNumInteriorRing();
   for (let i = 0; i < numHoles; i++) {
     const hole = poly.getInteriorRingN(i);
     const coords = hole.getCoordinates();
     for (let i = 0; i < coords.length - 1; i++) {
-      const data = wallData(coords[i].x, coords[i].y, coords[i+1].x, coords[i+1].y);
+      const data = wallData(
+        coords[i].x,
+        coords[i].y,
+        coords[i + 1].x,
+        coords[i + 1].y
+      );
       allWalls.push(data);
-    }      
+    }
   }
   if (allWalls.length) {
     await canvas.scene.createEmbeddedDocuments("Wall", allWalls);

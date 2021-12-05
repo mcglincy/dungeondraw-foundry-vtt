@@ -8,11 +8,13 @@
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.6",
+    "prettier": "^2.5.1",
     "rollup": "^2.60.2",
     "rollup-plugin-terser": "^7.0.2"
   },
   "scripts": {
     "build": "rollup --config",
+    "prettier": "prettier --write .",
     "watch": "rollup --config --watch"
   }
 }

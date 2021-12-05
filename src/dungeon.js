@@ -3,13 +3,11 @@ import { render } from "./renderer.js";
 import * as geo from "./geo-utils.js";
 import { getThemePainterThemeKey } from "./themes.js";
 
-
 /**
  * @extends {PlaceableObject}
  */
 // TODO: does Dungeon even need to be a PlaceableObject? Or could it just extend PIXI.Container?
 export class Dungeon extends PlaceableObject {
-
   // expects JournalEntry for constructor
   constructor(journalEntry, note) {
     // note will be saved as this.document
@@ -51,16 +49,18 @@ export class Dungeon extends PlaceableObject {
   draw() {
     this.refresh();
     return this;
-  }  
+  }
 
   /** @override */
   refresh() {
     render(this, this.state());
-  } 
+  }
 
   async maybeRefresh(journalEntry) {
     if (journalEntry.id === this.journalEntry.id) {
-      const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
+      const savedState = await DungeonState.loadFromJournalEntry(
+        this.journalEntry
+      );
       // update state, but don't save to journal
       await this.pushState(savedState, false);
     }
@@ -69,11 +69,13 @@ export class Dungeon extends PlaceableObject {
   /* -------------------------------------------- */
 
   async loadFromJournalEntry() {
-    const savedState = await DungeonState.loadFromJournalEntry(this.journalEntry);
+    const savedState = await DungeonState.loadFromJournalEntry(
+      this.journalEntry
+    );
     this.history = [savedState];
     this.historyIndex = 0;
     await this.refresh();
-  };
+  }
 
   /* -------------------------------------------- */
 
@@ -84,24 +86,27 @@ export class Dungeon extends PlaceableObject {
   }
 
   async redo() {
-    this.historyIndex = Math.min(this.history.length - 1, this.historyIndex + 1);
+    this.historyIndex = Math.min(
+      this.history.length - 1,
+      this.historyIndex + 1
+    );
     await this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
     await this.refresh();
   }
 
   /* -------------------------------------------- */
 
-  async pushState(newState, saveToJournalEntry=true) {
+  async pushState(newState, saveToJournalEntry = true) {
     // throw away any history states after current
     for (let i = this.history.length - 1; i > this.historyIndex; i--) {
       this.history.pop();
     }
-    // and add our new state    
+    // and add our new state
     this.history.push(newState);
     this.historyIndex++;
 
     if (saveToJournalEntry) {
-      await newState.saveToJournalEntry(this.journalEntry);      
+      await newState.saveToJournalEntry(this.journalEntry);
     }
     await this.refresh();
   }
@@ -113,7 +118,7 @@ export class Dungeon extends PlaceableObject {
   }
 
   async addDoor(x1, y1, x2, y2) {
-    await this._addDoor(x1, y1, x2, y2, "doors", );
+    await this._addDoor(x1, y1, x2, y2, "doors");
   }
 
   async addSecretDoor(x1, y1, x2, y2) {
@@ -128,7 +133,12 @@ export class Dungeon extends PlaceableObject {
     const wallsToDelete = [];
     const wallsToAdd = [];
     for (let wall of newState.interiorWalls) {
-      const wallPoly = geo.twoPointsToLineString(wall[0], wall[1], wall[2], wall[3]);
+      const wallPoly = geo.twoPointsToLineString(
+        wall[0],
+        wall[1],
+        wall[2],
+        wall[3]
+      );
       const contains = geo.contains(wallPoly, doorPoly);
       if (contains) {
         wallsToDelete.push(wall);
@@ -141,7 +151,9 @@ export class Dungeon extends PlaceableObject {
         wallsToAdd.push([d2[0], d2[1], w2[0], w2[1]]);
       }
     }
-    newState.interiorWalls = newState.interiorWalls.filter(w => wallsToDelete.indexOf(w) === -1);
+    newState.interiorWalls = newState.interiorWalls.filter(
+      (w) => wallsToDelete.indexOf(w) === -1
+    );
     newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
     newState[doorProperty].push([x1, y1, x2, y2]);
     await this.pushState(newState);
@@ -150,27 +162,32 @@ export class Dungeon extends PlaceableObject {
   // {x:, y:, height:, width:}
   async subtractDoors(rect) {
     const rectPoly = geo.rectToPolygon(rect);
-    const doorsToKeep = this.history[this.historyIndex].doors.filter(d => {
+    const doorsToKeep = this.history[this.historyIndex].doors.filter((d) => {
       const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
       return !rectPoly.intersects(doorPoly);
     });
     if (doorsToKeep.length != this.history[this.historyIndex].doors.length) {
       const newState = this.history[this.historyIndex].clone();
       newState.doors = doorsToKeep;
-      await this.pushState(newState);      
+      await this.pushState(newState);
     }
   }
 
   /**
    * Split the wall if it's drawn over an existing door.
-   * 
+   *
    * @returns [[x1, y1, x2, y2], ...]
    */
   _maybeSplitWall(x1, y1, x2, y2, doors) {
     // TODO: this logic doesn't handle two doors side by side
     const wallPoly = geo.twoPointsToLineString(x1, y1, x2, y2);
     for (let door of doors) {
-      const doorPoly = geo.twoPointsToLineString(door[0], door[1], door[2], door[3]);
+      const doorPoly = geo.twoPointsToLineString(
+        door[0],
+        door[1],
+        door[2],
+        door[3]
+      );
       const contains = geo.contains(wallPoly, doorPoly);
       if (contains) {
         // make sure points are consistently ordered
@@ -180,9 +197,9 @@ export class Dungeon extends PlaceableObject {
         const d2 = geo.greaterPoint(door[0], door[1], door[2], door[3]);
         return [
           [w1[0], w1[1], d1[0], d1[1]],
-          [d2[0], d2[1], w2[0], w2[1]]
+          [d2[0], d2[1], w2[0], w2[1]],
         ];
-      } 
+      }
     }
     // wall didn't contain any door, so return as-is
     return [[x1, y1, x2, y2]];
@@ -198,14 +215,18 @@ export class Dungeon extends PlaceableObject {
   // {x:, y:, height:, width:}
   async subtractInteriorWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
-    const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(w => {
-      const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
-      return !rectPoly.intersects(wallPoly);
-    });
-    if (wallsToKeep.length != this.history[this.historyIndex].interiorWalls.length) {
+    const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(
+      (w) => {
+        const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
+        return !rectPoly.intersects(wallPoly);
+      }
+    );
+    if (
+      wallsToKeep.length != this.history[this.historyIndex].interiorWalls.length
+    ) {
       const newState = this.history[this.historyIndex].clone();
       newState.interiorWalls = wallsToKeep;
-      await this.pushState(newState);      
+      await this.pushState(newState);
     }
   }
 
@@ -213,32 +234,34 @@ export class Dungeon extends PlaceableObject {
   async subtractDoorsAndInteriorWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const oldState = this.history[this.historyIndex];
-    const doorsToKeep = oldState.doors.filter(d => {
+    const doorsToKeep = oldState.doors.filter((d) => {
       const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
       return !rectPoly.intersects(doorPoly);
     });
-    const secretDoorsToKeep = oldState.secretDoors.filter(d => {
+    const secretDoorsToKeep = oldState.secretDoors.filter((d) => {
       const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
       return !rectPoly.intersects(doorPoly);
     });
-    const wallsToKeep = oldState.interiorWalls.filter(w => {
+    const wallsToKeep = oldState.interiorWalls.filter((w) => {
       const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
       return !rectPoly.intersects(wallPoly);
     });
-    if (doorsToKeep.length != oldState.doors.length 
-      || secretDoorsToKeep.length != oldState.secretDoors.length
-      || wallsToKeep.length != oldState.interiorWalls.length) {
+    if (
+      doorsToKeep.length != oldState.doors.length ||
+      secretDoorsToKeep.length != oldState.secretDoors.length ||
+      wallsToKeep.length != oldState.interiorWalls.length
+    ) {
       const newState = oldState.clone();
       newState.doors = doorsToKeep;
       newState.secretDoors = secretDoorsToKeep;
       newState.interiorWalls = wallsToKeep;
-      await this.pushState(newState);      
+      await this.pushState(newState);
     }
   }
 
   async _addPoly(poly) {
     const oldState = this.history[this.historyIndex];
-    const newState = oldState.clone();    
+    const newState = oldState.clone();
     if (newState.geometry) {
       newState.geometry = geo.union(newState.geometry, poly);
       const touches = geo.touches(oldState.geometry, poly);
@@ -248,28 +271,34 @@ export class Dungeon extends PlaceableObject {
         // TODO: do we need to handle more complicated overlaps, GeometryCollection etc?
         // this coordinate 2-step is flimsy
         if (coordinates.length > 1 && coordinates.length % 2 === 0) {
-          for (let i = 0; i < coordinates.length; i+=2) {
-            const wallsToAdd = this._maybeSplitWall(coordinates[i].x, coordinates[i].y, coordinates[i+1].x, coordinates[i+1].y, newState.doors);
+          for (let i = 0; i < coordinates.length; i += 2) {
+            const wallsToAdd = this._maybeSplitWall(
+              coordinates[i].x,
+              coordinates[i].y,
+              coordinates[i + 1].x,
+              coordinates[i + 1].y,
+              newState.doors
+            );
             newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
           }
         }
       } else {
         // also nuke any interior walls in this new poly
-        const wallsToKeep = newState.interiorWalls.filter(w => {
+        const wallsToKeep = newState.interiorWalls.filter((w) => {
           const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
           return !poly.intersects(wallPoly);
         });
         if (wallsToKeep.length != newState.interiorWalls.length) {
           newState.interiorWalls = wallsToKeep;
-        }        
+        }
       }
     } else {
       newState.geometry = poly;
     }
-    await this.pushState(newState);    
+    await this.pushState(newState);
   }
 
-  // {x:, y:, height:, width:}  
+  // {x:, y:, height:, width:}
   async addRectangle(rect) {
     const poly = geo.rectToPolygon(rect);
     this._addPoly(poly);
@@ -286,10 +315,10 @@ export class Dungeon extends PlaceableObject {
     if (!this.history[this.historyIndex].geometry.intersects(poly)) {
       return;
     }
-    const newState = this.history[this.historyIndex].clone();    
+    const newState = this.history[this.historyIndex].clone();
     newState.geometry = newState.geometry.difference(poly);
     await this.pushState(newState);
-  };
+  }
 
   // [[x,y]...]
   async addPolygon(points) {
@@ -302,7 +331,7 @@ export class Dungeon extends PlaceableObject {
   }
 
   /**
-   * @param {Object} rect 
+   * @param {Object} rect
    * @param {Number} rect.x
    * @param {Number} rect.y
    * @param {Number} rect.height
@@ -330,19 +359,23 @@ export class Dungeon extends PlaceableObject {
   // {x:, y:, height:, width:}
   async removeThemeAreas(rect) {
     const rectPoly = geo.rectToPolygon(rect);
-    const areasToKeep = this.history[this.historyIndex].themeAreas.filter(a => {
-      try {
-        const areaPoly = geo.pointsToPolygon(a.points);
-        return !rectPoly.intersects(areaPoly);
-      } catch (error) {
-        console.log(error);
-        return false;
-      } 
-    });
-    if (areasToKeep.length != this.history[this.historyIndex].themeAreas.length) {
+    const areasToKeep = this.history[this.historyIndex].themeAreas.filter(
+      (a) => {
+        try {
+          const areaPoly = geo.pointsToPolygon(a.points);
+          return !rectPoly.intersects(areaPoly);
+        } catch (error) {
+          console.log(error);
+          return false;
+        }
+      }
+    );
+    if (
+      areasToKeep.length != this.history[this.historyIndex].themeAreas.length
+    ) {
       const newState = this.history[this.historyIndex].clone();
       newState.themeAreas = areasToKeep;
-      await this.pushState(newState);      
+      await this.pushState(newState);
     }
-  }  
+  }
 }
