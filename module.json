@@ -10,7 +10,7 @@
     "compatibleCoreVersion": "0.8.9",
     "dependencies": [],
     "esmodules": [
-      "./scripts/dungeondraw-bundle.min.js"
+      "./modules/dungeondraw-bundle.min.js"
     ],
     "packs": [],
     "scripts": [],
