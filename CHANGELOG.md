@@ -1,5 +1,6 @@
 # 0.13.0
 - Use rollup to package Dungeon Draw as a single minified js file. Saves ~200kb download size.
+- Produce sourcemap to go along with js bundle.
 
 # 0.12.1
 - Allow the delete interior walls/door tool to also delete secret doors.
