@@ -1,7 +1,5 @@
-import { ConfigSheet } from "./configsheet.js";
-import { Dungeon } from "./dungeon.js";
-import { DungeonDraw } from "./dungeondraw.js";
-import { DungeonLayer } from "./dungeonlayer.js";
+// TODO: fix this circular dependency
+// import { ConfigSheet } from "./configsheet.js";
 import { getCustomThemes, setCustomThemes, themes } from "./themes.js";
 
 
@@ -57,6 +55,7 @@ export class ThemeSheet extends FormApplication {
     };
     setCustomThemes(customThemes);
     // force already-open config sheet to re-render
-    new ConfigSheet("themes").render(true);
+    // TODO: fix this circular dependency
+    // new ConfigSheet("themes").render(true);
   }
 }

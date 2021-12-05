@@ -129,7 +129,7 @@ export class Dungeon extends PlaceableObject {
     const wallsToAdd = [];
     for (let wall of newState.interiorWalls) {
       const wallPoly = geo.twoPointsToLineString(wall[0], wall[1], wall[2], wall[3]);
-      const contains = wallPoly.contains(doorPoly);
+      const contains = geo.contains(wallPoly, doorPoly);
       if (contains) {
         wallsToDelete.push(wall);
         // make sure points are consistently ordered
@@ -171,7 +171,7 @@ export class Dungeon extends PlaceableObject {
     const wallPoly = geo.twoPointsToLineString(x1, y1, x2, y2);
     for (let door of doors) {
       const doorPoly = geo.twoPointsToLineString(door[0], door[1], door[2], door[3]);
-      const contains = wallPoly.contains(doorPoly);
+      const contains = geo.contains(wallPoly, doorPoly);
       if (contains) {
         // make sure points are consistently ordered
         const w1 = geo.lesserPoint(x1, y1, x2, y2);
@@ -240,10 +240,10 @@ export class Dungeon extends PlaceableObject {
     const oldState = this.history[this.historyIndex];
     const newState = oldState.clone();    
     if (newState.geometry) {
-      newState.geometry = newState.geometry.union(poly);
-      const touches = oldState.geometry.touches(poly);
+      newState.geometry = geo.union(newState.geometry, poly);
+      const touches = geo.touches(oldState.geometry, poly);
       if (touches) {
-        const intersection = oldState.geometry.intersection(poly);
+        const intersection = geo.intersection(oldState.geometry, poly);
         const coordinates = intersection.getCoordinates();
         // TODO: do we need to handle more complicated overlaps, GeometryCollection etc?
         // this coordinate 2-step is flimsy

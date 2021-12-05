@@ -1,12 +1,56 @@
-import "./lib/jsts.min.js";
+import Coordinate from 'jsts/org/locationtech/jts/geom/Coordinate.js';
+import GeometryFactory from 'jsts/org/locationtech/jts/geom/GeometryFactory.js';
+import MultiPolygon from 'jsts/org/locationtech/jts/geom/MultiPolygon';
+import PrecisionModel from 'jsts/org/locationtech/jts/geom/PrecisionModel.js';
+import WKTReader from 'jsts/org/locationtech/jts/io/WKTReader.js';
+import WKTWriter from 'jsts/org/locationtech/jts/io/WKTWriter.js';
+import {BufferOp} from 'jsts/org/locationtech/jts/operation/buffer';
+import OverlayOp from 'jsts/org/locationtech/jts/operation/overlay/OverlayOp.js'
+import RelateOp from 'jsts/org/locationtech/jts/operation/relate/RelateOp.js'
+import UnionOp from 'jsts/org/locationtech/jts/operation/union/UnionOp.js'
+
+// TODO: various geometry patched functions don't show up in node module
+// see jsts monkey.js for patching
+
+export const intersects = (g1, g2) => {
+  return RelateOp.intersects(g1, g2);  
+}
+
+export const touches = (g1, g2) => {
+  return RelateOp.touches(g1, g2)
+};
+
+export const union = (g1, g2) => {
+  return UnionOp.union(g1, g2);
+};
+
+export const intersection = (g1, g2) => {
+  return OverlayOp.intersection(g1, g2);
+};
+
+export const contains = (g1, g2) => {
+  return RelateOp.contains(g1, g2);
+};
+
+export const expandGeometry = (geometry, distance) => {
+  return BufferOp.bufferOp(geometry, distance).norm();
+};
+
+export const isMultiPolygon = (geometry) => {
+  return geometry instanceof MultiPolygon;
+}
+
+export const isPolygon = (geometry) => {
+  return geometry instanceof Polygon;
+}
 
 export const geometryToWkt = (geometry) => {
   if (!geometry) {
     return null;
   }
-  const precisionModel = new jsts.geom.PrecisionModel();
-  const factory = new jsts.geom.GeometryFactory(precisionModel);
-  const wktWriter = new jsts.io.WKTWriter(factory);
+  const precisionModel = new PrecisionModel();
+  const factory = new GeometryFactory(precisionModel);
+  const wktWriter = new WKTWriter(factory);
   return wktWriter.write(geometry);
 };
 
@@ -14,13 +58,13 @@ export const wktToGeometry = (wkt) => {
   if (!wkt) {
     return null;
   }
-  const wktReader = new jsts.io.WKTReader(); 
+  const wktReader = new WKTReader(); 
   return wktReader.read(wkt);
 };
 
 // {x, y, height, width}
 export const rectToPolygon = (rect) => {
-  const reader = new jsts.io.WKTReader(); 
+  const reader = new WKTReader(); 
   const polyString = rectToWKTPolygonString(rect);
   return reader.read(polyString);
 };
@@ -39,16 +83,16 @@ export const rectToWKTPolygonString = (rect) => {
 };
 
 export const twoPointsToLineString = (x1, y1, x2, y2) => {
-  return new jsts.geom.GeometryFactory().createLineString([
-    new jsts.geom.Coordinate(x1, y1),
-    new jsts.geom.Coordinate(x2, y2),
+  return new GeometryFactory().createLineString([
+    new Coordinate(x1, y1),
+    new Coordinate(x2, y2),
     ]);
 };
 
 // [[x,y]...]
 export const pointsToPolygon = (points) => {
-  const coords = points.map(p => new jsts.geom.Coordinate(p[0], p[1]));
-  return new jsts.geom.GeometryFactory().createPolygon(coords);
+  const coords = points.map(p => new Coordinate(p[0], p[1]));
+  return new GeometryFactory().createPolygon(coords);
 };
 
 export const slope = (x1, y1, x2, y2) => {

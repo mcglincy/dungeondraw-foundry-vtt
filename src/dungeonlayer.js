@@ -1,5 +1,5 @@
+import * as constants from "./constants.js";
 import { Dungeon } from "./dungeon.js";
-import { DungeonDraw } from "./dungeondraw.js";
 
 
 const FOLDER_NAME = "Dungeon Draw";
@@ -8,7 +8,7 @@ const findDungeonEntryAndNote = () => {
   for (const [key, note] of canvas.scene.notes.entries()) {
     const journalEntry = game.journal.get(note.data.entryId);
     if (journalEntry) {
-      const flag = journalEntry.getFlag(DungeonDraw.MODULE_NAME, "dungeonVersion");
+      const flag = journalEntry.getFlag(constants.MODULE_NAME, "dungeonVersion");
       if (flag) {
         return {journalEntry, note};
       }
