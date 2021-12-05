@@ -343,11 +343,8 @@ const drawPolygonRoom = (floorGfx, interiorShadowGfx, wallGfx, config, poly) => 
     // that sometimes leaves an unshadowed or lighter pixel line/area next to the wall.
     // To (partially) work around that, draw a wider shadow from the middle of the wall, rather than inside.
     interiorShadowGfx.lineStyle({
-<<<<<<< Updated upstream
-      width: config.interiorShadowThickness,
-=======
+//      width: config.interiorShadowThickness,
       width: config.wallThickness + config.interiorShadowThickness,
->>>>>>> Stashed changes
       color: PIXI.utils.string2hex(config.interiorShadowColor),
       alignment: 0.5,  // middle
       join: "round"
