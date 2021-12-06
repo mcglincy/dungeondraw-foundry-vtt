@@ -20,7 +20,7 @@
     "build": "rollup --config",
     "lint": "eslint src",
     "precommit": "npm run validate",
-    "prepush": "npm run validate",
+    "prepare": "husky install",
     "pretty": "prettier --write .",
     "validate": "npm-run-all pretty lint",
     "watch": "rollup --config --watch"
