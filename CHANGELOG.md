@@ -1,9 +1,8 @@
 # 0.13.0
 
-- Use rollup to package Dungeon Draw as a single minified js file. Saves ~200kb download size.
+- Use rollup to package Dungeon Draw as a minified js bundle. Saves ~200kb download size.
 - Produce sourcemap to go along with js bundle.
-- Add prettier for code formatting.
-- Add eslint for code linting.
+- Project tooling: add prettier, eslint, and presubmit.
 
 # 0.12.1
 
