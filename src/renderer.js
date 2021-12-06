@@ -536,7 +536,6 @@ const drawDoor = (interiorShadowGfx, wallGfx, config, door) => {
   }
 };
 
-
 const drawSecretDoor = (interiorShadowGfx, wallGfx, config, door) => {
   const isGM = game.user.isGM;
   if (

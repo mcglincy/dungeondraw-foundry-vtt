@@ -1,7 +1,6 @@
 import * as constants from "./constants.js";
 import * as geo from "./geo-utils.js";
 
-
 export const makeWalls = async (state) => {
   if (!game.user.isGM) {
     // need GM privs to delete/create walls
