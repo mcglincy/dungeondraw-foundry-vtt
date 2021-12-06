@@ -2,36 +2,25 @@
  * 
  * NPM: https://www.npmjs.com/package/@typhonjs-fvtt/eslint-config-foundry.js
  */
-
 {
-    "env": {
-        "browser": true,
-        "es2021": true,
-        "jquery": true,
-    },
-    "extends": [
-      "eslint:recommended",
-      "@typhonjs-fvtt/eslint-config-foundry.js"
-    ],
-    "globals": {
-      "PIXI": "readonly"
-    },
-    "parserOptions": {
-        "ecmaVersion": 13,
-        "sourceType": "module"
-    },
-    "rules": {
-    }
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "jquery": true,
+  },
+  "extends": [
+    "eslint:recommended",
+    "@typhonjs-fvtt/eslint-config-foundry.js"
+  ],
+  "globals": {
+    "PIXI": "readonly"
+  },
+  "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+  },
+  "rules": {
+    // TODO: decide if we want no-shadow. Will likely need to omit minified.
+    //"no-shadow": ["error", { "builtinGlobals": true, "hoist": "all", "allow": ["event"] }]
+  }
 }
-// {
-//   "extends": "@typhonjs-fvtt/eslint-config-foundry.js"
-
-//   // Prevents overwriting any built in globals particularly from `@typhonjs-fvtt/eslint-config-foundry.js`. 
-//   // `event / window.event` shadowing is allowed due to being a common variable name and an uncommonly used browser 
-//   // feature.
-//   //
-//   // Note: if you are using Typescript you must use `@typescript-eslint/no-shadow`
-//   "rules": {
-//     "no-shadow": ["error", { "builtinGlobals": true, "hoist": "all", "allow": ["event"] }]
-//   }
-// }
