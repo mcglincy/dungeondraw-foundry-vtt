@@ -18,11 +18,12 @@
   },
   "scripts": {
     "build": "rollup --config",
+    "check": "prettier --check .",
     "lint": "eslint src",
     "precommit": "npm run validate",
     "prepare": "husky install",
     "pretty": "prettier --write .",
-    "validate": "npm-run-all pretty lint",
+    "validate": "npm-run-all check lint",
     "watch": "rollup --config --watch"
   }
 }
