@@ -4,7 +4,7 @@ import { Dungeon } from "./dungeon.js";
 const FOLDER_NAME = "Dungeon Draw";
 
 const findDungeonEntryAndNote = () => {
-  for (const [key, note] of canvas.scene.notes.entries()) {
+  for (const note of canvas.scene.notes) {
     const journalEntry = game.journal.get(note.data.entryId);
     if (journalEntry) {
       const flag = journalEntry.getFlag(
@@ -172,7 +172,7 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   async createNewDungeon() {
-    const { journalEntry, note } = await createDungeonEntryAndNote();
+    await createDungeonEntryAndNote();
     await this.loadDungeon();
   }
 

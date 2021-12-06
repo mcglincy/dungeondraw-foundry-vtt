@@ -186,12 +186,13 @@ export class ConfigSheet extends FormApplication {
     // deal with possible name collisions
     let num = 1;
     let newName;
-    while (true) {
+    let done = false;
+    while (!done) {
       newName = `${oldTheme.name} (${num})`;
       if (newName in customThemes) {
         num++;
       } else {
-        break;
+        done = true;
       }
     }
     newTheme.name = newName;

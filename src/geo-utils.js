@@ -1,6 +1,7 @@
 import Coordinate from "jsts/org/locationtech/jts/geom/Coordinate.js";
 import GeometryFactory from "jsts/org/locationtech/jts/geom/GeometryFactory.js";
 import MultiPolygon from "jsts/org/locationtech/jts/geom/MultiPolygon";
+import Polygon from "jsts/org/locationtech/jts/geom/MultiPolygon";
 import PrecisionModel from "jsts/org/locationtech/jts/geom/PrecisionModel.js";
 import WKTReader from "jsts/org/locationtech/jts/io/WKTReader.js";
 import WKTWriter from "jsts/org/locationtech/jts/io/WKTWriter.js";

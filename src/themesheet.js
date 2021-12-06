@@ -1,6 +1,6 @@
 // TODO: fix this circular dependency
 // import { ConfigSheet } from "./configsheet.js";
-import { getCustomThemes, setCustomThemes, themes } from "./themes.js";
+import { getCustomThemes, setCustomThemes } from "./themes.js";
 
 /**
  * Sheet for Theme editing.

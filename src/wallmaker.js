@@ -1,7 +1,6 @@
 import * as constants from "./constants.js";
 import * as geo from "./geo-utils.js";
 
-const FLAG_NAME = "";
 
 export const makeWalls = async (state) => {
   if (!game.user.isGM) {

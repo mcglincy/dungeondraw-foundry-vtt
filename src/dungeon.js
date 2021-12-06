@@ -340,7 +340,7 @@ export class Dungeon extends PlaceableObject {
   async addThemeArea(points) {
     try {
       // make sure we can create a polygon from the points
-      const poly = geo.pointsToPolygon(points);
+      geo.pointsToPolygon(points);
     } catch (error) {
       console.log(error);
       return;
