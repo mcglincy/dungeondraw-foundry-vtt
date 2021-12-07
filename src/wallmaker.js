@@ -1,5 +1,4 @@
 import * as constants from "./constants.js";
-import * as geo from "./geo-utils.js";
 
 export const makeWalls = async (state) => {
   if (!game.user.isGM) {
@@ -8,11 +7,7 @@ export const makeWalls = async (state) => {
   }
   await deleteAllWalls();
   if (state.geometry) {
-    if (geo.isMultiPolygon(state.geometry)) {
-      await makeWallsFromMulti(state.geometry);
-    } else if (geo.isPolygon(state.geometry)) {
-      await makeWallsFromPoly(state.geometry);
-    }
+    await makeWallsFromMulti(state.geometry);
   }
   await makeInteriorWalls(state.interiorWalls);
   await makeDoors(state.doors);

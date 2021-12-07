@@ -57,5 +57,7 @@
   "DD.ThemePainterTheme": "Theme to Paint",
   "DD.ThemeSheetTitle": "Theme Config",
   "DD.WallColor": "Wall Color",
+  "DD.WallTexture": "Wall Texture",
+  "DD.WallTextureTint": "Wall Texture Tint",
   "DD.WallThickness": "Wall Thickness"
 }

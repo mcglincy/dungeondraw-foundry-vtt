@@ -62,11 +62,7 @@ const renderPass = async (container, state, options = {}) => {
 
     // use a mask to clip the tiled background and interior shadows
     const clipMask = new PIXI.Graphics();
-    if (geo.isMultiPolygon(state.geometry)) {
-      drawMultiPolygonMask(clipMask, state.geometry);
-    } else if (geo.isPolygon(state.geometry)) {
-      drawPolygonMask(clipMask, state.geometry);
-    }
+    drawMultiPolygonMask(clipMask, state.geometry);
     container.addChild(clipMask);
 
     interiorShadowGfx.mask = clipMask;
@@ -83,48 +79,72 @@ const renderPass = async (container, state, options = {}) => {
       await addTiledBackground(
         container,
         clipMask,
-        state.config,
+        state.config.floorTexture,
+        state.config.floorTextureTint,
         state.geometry,
-        options.clipPoly
+        options.clipPoly,
+        0
       );
     }
 
     // draw the dungeon geometry room(s)
-    if (geo.isMultiPolygon(state.geometry)) {
-      drawMultiPolygonRoom(
-        floorGfx,
-        interiorShadowGfx,
-        wallGfx,
-        state.config,
-        state.geometry
-      );
-    } else if (geo.isPolygon(state.geometry)) {
-      drawPolygonRoom(
-        floorGfx,
-        interiorShadowGfx,
-        wallGfx,
-        state.config,
-        state.geometry
-      );
-    }
+    drawMultiPolygonRoom(
+      floorGfx,
+      interiorShadowGfx,
+      wallGfx,
+      state.config,
+      state.geometry
+    );
   }
+
+  // TODO: need to apply texture to interior walls, too
+
+  const wallMask = new PIXI.Graphics();
+  const maskConfig = JSON.parse(JSON.stringify(state.config));
+  maskConfig.wallColor = "#000000";
 
   // draw interior walls
   for (let wall of state.interiorWalls) {
-    drawInteriorWall(interiorShadowGfx, wallGfx, state.config, wall);
+    drawInteriorWallShadow(interiorShadowGfx, state.config, wall);
+    if (state.config.wallTexture) {
+      drawInteriorWall(wallMask, maskConfig, wall);
+    } else {
+      drawInteriorWall(wallGfx, state.config, wall);
+    }
   }
 
   // draw doors
   for (let door of state.doors) {
-    drawDoor(interiorShadowGfx, wallGfx, state.config, door);
+    drawDoorShadow(interiorShadowGfx, state.config, door);
+    drawDoor(wallGfx, wallMask, state.config, door);
   }
   for (let secretDoor of state.secretDoors) {
-    drawSecretDoor(interiorShadowGfx, wallGfx, state.config, secretDoor);
+    drawInteriorWallShadow(interiorShadowGfx, state.config, secretDoor);
+    drawSecretDoor(wallGfx, wallMask, state.config, secretDoor);
   }
 
   // layer everything properly
   container.addChild(floorGfx);
   container.addChild(interiorShadowGfx);
+  if (state.config.wallTexture) {
+    drawMultiPolygonWallMask(
+      wallMask,
+      state.geometry,
+      state.config.wallThickness
+    );
+    container.addChild(wallMask);
+    await addTiledBackground(
+      container,
+      wallMask,
+      state.config.wallTexture,
+      state.config.wallTextureTint,
+      state.geometry,
+      options.clipPoly,
+      // expand by our wall thickness, so walls spilling over don't get clipped
+      // TODO: this seems maybe a hacky way to do this
+      state.config.wallThickness
+    );
+  }
   container.addChild(wallGfx);
 };
 
@@ -176,13 +196,9 @@ const addExteriorShadow = (container, config, geometry) => {
   ) {
     return;
   }
-  if (geo.isMultiPolygon(geometry)) {
-    for (let i = 0; i < geometry.getNumGeometries(); i++) {
-      const poly = geometry.getGeometryN(i);
-      addExteriorShadowForPoly(container, config, poly);
-    }
-  } else if (geo.isPolygon(geometry)) {
-    addExteriorShadowForPoly(container, config, geometry);
+  for (let i = 0; i < geometry.getNumGeometries(); i++) {
+    const poly = geometry.getGeometryN(i);
+    addExteriorShadowForPoly(container, config, poly);
   }
 };
 
@@ -208,15 +224,17 @@ const addExteriorShadowForPoly = (container, config, poly) => {
   container.addChild(outerShadow);
 };
 
-/** Add TilingSprites for floor texture. */
+/** Add TilingSprites for floor or wall texture. */
 const addTiledBackground = async (
   container,
   mask,
-  config,
+  texturePath,
+  textureTint,
   geometry,
-  clipPoly
+  clipPoly,
+  expandBy
 ) => {
-  const texture = await getTexture(config.floorTexture);
+  const texture = await getTexture(texturePath);
   if (!texture?.valid) {
     return;
   }
@@ -240,16 +258,19 @@ const addTiledBackground = async (
         [col * textureSize, (row + 1) * textureSize],
         [col * textureSize, row * textureSize],
       ]);
+      // TODO: this seems maybe a hacky way to do this
+      // TODO: this is over-creating sprites, since we may hit multiple times
+      const expanded = geo.expandGeometry(rect, expandBy);
       if (
-        (!clipPoly || geo.intersects(clipPoly, rect)) &&
-        geo.intersects(geometry, rect) &&
-        !geo.touches(geometry, rect)
+        (!clipPoly || geo.intersects(clipPoly, expanded)) &&
+        geo.intersects(geometry, expanded) &&
+        !geo.touches(geometry, expanded)
       ) {
         const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
         sprite.x = col * textureSize;
         sprite.y = row * textureSize;
-        if (config.floorTextureTint) {
-          sprite.tint = foundry.utils.colorStringToHex(config.floorTextureTint);
+        if (textureTint) {
+          sprite.tint = foundry.utils.colorStringToHex(textureTint);
         }
         maybeStartSpriteVideo(sprite);
         bg.addChild(sprite);
@@ -258,62 +279,6 @@ const addTiledBackground = async (
   }
   bg.mask = mask;
   container.addChild(bg);
-};
-
-const rectangleForSegment = (thickness, x1, y1, x2, y2) => {
-  const slope = geo.slope(x1, y1, x2, y2);
-  const rectDelta = thickness / 2.0;
-
-  // slope is delta y / delta x
-  if (slope === 0) {
-    // door is horizontal
-    return [
-      x1,
-      y1 + rectDelta,
-      x2,
-      y1 + rectDelta,
-      x2,
-      y1 - rectDelta,
-      x1,
-      y1 - rectDelta,
-    ];
-  }
-  if (slope === Infinity) {
-    // door is vertical
-    return [
-      x1 - rectDelta,
-      y1,
-      x1 - rectDelta,
-      y2,
-      x2 + rectDelta,
-      y2,
-      x2 + rectDelta,
-      y1,
-    ];
-  }
-
-  // https://math.stackexchange.com/questions/656500/given-a-point-slope-and-a-distance-along-that-slope-easily-find-a-second-p/656512
-  const theta = Math.atan(slope);
-  // flipped dx/dy and +/- to make things work
-  const dy = rectDelta * Math.cos(theta);
-  const dx = rectDelta * Math.sin(theta);
-  return [
-    // lower right - more x, more y
-    x1 - dx,
-    y1 + dy,
-    // upper right - more x, less y
-    x2 - dx,
-    y2 + dy,
-    // upper left - less x, less y
-    x2 + dx,
-    y2 - dy,
-    // lower left - less x, more y
-    x1 + dx,
-    y1 - dy,
-    // close the polygon
-    x1 + dy,
-    y1 - dx,
-  ];
 };
 
 const drawPolygonMask = (gfx, poly) => {
@@ -340,6 +305,42 @@ const drawMultiPolygonMask = (gfx, multi) => {
   for (let i = 0; i < multi.getNumGeometries(); i++) {
     const poly = multi.getGeometryN(i);
     drawPolygonMask(gfx, poly);
+  }
+};
+
+const drawPolygonWallMask = (gfx, poly, wallThickness) => {
+  const exterior = poly.getExteriorRing();
+  const coords = exterior.getCoordinates();
+  const flatCoords = coords.map((c) => [c.x, c.y]).flat();
+  gfx.lineStyle(wallThickness, PIXI.utils.string2hex("#000000"), 1.0, 0.5);
+  gfx.drawPolygon(flatCoords);
+
+  const numHoles = poly.getNumInteriorRing();
+  // for (let i = 0; i < numHoles; i++) {
+  //   const hole = poly.getInteriorRingN(i);
+  //   const coords = hole.getCoordinates();
+  //   const flatCoords = coords.map((c) => [c.x, c.y]).flat();
+  //   gfx.beginHole();
+  //   gfx.drawPolygon(flatCoords);
+  //   gfx.endHole();
+  // }
+
+  // draw interior hole walls/shadows
+  for (let i = 0; i < numHoles; i++) {
+    const hole = poly.getInteriorRingN(i);
+    const coords = hole.getCoordinates();
+    const flatCoords = coords.map((c) => [c.x, c.y]).flat();
+
+    // draw hole wall poly
+    gfx.lineStyle(wallThickness, PIXI.utils.string2hex("#000000"), 1.0);
+    gfx.drawPolygon(flatCoords);
+  }
+};
+
+const drawMultiPolygonWallMask = (gfx, multi, wallThickness) => {
+  for (let i = 0; i < multi.getNumGeometries(); i++) {
+    const poly = multi.getGeometryN(i);
+    drawPolygonWallMask(gfx, poly, wallThickness);
   }
 };
 
@@ -402,13 +403,15 @@ const drawPolygonRoom = (
   }
 
   // draw outer wall poly
-  wallGfx.lineStyle(
-    config.wallThickness,
-    PIXI.utils.string2hex(config.wallColor),
-    1.0,
-    0.5
-  );
-  wallGfx.drawPolygon(flatCoords);
+  if (!config.wallTexture) {
+    wallGfx.lineStyle(
+      config.wallThickness,
+      PIXI.utils.string2hex(config.wallColor),
+      1.0,
+      0.5
+    );
+    wallGfx.drawPolygon(flatCoords);
+  }
 
   // draw interior hole walls/shadows
   for (let i = 0; i < numHoles; i++) {
@@ -420,19 +423,19 @@ const drawPolygonRoom = (
     interiorShadowGfx.drawPolygon(flatCoords);
 
     // draw hole wall poly
-    wallGfx.lineStyle(
-      config.wallThickness,
-      PIXI.utils.string2hex(config.wallColor),
-      1.0
-    );
-    wallGfx.drawPolygon(flatCoords);
+    if (!config.wallTexture) {
+      wallGfx.lineStyle(
+        config.wallThickness,
+        PIXI.utils.string2hex(config.wallColor),
+        1.0
+      );
+      wallGfx.drawPolygon(flatCoords);
+    }
   }
 };
 
 // [x1, y1, x2, y2]
-const drawInteriorWall = (interiorShadowGfx, wallGfx, config, wall) => {
-  drawInteriorWallShadow(interiorShadowGfx, config, wall);
-
+const drawInteriorWall = (wallGfx, config, wall) => {
   wallGfx.lineStyle({
     width: config.wallThickness,
     color: PIXI.utils.string2hex(config.wallColor),
@@ -458,7 +461,7 @@ const drawInteriorWallShadow = (gfx, config, wall) => {
 };
 
 // [x1, y1, x2, y2]
-const drawDoor = (interiorShadowGfx, wallGfx, config, door) => {
+const drawDoor = (wallGfx, wallMask, config, door) => {
   const totalLength = geo.distanceBetweenPoints(
     door[0],
     door[1],
@@ -480,7 +483,7 @@ const drawDoor = (interiorShadowGfx, wallGfx, config, door) => {
     door[0] + deltaX * rectEndFraction,
     door[1] + deltaY * rectEndFraction,
   ];
-  const doorRect = rectangleForSegment(
+  const doorRect = geo.rectangleForSegment(
     config.doorThickness,
     jamb1End[0],
     jamb1End[1],
@@ -488,23 +491,30 @@ const drawDoor = (interiorShadowGfx, wallGfx, config, door) => {
     rectEnd[1]
   );
 
-  // draw drop shadows
-  drawDoorShadow(interiorShadowGfx, config, door);
-
   // draw door
+  const wallColor = config.wallTexture ? "#000000" : config.wallColor;
   wallGfx.lineStyle({
     width: config.wallThickness,
-    color: PIXI.utils.string2hex(config.wallColor),
+    color: PIXI.utils.string2hex(wallColor),
     alpha: 1.0,
     alignment: 0.5, // middle
     cap: "round",
   });
-  wallGfx.moveTo(door[0], door[1]);
-  // left jamb
-  wallGfx.lineTo(jamb1End[0], jamb1End[1]);
-  // right jamb
-  wallGfx.moveTo(rectEnd[0], rectEnd[1]);
-  wallGfx.lineTo(door[2], door[3]);
+  if (config.wallTexture) {
+    wallMask.moveTo(door[0], door[1]);
+    // left jamb
+    wallMask.lineTo(jamb1End[0], jamb1End[1]);
+    // right jamb
+    wallMask.moveTo(rectEnd[0], rectEnd[1]);
+    wallMask.lineTo(door[2], door[3]);
+  } else {
+    wallGfx.moveTo(door[0], door[1]);
+    // left jamb
+    wallGfx.lineTo(jamb1End[0], jamb1End[1]);
+    // right jamb
+    wallGfx.moveTo(rectEnd[0], rectEnd[1]);
+    wallGfx.lineTo(door[2], door[3]);
+  }
   // door rectangle
   if (config.doorFillOpacity) {
     wallGfx.beginFill(
@@ -536,13 +546,14 @@ const drawDoor = (interiorShadowGfx, wallGfx, config, door) => {
   }
 };
 
-const drawSecretDoor = (interiorShadowGfx, wallGfx, config, door) => {
+const drawSecretDoor = (wallGfx, wallMask, config, door) => {
   const isGM = game.user.isGM;
   if (
     (isGM && config.secretDoorStyleGM === "door") ||
     (!isGM && config.secretDoorStylePlayer === "door")
   ) {
-    drawDoor(interiorShadowGfx, wallGfx, config, door);
+    // TODO: need to draw door shadow. where?
+    drawDoor(wallGfx, wallMask, config, door);
     return;
   }
 
@@ -568,7 +579,7 @@ const drawSecretDoor = (interiorShadowGfx, wallGfx, config, door) => {
     door[0] + deltaX * rectEndFraction,
     door[1] + deltaY * rectEndFraction,
   ];
-  const doorRect = rectangleForSegment(
+  const doorRect = geo.rectangleForSegment(
     30.0,
     jamb1End[0],
     jamb1End[1],
@@ -576,33 +587,36 @@ const drawSecretDoor = (interiorShadowGfx, wallGfx, config, door) => {
     rectEnd[1]
   );
 
-  // draw drop shadows
-  drawInteriorWallShadow(interiorShadowGfx, config, door);
-
   // draw a wall across the door opening
+  const wallColor = config.wallTexture ? "#000000" : config.wallColor;
   wallGfx.lineStyle({
     width: config.wallThickness,
-    color: PIXI.utils.string2hex(config.wallColor),
+    color: PIXI.utils.string2hex(wallColor),
     alpha: 1.0,
     alignment: 0.5, // middle
     cap: "round",
   });
-  wallGfx.moveTo(door[0], door[1]);
-  wallGfx.lineTo(door[2], door[3]);
+  if (config.wallTexture) {
+    wallMask.moveTo(door[0], door[1]);
+    wallMask.lineTo(door[2], door[3]);
+  } else {
+    wallGfx.moveTo(door[0], door[1]);
+    wallGfx.lineTo(door[2], door[3]);
+  }
 
   // possibly draw an additional S-shape through the wall
   if (
     (isGM && config.secretDoorStyleGM === "secret") ||
     (!isGM && config.secretDoorStylePlayer === "secret")
   ) {
-    const midRect = rectangleForSegment(
+    const midRect = geo.rectangleForSegment(
       50.0,
       jamb1End[0],
       jamb1End[1],
       middle[0],
       middle[1]
     );
-    const midRect2 = rectangleForSegment(
+    const midRect2 = geo.rectangleForSegment(
       50.0,
       middle[0],
       middle[1],
@@ -658,7 +672,7 @@ const drawDoorShadow = (gfx, config, door) => {
     door[0] + deltaX * rectEndFraction,
     door[1] + deltaY * rectEndFraction,
   ];
-  const doorRect = rectangleForSegment(
+  const doorRect = geo.rectangleForSegment(
     config.doorThickness,
     jamb1End[0],
     jamb1End[1],

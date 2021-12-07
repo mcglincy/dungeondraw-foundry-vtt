@@ -23,6 +23,8 @@ export const defaultConfig = () => {
     secretDoorStyleGM: "secret",
     secretDoorStylePlayer: "wall",
     wallColor: "#000000",
+    wallTexture: "",
+    wallTextureTint: "",
     wallThickness: 8,
   };
 };

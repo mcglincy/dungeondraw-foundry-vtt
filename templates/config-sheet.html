@@ -388,6 +388,47 @@
         />
       </div>
     </div>
+    <div class="form-group">
+      <label>{{localize "DD.WallTexture"}}</label>
+      <div class="form-fields">
+        <button
+          type="button"
+          class="file-picker"
+          data-type="imagevideo"
+          data-target="wallTexture"
+          title="Browse Files"
+          tabindex="-1"
+        >
+          <i class="fas fa-file-import fa-fw"></i>
+        </button>
+        <input
+          class="image"
+          type="text"
+          name="wallTexture"
+          value="{{config.wallTexture}}"
+          data-dtype="String"
+          placeholder="File Path"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.WallTextureTint"}}</label>
+      <div class="form-fields">
+        <input
+          type="text"
+          class="color"
+          name="wallTextureTint"
+          value="{{config.wallTextureTint}}"
+          data-dtype="String"
+        />
+        <input
+          type="color"
+          value="{{config.wallTextureTint}}"
+          data-edit="wallTextureTint"
+          data-dtype="String"
+        />
+      </div>
+    </div>
     <hr />
     <div style="display: flex">
       <button type="button" name="resetDefault" value="1">
