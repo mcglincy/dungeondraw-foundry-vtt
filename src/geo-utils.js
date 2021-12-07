@@ -1,7 +1,5 @@
 import Coordinate from "jsts/org/locationtech/jts/geom/Coordinate.js";
 import GeometryFactory from "jsts/org/locationtech/jts/geom/GeometryFactory.js";
-import MultiPolygon from "jsts/org/locationtech/jts/geom/MultiPolygon";
-import Polygon from "jsts/org/locationtech/jts/geom/Polygon";
 import PrecisionModel from "jsts/org/locationtech/jts/geom/PrecisionModel.js";
 import WKTReader from "jsts/org/locationtech/jts/io/WKTReader.js";
 import WKTWriter from "jsts/org/locationtech/jts/io/WKTWriter.js";
@@ -12,6 +10,10 @@ import UnionOp from "jsts/org/locationtech/jts/operation/union/UnionOp.js";
 
 // TODO: various geometry patched functions don't show up in node module
 // see jsts monkey.js for patching
+
+export const difference = (g1, g2) => {
+  return OverlayOp.difference(g1, g2);
+};
 
 export const intersects = (g1, g2) => {
   return RelateOp.intersects(g1, g2);
@@ -35,14 +37,6 @@ export const contains = (g1, g2) => {
 
 export const expandGeometry = (geometry, distance) => {
   return BufferOp.bufferOp(geometry, distance).norm();
-};
-
-export const isMultiPolygon = (geometry) => {
-  return geometry instanceof MultiPolygon;
-};
-
-export const isPolygon = (geometry) => {
-  return geometry instanceof Polygon;
 };
 
 export const geometryToWkt = (geometry) => {
@@ -150,4 +144,60 @@ export const greaterPoint = (x1, y1, x2, y2) => {
     return [x1, y1];
   }
   return [x2, y2];
+};
+
+export const rectangleForSegment = (thickness, x1, y1, x2, y2) => {
+  const m = slope(x1, y1, x2, y2);
+  const rectDelta = thickness / 2.0;
+
+  // slope is delta y / delta x
+  if (m === 0) {
+    // door is horizontal
+    return [
+      x1,
+      y1 + rectDelta,
+      x2,
+      y1 + rectDelta,
+      x2,
+      y1 - rectDelta,
+      x1,
+      y1 - rectDelta,
+    ];
+  }
+  if (m === Infinity) {
+    // door is vertical
+    return [
+      x1 - rectDelta,
+      y1,
+      x1 - rectDelta,
+      y2,
+      x2 + rectDelta,
+      y2,
+      x2 + rectDelta,
+      y1,
+    ];
+  }
+
+  // https://math.stackexchange.com/questions/656500/given-a-point-slope-and-a-distance-along-that-slope-easily-find-a-second-p/656512
+  const theta = Math.atan(m);
+  // flipped dx/dy and +/- to make things work
+  const dy = rectDelta * Math.cos(theta);
+  const dx = rectDelta * Math.sin(theta);
+  return [
+    // lower right - more x, more y
+    x1 - dx,
+    y1 + dy,
+    // upper right - more x, less y
+    x2 - dx,
+    y2 + dy,
+    // upper left - less x, less y
+    x2 + dx,
+    y2 - dy,
+    // lower left - less x, more y
+    x1 + dx,
+    y1 - dy,
+    // close the polygon
+    x1 + dy,
+    y1 - dx,
+  ];
 };

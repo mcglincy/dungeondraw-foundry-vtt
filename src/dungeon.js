@@ -164,7 +164,7 @@ export class Dungeon extends PlaceableObject {
     const rectPoly = geo.rectToPolygon(rect);
     const doorsToKeep = this.history[this.historyIndex].doors.filter((d) => {
       const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
-      return !rectPoly.intersects(doorPoly);
+      return !geo.intersects(rectPoly, doorPoly);
     });
     if (doorsToKeep.length != this.history[this.historyIndex].doors.length) {
       const newState = this.history[this.historyIndex].clone();
@@ -218,7 +218,7 @@ export class Dungeon extends PlaceableObject {
     const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(
       (w) => {
         const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
-        return !rectPoly.intersects(wallPoly);
+        return !geo.intersects(rectPoly, wallPoly);
       }
     );
     if (
@@ -236,15 +236,15 @@ export class Dungeon extends PlaceableObject {
     const oldState = this.history[this.historyIndex];
     const doorsToKeep = oldState.doors.filter((d) => {
       const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
-      return !rectPoly.intersects(doorPoly);
+      return !geo.intersects(rectPoly, doorPoly);
     });
     const secretDoorsToKeep = oldState.secretDoors.filter((d) => {
       const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
-      return !rectPoly.intersects(doorPoly);
+      return !geo.intersects(rectPoly, doorPoly);
     });
     const wallsToKeep = oldState.interiorWalls.filter((w) => {
       const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
-      return !rectPoly.intersects(wallPoly);
+      return !geo.intersects(rectPoly, wallPoly);
     });
     if (
       doorsToKeep.length != oldState.doors.length ||
@@ -286,7 +286,7 @@ export class Dungeon extends PlaceableObject {
         // also nuke any interior walls in this new poly
         const wallsToKeep = newState.interiorWalls.filter((w) => {
           const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
-          return !poly.intersects(wallPoly);
+          return !geo.intersects(poly, wallPoly);
         });
         if (wallsToKeep.length != newState.interiorWalls.length) {
           newState.interiorWalls = wallsToKeep;
@@ -312,11 +312,11 @@ export class Dungeon extends PlaceableObject {
     }
     const poly = geo.rectToPolygon(rect);
     // and if the poly intersects existing geometry
-    if (!this.history[this.historyIndex].geometry.intersects(poly)) {
+    if (!geo.intersects(this.history[this.historyIndex].geometry, poly)) {
       return;
     }
     const newState = this.history[this.historyIndex].clone();
-    newState.geometry = newState.geometry.difference(poly);
+    newState.geometry = geo.difference(newState.geometry, poly);
     await this.pushState(newState);
   }
 
@@ -363,7 +363,7 @@ export class Dungeon extends PlaceableObject {
       (a) => {
         try {
           const areaPoly = geo.pointsToPolygon(a.points);
-          return !rectPoly.intersects(areaPoly);
+          return !geo.intersects(rectPoly, areaPoly);
         } catch (error) {
           console.log(error);
           return false;
