@@ -285,7 +285,9 @@ export const themes = {
       floorTexture:
         "modules/dungeon-draw/assets/textures/Old_Wooden_Plank_Seamless_Texture_765.jpg",
       wallColor: "#332211",
-      wallThickness: 10,
+      wallTexture: "modules/dungeon-draw/assets/textures/Bark_002_bw.jpg",
+      wallTextureTint: "#7e5935",
+      wallThickness: 15,
     }),
   },
 };
