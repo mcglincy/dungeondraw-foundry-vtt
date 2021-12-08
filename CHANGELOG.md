@@ -2,6 +2,7 @@
 
 - Add config settings for wall texture and wall texture tint.
 - Add config setting for door line thickness, separate from wall thickness.
+- Moved Save new Custom Theme to theme tab.
 - Project tooling: use rollup to package Dungeon Draw as a minified js bundle. Saves ~200kb download size.
 - Project tooling: add prettier, eslint, and presubmit checks.
 

@@ -15,23 +15,6 @@
   <!-- Settings Tab -->
   <div class="tab" data-tab="settings">
     <div class="form-group">
-      <label>{{localize "DD.SaveAsCustomTheme"}}</label>
-      <div class="form-fields">
-        <input
-          type="text"
-          class="saveAsThemeName"
-          name="saveAsThemeName"
-          value=""
-          placeholder='{{localize "DD.ThemeNamePlaceholder"}}'
-          data-dtype="String"
-        />
-        <button type="button" class="dd-save-as-theme-button">
-          <i class="fas fa-save"></i>
-        </button>
-      </div>
-    </div>
-    <hr />
-    <div class="form-group">
       <label>{{localize "DD.BackgroundImage"}}</label>
       <div class="form-fields">
         <button
@@ -453,6 +436,23 @@
 
   <!-- Themes Tab -->
   <div class="tab" data-tab="themes">
+    <div class="form-group">
+      <label>{{localize "DD.SaveAsCustomTheme"}}</label>
+      <div class="form-fields">
+        <input
+          type="text"
+          class="saveAsThemeName"
+          name="saveAsThemeName"
+          value=""
+          placeholder='{{localize "DD.ThemeNamePlaceholder"}}'
+          data-dtype="String"
+        />
+        <button type="button" class="dd-save-as-theme-button">
+          <i class="fas fa-save"></i>
+        </button>
+      </div>
+    </div>
+    <hr />
     <div class="dd-themes">
       <h2>{{localize "DD.CustomThemes"}}</h2>
       {{#each customThemeKeys as |themeKey|}}
