@@ -3,10 +3,11 @@ import * as constants from "./constants.js";
 export const defaultConfig = () => {
   return {
     backgroundImage: "",
-    doorThickness: 25,
     doorColor: "#000000",
     doorFillColor: "#ffffff",
     doorFillOpacity: 1.0,
+    doorLineThickness: 8,
+    doorThickness: 25,
     exteriorShadowColor: "#000000",
     exteriorShadowThickness: 20,
     exteriorShadowOpacity: 0.5,

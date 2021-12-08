@@ -82,8 +82,7 @@ const renderPass = async (container, state, options = {}) => {
         state.config.floorTexture,
         state.config.floorTextureTint,
         state.geometry,
-        options.clipPoly,
-        0
+        options.clipPoly
       );
     }
 
@@ -133,16 +132,19 @@ const renderPass = async (container, state, options = {}) => {
       state.config.wallThickness
     );
     container.addChild(wallMask);
+    // expand our geometry, so we add sprites
+    // under the half of the wall thickness that expands past the geometry
+    const expandedGeometry = geo.expandGeometry(
+      state.geometry,
+      state.config.wallThickness / 2.0
+    );
     await addTiledBackground(
       container,
       wallMask,
       state.config.wallTexture,
       state.config.wallTextureTint,
-      state.geometry,
-      options.clipPoly,
-      // expand by our wall thickness, so walls spilling over don't get clipped
-      // TODO: this seems maybe a hacky way to do this
-      state.config.wallThickness
+      expandedGeometry,
+      options.clipPoly
     );
   }
   container.addChild(wallGfx);
@@ -231,8 +233,7 @@ const addTiledBackground = async (
   texturePath,
   textureTint,
   geometry,
-  clipPoly,
-  expandBy
+  clipPoly
 ) => {
   const texture = await getTexture(texturePath);
   if (!texture?.valid) {
@@ -258,13 +259,10 @@ const addTiledBackground = async (
         [col * textureSize, (row + 1) * textureSize],
         [col * textureSize, row * textureSize],
       ]);
-      // TODO: this seems maybe a hacky way to do this
-      // TODO: this is over-creating sprites, since we may hit multiple times
-      const expanded = geo.expandGeometry(rect, expandBy);
       if (
-        (!clipPoly || geo.intersects(clipPoly, expanded)) &&
-        geo.intersects(geometry, expanded) &&
-        !geo.touches(geometry, expanded)
+        (!clipPoly || geo.intersects(clipPoly, rect)) &&
+        geo.intersects(geometry, rect) &&
+        !geo.touches(geometry, rect)
       ) {
         const sprite = new PIXI.TilingSprite(texture, textureSize, textureSize);
         sprite.x = col * textureSize;
@@ -462,6 +460,7 @@ const drawInteriorWallShadow = (gfx, config, wall) => {
 
 // [x1, y1, x2, y2]
 const drawDoor = (wallGfx, wallMask, config, door) => {
+  // calculate some door dimensions
   const totalLength = geo.distanceBetweenPoints(
     door[0],
     door[1],
@@ -491,7 +490,7 @@ const drawDoor = (wallGfx, wallMask, config, door) => {
     rectEnd[1]
   );
 
-  // draw door
+  // draw the door jamb at wall thickness, either into the texture mask or onto the wall graphics
   const wallColor = config.wallTexture ? "#000000" : config.wallColor;
   wallGfx.lineStyle({
     width: config.wallThickness,
@@ -522,9 +521,9 @@ const drawDoor = (wallGfx, wallMask, config, door) => {
       config.doorFillOpacity
     );
   }
-  // TODO: redundant/remove?
+  // door rectangle is drawn at a different line thickness
   wallGfx.lineStyle(
-    config.wallThickness,
+    config.doorLineThickness,
     PIXI.utils.string2hex(config.doorColor),
     1.0,
     0.5
@@ -651,6 +650,7 @@ const drawSecretDoor = (wallGfx, wallMask, config, door) => {
 };
 
 const drawDoorShadow = (gfx, config, door) => {
+  // TODO: DRY up these repeated dimension calculations
   const totalLength = geo.distanceBetweenPoints(
     door[0],
     door[1],
@@ -695,6 +695,14 @@ const drawDoorShadow = (gfx, config, door) => {
   // right jamb
   gfx.moveTo(jamb1End[0], jamb1End[1]);
   gfx.lineTo(door[0], door[1]);
+
+  gfx.lineStyle({
+    // wide enough to be exposed on either side
+    width: config.doorLineThickness + config.interiorShadowThickness,
+    color: PIXI.utils.string2hex(config.interiorShadowColor),
+    alignment: 0.5, // middle
+    join: "round",
+  });
 
   // door rectangle
   gfx.drawPolygon(

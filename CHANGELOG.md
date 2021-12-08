@@ -1,5 +1,7 @@
 # 0.13.0
 
+- Add support for wall textures, via a config setting.
+- Add door line thickness config setting.
 - Use rollup to package Dungeon Draw as a minified js bundle. Saves ~200kb download size.
 - Produce sourcemap to go along with js bundle.
 - Project tooling: add prettier, eslint, and presubmit.
