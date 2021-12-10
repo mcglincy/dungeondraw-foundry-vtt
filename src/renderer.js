@@ -52,49 +52,51 @@ const drawThemeAreas = async (container, state) => {
 };
 
 const renderPass = async (container, state, options = {}) => {
+  if (!state.geometry) {
+    return;
+  }
+
   const floorGfx = new PIXI.Graphics();
   const interiorShadowGfx = new PIXI.Graphics();
   const wallGfx = new PIXI.Graphics();
 
-  if (state.geometry) {
-    // maybe draw an outer surrounding blurred shadow
-    addExteriorShadow(container, state.config, state.geometry);
+  // maybe draw an outer surrounding blurred shadow
+  addExteriorShadow(container, state.config, state.geometry);
 
-    // use a mask to clip the tiled background and interior shadows
-    const clipMask = new PIXI.Graphics();
-    drawMultiPolygonMask(clipMask, state.geometry);
-    container.addChild(clipMask);
+  // use a mask to clip the tiled background and interior shadows
+  const clipMask = new PIXI.Graphics();
+  drawMultiPolygonMask(clipMask, state.geometry);
+  container.addChild(clipMask);
 
-    interiorShadowGfx.mask = clipMask;
-    // apply alpha filter once for entire shadow graphics, so overlaps aren't additive
-    const alphaFilter = new PIXI.filters.AlphaFilter(
-      state.config.interiorShadowOpacity
-    );
-    const blurFilter = new PIXI.filters.BlurFilter();
-    interiorShadowGfx.filters = [alphaFilter, blurFilter];
+  interiorShadowGfx.mask = clipMask;
+  // apply alpha filter once for entire shadow graphics, so overlaps aren't additive
+  const alphaFilter = new PIXI.filters.AlphaFilter(
+    state.config.interiorShadowOpacity
+  );
+  const blurFilter = new PIXI.filters.BlurFilter();
+  interiorShadowGfx.filters = [alphaFilter, blurFilter];
 
-    // maybe add a tiled background
-    if (state.config.floorTexture) {
-      // TODO: having both clipMask / clipPoly parameters is confusing.
-      await addTiledBackground(
-        container,
-        clipMask,
-        state.config.floorTexture,
-        state.config.floorTextureTint,
-        state.geometry,
-        options.clipPoly
-      );
-    }
-
-    // draw the dungeon geometry room(s)
-    drawMultiPolygonRoom(
-      floorGfx,
-      interiorShadowGfx,
-      wallGfx,
-      state.config,
-      state.geometry
+  // maybe add a tiled background
+  if (state.config.floorTexture) {
+    // TODO: having both clipMask / clipPoly parameters is confusing.
+    await addTiledBackground(
+      container,
+      clipMask,
+      state.config.floorTexture,
+      state.config.floorTextureTint,
+      state.geometry,
+      options.clipPoly
     );
   }
+
+  // draw the dungeon geometry room(s)
+  drawMultiPolygonRoom(
+    floorGfx,
+    interiorShadowGfx,
+    wallGfx,
+    state.config,
+    state.geometry
+  );
 
   // TODO: need to apply texture to interior walls, too
 
