@@ -1,5 +1,6 @@
 # 0.13.0
 
+- Make Dungeon Draw compatible with Foundry v9.
 - Add config settings for wall texture and wall texture tint.
 - Add config setting for door line thickness, separate from wall thickness.
 - Update Wood Planks theme to use a wall texture.
