@@ -89,7 +89,18 @@ export class DungeonDraw {
   }
 
   static getSceneControlButtons(controls) {
-    CONFIG.Canvas.layers.dungeon = DungeonLayer;
+    if (CONFIG.Canvas.layers.background?.group) {
+      // v9+ layer setup
+      CONFIG.Canvas.layers.dungeon = {
+        layerClass: DungeonLayer,
+        group: "primary",
+      };
+    } else {
+      // v8 layer setup
+      // TODO: remove this if/else once v8 is gone from existence
+      CONFIG.Canvas.layers.dungeon = DungeonLayer;
+    }
+
     CONFIG.Dungeon = {
       //documentClass: DungeonDocument,
       layerClass: DungeonLayer,
