@@ -48,6 +48,7 @@ Want some good floor textures? Check out this free Texture Pack 3 from Forgotten
 
 ## Known issues
 
+- Dungeon Draw isn't compatible with a scene background image (which will cover up the dungeon map). Dungeon Draw's map layer is below Foundry's normal background layer. This lets you use placeable background tiles as you'd expect (they appear on top of the dungeon map), but also means a scene background image appears on top of the dungeon map, too. As a workaround, you can specify a background image in the Dungeon Draw config for the particular scene, which will show your background below the dungeon map.
 - Simultaneous map editors can trample each other's changes and cause save errors. It's best to stick to one map-maker at a time (either the GM or a single player).
 - The geometry library used (JSTS) is \~500kb. I'm looking at ways to reduce the size.
 
