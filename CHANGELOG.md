@@ -1,3 +1,7 @@
+# 0.13.1
+
+- Fix bug where custom themes wouldn't get defaults for new config settings.
+
 # 0.13.0
 
 - Make Dungeon Draw compatible with Foundry v9.

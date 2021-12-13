@@ -47,7 +47,16 @@ export const getCustomThemes = () => {
       constants.MODULE_NAME,
       "customThemes"
     );
-    return JSON.parse(customThemesString);
+    const themeObj = JSON.parse(customThemesString);
+    // ensure saved custom themes get any new defaults
+    Object.keys(themeObj).forEach((key) => {
+      themeObj[key].config = foundry.utils.mergeObject(
+        defaultConfig(),
+        themeObj[key].config
+      );
+    });
+    console.log(themeObj);
+    return themeObj;
   } catch (e) {
     console.log(e);
     return {};
