@@ -55,7 +55,6 @@ export const getCustomThemes = () => {
         themeObj[key].config
       );
     });
-    console.log(themeObj);
     return themeObj;
   } catch (e) {
     console.log(e);
