@@ -3,6 +3,8 @@
 - Add support for 3D Canvas module wall flags.
 - Add "Save to Scene Background" button, useful for setting a 3D Canvas floor.
 - Change renderer to use Pixi.js polygon texture fill for floor and wall textures, rather than manually creating Sprites. This should allow small (e.g., 100x100px) textures to be performant.
+- Only show delete-all button to GM.
+- Improve Clear button confirmation dialog text.
 
 # 0.13.1
 

@@ -149,22 +149,14 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   async deleteAll() {
-    const type = this.constructor.documentName;
     if (!game.user.isGM) {
-      throw new Error(
-        `You do not have permission to delete ${type} objects from the Scene.`
-      );
+      throw new Error(`You do not have permission to clear all.`);
     }
     return Dialog.confirm({
-      title: game.i18n.localize("CONTROLS.ClearAll"),
-      content: `<p>${game.i18n.format("CONTROLS.ClearAllHint", { type })}</p>`,
-      yes: () => this._deleteAll(),
+      title: game.i18n.localize("DD.ButtonTitleClear"),
+      content: `<p>${game.i18n.localize("DD.ClearAllDialogContent")}</p>`,
+      yes: () => this.dungeon?.deleteAll(),
     });
-  }
-
-  // actually delete everything
-  async _deleteAll() {
-    this.dungeon?.deleteAll();
   }
 
   /* -------------------------------------------- */

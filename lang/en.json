@@ -17,6 +17,7 @@
   "DD.ButtonTitleThemeEraser": "Theme Eraser",
   "DD.ButtonTitleThemePainter": "Theme Painter",
   "DD.ButtonTitleUndo": "Undo",
+  "DD.ClearAllDialogContent": "Clear this scene's dungeon? This cannot be undone.",
   "DD.ConfigSheetTitle": "Dungeon Settings",
   "DD.CopyOf": "Copy of",
   "DD.CopyTheme": "Copy Theme",
