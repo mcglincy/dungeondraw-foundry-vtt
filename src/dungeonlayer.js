@@ -281,13 +281,6 @@ export class DungeonLayer extends PlaceablesLayer {
 
     // Successful drawing completion
     if (createState === 2) {
-      if (this.options.snapToGrid) {
-        // XXXX ugh
-        // const snapPos = canvas.grid.getSnappedPosition(data.x, data.y, this.gridPrecision);
-        // data.x = snapPos.x;
-        // data.y = snapPos.y;
-      }
-
       // create a new dungeon if we don't already have one
       if (!this.dungeon) {
         await this.createNewDungeon();
@@ -335,7 +328,9 @@ export class DungeonLayer extends PlaceablesLayer {
       } else if (minDistance || completePolygon) {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
+        // TODO: do we care about _chain?
         preview._chain = false;
+        // TODO: do we care about normalizing the shape? maybe for freehand curves/lines?
         const createData = this.constructor.placeableClass.normalizeShape(data);
 
         if (game.activeTool === "addpoly") {
@@ -354,6 +349,17 @@ export class DungeonLayer extends PlaceablesLayer {
           ]);
           await this.dungeon.addPolygon(offsetPoints);
         } else if (game.activeTool === "addrect") {
+          console.log(data);
+          console.log(createData);
+          if (this.options.snapToGrid) {
+            const snapPos = canvas.grid.getSnappedPosition(
+              createData.x + createData.width,
+              createData.y + createData.height,
+              this.gridPrecision
+            );
+            createData.height = snapPos.y - createData.y;
+            createData.width = snapPos.x - createData.x;
+          }
           const rect = {
             x: createData.x,
             y: createData.y,
