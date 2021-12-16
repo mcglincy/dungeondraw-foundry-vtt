@@ -24,6 +24,11 @@ export class Dungeon extends PlaceableObject {
   /** @inheritdoc */
   static embeddedName = "Drawing";
 
+  /** Convenience method to get most recent state. */
+  state() {
+    return this.history[this.historyIndex];
+  }
+
   /* -------------------------------------------- */
 
   deleteAll() {
@@ -37,8 +42,29 @@ export class Dungeon extends PlaceableObject {
     this.refresh();
   }
 
-  state() {
-    return this.history[this.historyIndex];
+  /* -------------------------------------------- */
+
+  async saveToSceneBackground() {
+    // TODO: decide if we want a folder, and if so, how to precreate
+    // const folder = "Dungeon Draw";
+    const folder = "";
+    // uncomment for jpg+compression
+    //const filename = `${canvas.scene.name}-dungeon.jpg`;
+    //const base64 = await canvas.app.renderer.extract.base64(this, "image/jpeg", 0.5);
+    const filename = `${canvas.scene.name}-dungeon.png`;
+    const base64 = await canvas.app.renderer.extract.base64(this);
+    const res = await fetch(base64);
+    const blob = await res.blob();
+    //const file = new File([blob], filename, { type: "image/jpeg" });
+    const file = new File([blob], filename, { type: "image/png" });
+    await FilePicker.upload("data", folder, file, {});
+    const path = folder ? folder + "/" + filename : filename;
+    // make sure we don't keep using a cached copy
+    TextureLoader.loader.cache.delete(path);
+    await canvas.scene.update({
+      img: path,
+    });
+    await canvas.background.draw();
   }
 
   /* -------------------------------------------- */
@@ -74,7 +100,7 @@ export class Dungeon extends PlaceableObject {
     );
     this.history = [savedState];
     this.historyIndex = 0;
-    await this.refresh();
+    this.refresh();
   }
 
   /* -------------------------------------------- */

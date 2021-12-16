@@ -4,21 +4,39 @@ import * as constants from "./constants.js";
 
 export class DungeonDraw {
   static init() {
-    console.log("***** DUNGEON DRAW *****");
-    game.settings.register(constants.MODULE_NAME, "releaseNotesVersion", {
-      name: "Last version we showed release notes.",
-      scope: "client",
-      default: "",
-      type: String,
-      config: false,
-    });
-    game.settings.register(constants.MODULE_NAME, "customThemes", {
-      name: "Custom themes.",
-      scope: "client",
-      default: "{}",
-      type: String,
-      config: false,
-    });
+    game.settings.register(
+      constants.MODULE_NAME,
+      constants.SETTING_3DCANVAS_ENABLED,
+      {
+        name: "Enable support for 3D Canvas module",
+        scope: "client",
+        default: true,
+        type: Boolean,
+        config: true,
+      }
+    );
+    game.settings.register(
+      constants.MODULE_NAME,
+      constants.SETTING_RELEASE_NOTES_VERSION,
+      {
+        name: "Last version we showed release notes.",
+        scope: "client",
+        default: "",
+        type: String,
+        config: false,
+      }
+    );
+    game.settings.register(
+      constants.MODULE_NAME,
+      constants.SETTING_CUSTOM_THEMES,
+      {
+        name: "Custom themes data.",
+        scope: "client",
+        default: "{}",
+        type: String,
+        config: false,
+      }
+    );
     game.settings.register(
       constants.MODULE_NAME,
       constants.SETTING_THEME_PAINTER_THEME,
@@ -185,11 +203,20 @@ export class DungeonDraw {
           button: true,
         },
         {
+          name: "savetoscene",
+          title: "DD.ButtonTitleSaveToSceneBackground",
+          icon: "fas fa-sign-out-alt",
+          visible: game.user.isGM,
+          onClick: async () => {
+            await canvas.dungeon.dungeon.saveToSceneBackground();
+          },
+          button: true,
+        },
+        {
           name: "clear",
           title: "DD.ButtonTitleClear",
           icon: "fas fa-trash",
-          // visible: isGM,
-          visible: true,
+          visible: game.user.isGM,
           onClick: () => canvas.dungeon.deleteAll(),
           button: true,
         },

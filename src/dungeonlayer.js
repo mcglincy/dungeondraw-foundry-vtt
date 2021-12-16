@@ -86,9 +86,20 @@ export class DungeonLayer extends PlaceablesLayer {
       name: DungeonLayer.LAYER_NAME,
       // canDragCreate: game.user.isGM,
       canDragCreate: true,
+      snapToGrid: true,
       zIndex: -1, // under tiles and background image
+      quadTree: true,
     });
   }
+
+  /**
+   * Use an adaptive precision depending on the size of the grid
+   * @type {number}
+   */
+  // get gridPrecision() {
+  //   if ( canvas.scene.data.gridType === CONST.GRID_TYPES.GRIDLESS ) return 0;
+  //   return canvas.dimensions.size >= 128 ? 16 : 8;
+  // }
 
   // TODO: figure out what documentName / embeddedName / type we should be using
   /** @inheritdoc */
@@ -228,6 +239,16 @@ export class DungeonLayer extends PlaceablesLayer {
   async _onDragLeftStart(event) {
     await super._onDragLeftStart(event);
 
+    // Snap the origin to the grid
+    const { origin, originalEvent } = event.data;
+    if (this.options.snapToGrid && !originalEvent.isShift) {
+      event.data.origin = canvas.grid.getSnappedPosition(
+        origin.x,
+        origin.y,
+        this.gridPrecision
+      );
+    }
+
     // we use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
     const data = this._getNewDrawingData(event.data.origin);
@@ -262,10 +283,19 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   async _onDragLeftDrop(event) {
+    // TODO: const, except for origin
+    console.log(event);
     const { createState, destination, origin, preview } = event.data;
 
     // Successful drawing completion
     if (createState === 2) {
+      if (this.options.snapToGrid) {
+        // XXXX ugh
+        // const snapPos = canvas.grid.getSnappedPosition(data.x, data.y, this.gridPrecision);
+        // data.x = snapPos.x;
+        // data.y = snapPos.y;
+      }
+
       // create a new dungeon if we don't already have one
       if (!this.dungeon) {
         await this.createNewDungeon();
