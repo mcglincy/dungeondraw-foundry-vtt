@@ -1,3 +1,7 @@
+# 0.14.1
+
+- Fix "Save to Scene Background" offset and padding bugs.
+
 # 0.14.0
 
 - Add snap to grid, with module setting to turn on/off. Hold shift to disable.
