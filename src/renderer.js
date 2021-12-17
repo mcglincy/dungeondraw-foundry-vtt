@@ -6,14 +6,6 @@ import "./lib/pixi-filters.min.js";
 export const render = async (container, state) => {
   container.clear();
 
-  // force container to scene dimensions
-  const sizeForcer = new PIXI.Sprite();
-  sizeForcer.height = canvas.scene.data.height;
-  sizeForcer.width = canvas.scene.data.width;
-  sizeForcer.position.x = canvas.scene.data.width * canvas.scene.data.padding;
-  sizeForcer.position.y = canvas.scene.data.height * canvas.scene.data.padding;
-  container.addChild(sizeForcer);
-
   // add a background image if specified
   await addBackgroundImage(container, state.config);
   // floor render pass, no additional clipping

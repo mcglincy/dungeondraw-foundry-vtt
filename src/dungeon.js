@@ -45,6 +45,40 @@ export class Dungeon extends PlaceableObject {
   /* -------------------------------------------- */
 
   async saveToSceneBackground() {
+    const tempContainer = new PIXI.Container();
+
+    // force container to scene dimensions
+    const sizeForcer = new PIXI.Sprite();
+    sizeForcer.height = canvas.scene.data.height;
+    sizeForcer.width = canvas.scene.data.width;
+    sizeForcer.position.x = canvas.scene.data.width * canvas.scene.data.padding;
+    sizeForcer.position.y =
+      canvas.scene.data.height * canvas.scene.data.padding;
+    tempContainer.addChild(sizeForcer);
+
+    tempContainer.addChild(this);
+
+    // clip to just the scene
+    const mask = new PIXI.Graphics();
+    const xOffset = canvas.scene.data.width * canvas.scene.data.padding;
+    const yOffset = canvas.scene.data.height * canvas.scene.data.padding;
+    const maskCoords = [
+      xOffset,
+      yOffset,
+      xOffset + canvas.scene.data.width,
+      yOffset,
+      xOffset + canvas.scene.data.width,
+      yOffset + canvas.scene.data.height,
+      xOffset,
+      yOffset + canvas.scene.data.height,
+      xOffset,
+      yOffset,
+    ];
+    mask.beginFill(PIXI.utils.string2hex("#FFFFFF"), 1.0);
+    mask.drawPolygon(maskCoords);
+    mask.endFill();
+    tempContainer.mask = mask;
+
     // TODO: decide if we want a folder, and if so, how to precreate
     // const folder = "Dungeon Draw";
     const folder = "";
@@ -52,7 +86,7 @@ export class Dungeon extends PlaceableObject {
     //const filename = `${canvas.scene.name}-dungeon.jpg`;
     //const base64 = await canvas.app.renderer.extract.base64(this, "image/jpeg", 0.5);
     const filename = `${canvas.scene.name}-dungeon.png`;
-    const base64 = await canvas.app.renderer.extract.base64(this);
+    const base64 = await canvas.app.renderer.extract.base64(tempContainer);
     const res = await fetch(base64);
     const blob = await res.blob();
     //const file = new File([blob], filename, { type: "image/jpeg" });
