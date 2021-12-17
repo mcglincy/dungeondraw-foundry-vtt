@@ -1,53 +1,11 @@
 import { ConfigSheet } from "./configsheet.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 import * as constants from "./constants.js";
+import { Settings } from "./settings";
 
 export class DungeonDraw {
   static init() {
-    game.settings.register(
-      constants.MODULE_NAME,
-      constants.SETTING_3DCANVAS_ENABLED,
-      {
-        name: "Enable support for 3D Canvas module",
-        scope: "client",
-        default: true,
-        type: Boolean,
-        config: true,
-      }
-    );
-    game.settings.register(
-      constants.MODULE_NAME,
-      constants.SETTING_RELEASE_NOTES_VERSION,
-      {
-        name: "Last version we showed release notes.",
-        scope: "client",
-        default: "",
-        type: String,
-        config: false,
-      }
-    );
-    game.settings.register(
-      constants.MODULE_NAME,
-      constants.SETTING_CUSTOM_THEMES,
-      {
-        name: "Custom themes data.",
-        scope: "client",
-        default: "{}",
-        type: String,
-        config: false,
-      }
-    );
-    game.settings.register(
-      constants.MODULE_NAME,
-      constants.SETTING_THEME_PAINTER_THEME,
-      {
-        name: "Theme painter theme key.",
-        scope: "client",
-        default: "module.cavern",
-        type: String,
-        config: false,
-      }
-    );
+    Settings.register();
   }
 
   static ready() {
@@ -62,7 +20,7 @@ export class DungeonDraw {
     const moduleVersion = game.modules.get(constants.MODULE_NAME).data.version;
     const settingsVersion = game.settings.get(
       constants.MODULE_NAME,
-      "releaseNotesVersion"
+      constants.SETTING_RELEASE_NOTES_VERSION
     );
     if (moduleVersion === settingsVersion) {
       // they've already seen it

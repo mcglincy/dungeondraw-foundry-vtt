@@ -1,4 +1,5 @@
 import * as constants from "./constants.js";
+import { Settings } from "./settings.js";
 
 export const makeWalls = async (state) => {
   if (!game.user.isGM) {
@@ -111,13 +112,6 @@ const makeSecretDoors = async (config, doors) => {
   }
 };
 
-const threeDCanvasEnabled = () => {
-  return game.settings.get(
-    constants.MODULE_NAME,
-    constants.SETTING_3DCANVAS_ENABLED
-  );
-};
-
 const wallData = (config, x1, y1, x2, y2) => {
   const data = {
     // From Foundry API docs:
@@ -129,7 +123,7 @@ const wallData = (config, x1, y1, x2, y2) => {
   data.flags[constants.MODULE_NAME][constants.FLAG_DUNGEON_VERSION] =
     constants.DUNGEON_VERSION;
   // Maybe set Canvas3D flags
-  if (threeDCanvasEnabled()) {
+  if (Settings.threeDCanvasEnabled()) {
     data.flags["levels-3d-preview"] = {
       joinWall: true,
       wallDepth: config.wallThickness,
@@ -144,7 +138,7 @@ const doorData = (config, x1, y1, x2, y2) => {
   const data = wallData(config, x1, y1, x2, y2);
   data.door = 1; // door
   // Maybe set Canvas3D flags
-  if (threeDCanvasEnabled()) {
+  if (Settings.threeDCanvasEnabled()) {
     data.flags["levels-3d-preview"]["joinWall"] = false;
     // top and sides of door look like surrounding walls
     data.flags["levels-3d-preview"]["wallSidesTexture"] = config.wallTexture;

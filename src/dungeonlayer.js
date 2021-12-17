@@ -1,5 +1,6 @@
 import * as constants from "./constants.js";
 import { Dungeon } from "./dungeon.js";
+import { Settings } from "./settings.js";
 
 const FOLDER_NAME = "Dungeon Draw";
 
@@ -76,7 +77,6 @@ export class DungeonLayer extends PlaceablesLayer {
 
   constructor() {
     super();
-    this.dungeonContainer = null;
     this.dungeon = null;
   }
 
@@ -86,7 +86,8 @@ export class DungeonLayer extends PlaceablesLayer {
       name: DungeonLayer.LAYER_NAME,
       // canDragCreate: game.user.isGM,
       canDragCreate: true,
-      snapToGrid: true,
+      // we use our own snapToGrid setting to control snap
+      snapToGrid: Settings.snapToGrid(),
       zIndex: -1, // under tiles and background image
       quadTree: true,
     });
@@ -229,17 +230,12 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   async _onDragLeftStart(event) {
-    await super._onDragLeftStart(event);
+    // TODO: DrawingsLayer _onDragLeftStart isn't seeing the shift key press,
+    // so set it for them ourselves :P
+    event.data.originalEvent.isShift = game.keyboard.isDown("SHIFT");
 
-    // Snap the origin to the grid
-    const { origin, originalEvent } = event.data;
-    if (this.options.snapToGrid && !originalEvent.isShift) {
-      event.data.origin = canvas.grid.getSnappedPosition(
-        origin.x,
-        origin.y,
-        this.gridPrecision
-      );
-    }
+    // superclass will handle layerOptions.snapToGrid
+    await super._onDragLeftStart(event);
 
     // we use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
@@ -273,10 +269,70 @@ export class DungeonLayer extends PlaceablesLayer {
     }
   }
 
+  _maybeSnappedEndPoint(data) {
+    const endPoint = data.points[1];
+    if (Settings.snapToGrid() && !game.keyboard.isDown("SHIFT")) {
+      const snapPos = canvas.grid.getSnappedPosition(
+        endPoint[0],
+        endPoint[1],
+        this.gridPrecision
+      );
+      endPoint[0] = snapPos.x;
+      endPoint[1] = snapPos.y;
+    }
+    return endPoint;
+  }
+
+  _maybeSnappedRect(createData) {
+    // TODO: switch to downKeys() when we only support Foundry 9+
+    if (Settings.snapToGrid() && !game.keyboard.isDown("SHIFT")) {
+      const snapPos = canvas.grid.getSnappedPosition(
+        createData.x + createData.width,
+        createData.y + createData.height,
+        this.gridPrecision
+      );
+      createData.height = snapPos.y - createData.y;
+      createData.width = snapPos.x - createData.x;
+    }
+    const rect = {
+      x: createData.x,
+      y: createData.y,
+      height: createData.height,
+      width: createData.width,
+    };
+    return rect;
+  }
+
+  _maybeSnapLastPoint(createData) {
+    const length = createData.points.length;
+    if (length === 0) {
+      return;
+    }
+    if (Settings.snapToGrid() && !game.keyboard.isDown("SHIFT")) {
+      const snapPos = canvas.grid.getSnappedPosition(
+        createData.points[length - 1][0],
+        createData.points[length - 1][1],
+        this.gridPrecision
+      );
+      createData.points[length - 1][0] = snapPos.x;
+      createData.points[length - 1][1] = snapPos.y;
+    }
+  }
+
+  _autoClosePolygon(createData) {
+    const length = createData.points.length;
+    if (
+      length > 2 &&
+      (createData.points[0][0] !== createData.points[length - 1][0] ||
+        createData.points[0][1] !== createData.points[length - 1][1])
+    ) {
+      // auto-close the polygon
+      createData.points.push(createData.points[0]);
+    }
+  }
+
   /** @override */
   async _onDragLeftDrop(event) {
-    // TODO: const, except for origin
-    console.log(event);
     const { createState, destination, origin, preview } = event.data;
 
     // Successful drawing completion
@@ -294,24 +350,32 @@ export class DungeonLayer extends PlaceablesLayer {
       const completePolygon =
         preview.isPolygon && preview.data.points.length > 2;
 
+      // Clean up and DRY up these if/else blocks
       if (game.activeTool === "adddoor") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
+        //const endPoint = this._maybeSnappedEndPoint(data);
+        this._maybeSnapLastPoint(data);
         await this.dungeon.addDoor(
           data.x,
           data.y,
+          // data.x + endPoint[0],
+          // data.y + endPoint[1]
           data.x + data.points[1][0],
           data.y + data.points[1][1]
         );
-      }
-      if (game.activeTool === "addsecretdoor") {
+      } else if (game.activeTool === "addsecretdoor") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
+        // const endPoint = this._maybeSnappedEndPoint(data);
+        this._maybeSnapLastPoint(data);
         await this.dungeon.addSecretDoor(
           data.x,
           data.y,
+          // data.x + endPoint[0],
+          // data.y + endPoint[1]
           data.x + data.points[1][0],
           data.y + data.points[1][1]
         );
@@ -319,93 +383,50 @@ export class DungeonLayer extends PlaceablesLayer {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
+        // const endPoint = this._maybeSnappedEndPoint(data);
+        this._maybeSnapLastPoint(data);
         await this.dungeon.addInteriorWall(
           data.x,
           data.y,
+          // data.x + endPoint[0],
+          // data.y + endPoint[1]
           data.x + data.points[1][0],
           data.y + data.points[1][1]
         );
       } else if (minDistance || completePolygon) {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
-        // TODO: do we care about _chain?
         preview._chain = false;
         // TODO: do we care about normalizing the shape? maybe for freehand curves/lines?
         const createData = this.constructor.placeableClass.normalizeShape(data);
-
         if (game.activeTool === "addpoly") {
-          const length = createData.points.length;
-          if (
-            length > 2 &&
-            (createData.points[0][0] !== createData.points[length - 1][0] ||
-              createData.points[0][1] !== createData.points[length - 1][1])
-          ) {
-            // auto-close the polygon
-            createData.points.push(createData.points[0]);
-          }
+          this._maybeSnapLastPoint(createData);
+          this._autoClosePolygon(createData);
           const offsetPoints = createData.points.map((p) => [
             p[0] + createData.x,
             p[1] + createData.y,
           ]);
           await this.dungeon.addPolygon(offsetPoints);
         } else if (game.activeTool === "addrect") {
-          console.log(data);
-          console.log(createData);
-          if (this.options.snapToGrid) {
-            const snapPos = canvas.grid.getSnappedPosition(
-              createData.x + createData.width,
-              createData.y + createData.height,
-              this.gridPrecision
-            );
-            createData.height = snapPos.y - createData.y;
-            createData.width = snapPos.x - createData.x;
-          }
-          const rect = {
-            x: createData.x,
-            y: createData.y,
-            height: createData.height,
-            width: createData.width,
-          };
+          const rect = this._maybeSnappedRect(createData);
           await this.dungeon.addRectangle(rect);
         } else if (game.activeTool === "subtractdoor") {
-          const rect = {
-            x: createData.x,
-            y: createData.y,
-            height: createData.height,
-            width: createData.width,
-          };
+          const rect = this._maybeSnappedRect(createData);
           await this.dungeon.subtractDoorsAndInteriorWalls(rect);
+        } else if (game.activeTool === "subtractrect") {
+          const rect = this._maybeSnappedRect(createData);
+          await this.dungeon.subtractRectangle(rect);
         } else if (game.activeTool === "themeeraser") {
-          const rect = {
-            x: createData.x,
-            y: createData.y,
-            height: createData.height,
-            width: createData.width,
-          };
+          const rect = this._maybeSnappedRect(createData);
           await this.dungeon.removeThemeAreas(rect);
         } else if (game.activeTool === "themepainter") {
-          const length = createData.points.length;
-          if (
-            length > 2 &&
-            (createData.points[0][0] !== createData.points[length - 1][0] ||
-              createData.points[0][1] !== createData.points[length - 1][1])
-          ) {
-            // auto-close the polygon
-            createData.points.push(createData.points[0]);
-          }
+          this._maybeSnapLastPoint(createData);
+          this._autoClosePolygon(createData);
           const offsetPoints = createData.points.map((p) => [
             p[0] + createData.x,
             p[1] + createData.y,
           ]);
           await this.dungeon.addThemeArea(offsetPoints);
-        } else if (game.activeTool === "subtractrect") {
-          const rect = {
-            x: createData.x,
-            y: createData.y,
-            height: createData.height,
-            width: createData.width,
-          };
-          await this.dungeon.subtractRectangle(rect);
         }
       }
 
