@@ -127,8 +127,16 @@ const wallData = (config, x1, y1, x2, y2) => {
     data.flags["levels-3d-preview"] = {
       joinWall: true,
       wallDepth: config.wallThickness,
-      wallTexture: config.wallTexture,
-      wallTint: config.wallTexture ? config.wallTextureTint : config.wallColor,
+      wallSidesTexture: config.wallTexture,
+      wallSidesTint: config.wallTexture
+        ? config.wallTextureTint
+        : config.wallColor,
+      wallTexture: config.threeDWallTexture ?? config.wallTexture,
+      wallTint: config.threeDWallTexture
+        ? config.threeDWallTextureTint
+        : config.wallTexture
+        ? config.wallTextureTint
+        : config.wallColor,
     };
   }
   return data;
@@ -140,15 +148,8 @@ const doorData = (config, x1, y1, x2, y2) => {
   // Maybe set Canvas3D flags
   if (Settings.threeDCanvasEnabled()) {
     data.flags["levels-3d-preview"]["joinWall"] = false;
-    // top and sides of door look like surrounding walls
-    data.flags["levels-3d-preview"]["wallSidesTexture"] = config.wallTexture;
-    data.flags["levels-3d-preview"]["wallSidesTint"] = config.wallTextureTint;
-    // actual door texture in a 2d door
-    data.flags["levels-3d-preview"]["wallTexture"] =
-      "modules/dungeon-draw/assets/textures/arena-gate-texture.webp";
-    // TODO: what do we want to do with wallTint?
-    // data.flags["levels-3d-preview"]["wallTint"] = config.doorFillColor;
-    delete data.flags["levels-3d-preview"]["wallTint"];
+    data.flags["levels-3d-preview"]["wallTexture"] = config.threeDDoorTexture;
+    data.flags["levels-3d-preview"]["wallTint"] = config.threeDDoorTextureTint;
   }
   return data;
 };

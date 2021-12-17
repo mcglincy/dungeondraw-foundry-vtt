@@ -19,7 +19,7 @@ export class ThemeSheet extends FormApplication {
       classes: ["sheet"],
       template: "modules/dungeon-draw/templates/theme-sheet.html",
       width: 480,
-      height: 880,
+      height: 1020,
       tabs: [
         { navSelector: ".tabs", contentSelector: "form", initial: "position" },
       ],

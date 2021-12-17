@@ -424,6 +424,89 @@
       </div>
     </div>
     <hr />
+    <div class="form-group">
+      <label>{{localize "DD.ThreeDDoorTexture"}}</label>
+      <div class="form-fields">
+        <button
+          type="button"
+          class="file-picker"
+          data-type="imagevideo"
+          data-target="threeDDoorTexture"
+          title="Browse Files"
+          tabindex="-1"
+        >
+          <i class="fas fa-file-import fa-fw"></i>
+        </button>
+        <input
+          class="image"
+          type="text"
+          name="threeDDoorTexture"
+          value="{{config.threeDDoorTexture}}"
+          data-dtype="String"
+          placeholder="File Path"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.ThreeDDoorTextureTint"}}</label>
+      <div class="form-fields">
+        <input
+          type="text"
+          class="color"
+          name="threeDDoorTextureTint"
+          value="{{config.threeDDoorTextureTint}}"
+          data-dtype="String"
+        />
+        <input
+          type="color"
+          value="{{config.threeDDoorTextureTint}}"
+          data-edit="threeDDoorTextureTint"
+          data-dtype="String"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.ThreeDWallTexture"}}</label>
+      <div class="form-fields">
+        <button
+          type="button"
+          class="file-picker"
+          data-type="imagevideo"
+          data-target="threeDWallTexture"
+          title="Browse Files"
+          tabindex="-1"
+        >
+          <i class="fas fa-file-import fa-fw"></i>
+        </button>
+        <input
+          class="image"
+          type="text"
+          name="threeDWallTexture"
+          value="{{config.threeDWallTexture}}"
+          data-dtype="String"
+          placeholder="File Path"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.ThreeDWallTextureTint"}}</label>
+      <div class="form-fields">
+        <input
+          type="text"
+          class="color"
+          name="threeDWallTextureTint"
+          value="{{config.threeDWallTextureTint}}"
+          data-dtype="String"
+        />
+        <input
+          type="color"
+          value="{{config.threeDWallTextureTint}}"
+          data-edit="threeDWallTextureTint"
+          data-dtype="String"
+        />
+      </div>
+    </div>
+    <hr />
     <div style="display: flex">
       <button type="button" name="resetDefault" value="1">
         <i class="fas fa-sync"></i> {{localize "DD.ResetToDefaults"}}
