@@ -42,8 +42,6 @@ If you choose a floor texture it will be used in preference to the floor fill co
 
 Dungeon Draw currently assumes square texture files.
 
-Some care needs to be taken when choosing texture files and sizes. Using larger texture files (e.g., 400x400, 600x600, etc) will cause fewer texture sprites and should perform better. Conversely, using a 50x50 texture on a big map can make your browser crawl.
-
 Want some good floor textures? Check out this free Texture Pack 3 from Forgotten Adventures: https://www.patreon.com/posts/texture-pack-3-24886718
 
 ## Known issues
