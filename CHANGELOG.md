@@ -1,3 +1,9 @@
+# 0.15.0
+
+- New "Draw Freehand" tool.
+- Handle SHIFT keypress changes for latest v9 Foundry.
+- Fix yet another "Save to Scene Background" offset bug.
+
 # 0.14.2
 
 - Show various 3D settings on Config and Theme sheets.
