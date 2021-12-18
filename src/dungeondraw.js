@@ -106,6 +106,11 @@ export class DungeonDraw {
           icon: "fas fa-draw-polygon",
         },
         {
+          name: "freehand",
+          title: "DD.ButtonTitleFreehand",
+          icon: "fas fa-signature",
+        },
+        {
           name: "addwall",
           title: "DD.ButtonTitleAddWall",
           icon: "fas fa-bars",

@@ -4,6 +4,14 @@ import { Settings } from "./settings.js";
 
 const FOLDER_NAME = "Dungeon Draw";
 
+/** Handle both v8 and v9 styles of detecting shift */
+const shiftPressed = () => {
+  if (KeyboardManager.MODIFIER_KEYS?.SHIFT) {
+    return game.keyboard.isModifierActive(KeyboardManager.MODIFIER_KEYS.SHIFT);
+  }
+  return game.keyboard.isDown("SHIFT");
+};
+
 const findDungeonEntryAndNote = () => {
   for (const note of canvas.scene.notes) {
     const journalEntry = game.journal.get(note.data.entryId);
@@ -89,7 +97,7 @@ export class DungeonLayer extends PlaceablesLayer {
       // we use our own snapToGrid setting to control snap
       snapToGrid: Settings.snapToGrid(),
       zIndex: -1, // under tiles and background image
-      quadTree: true,
+      quadtree: true,
     });
   }
 
@@ -139,6 +147,11 @@ export class DungeonLayer extends PlaceablesLayer {
       case "themepainter":
         data.type = CONST.DRAWING_TYPES.POLYGON;
         data.points = [[0, 0]];
+        break;
+      case "freehand":
+        data.type = CONST.DRAWING_TYPES.FREEHAND;
+        data.points = [[0, 0]];
+        data.bezierFactor = data.bezierFactor ?? 0.5;
         break;
       case "ellipse":
         data.type = CONST.DRAWING_TYPES.ELLIPSE;
@@ -195,7 +208,7 @@ export class DungeonLayer extends PlaceablesLayer {
   /* -------------------------------------------- */
 
   /** @override */
-  async _onClickLeft(event) {
+  _onClickLeft(event) {
     const { preview, createState, originalEvent } = event.data;
 
     // Continue polygon point placement
@@ -211,8 +224,7 @@ export class DungeonLayer extends PlaceablesLayer {
       preview._chain = true; // Note that we are now in chain mode
       return preview.refresh();
     }
-
-    await super._onClickLeft(event);
+    super._onClickLeft(event);
   }
 
   /** @override */
@@ -232,10 +244,13 @@ export class DungeonLayer extends PlaceablesLayer {
   async _onDragLeftStart(event) {
     // TODO: DrawingsLayer _onDragLeftStart isn't seeing the shift key press,
     // so set it for them ourselves :P
-    event.data.originalEvent.isShift = game.keyboard.isDown("SHIFT");
+    event.data.originalEvent.isShift = shiftPressed();
 
     // superclass will handle layerOptions.snapToGrid
     await super._onDragLeftStart(event);
+
+    // TODO: why is super._onDragleftStart() not setting createState?
+    event.data.createState = 1;
 
     // we use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
@@ -271,7 +286,7 @@ export class DungeonLayer extends PlaceablesLayer {
 
   _maybeSnappedEndPoint(data) {
     const endPoint = data.points[1];
-    if (Settings.snapToGrid() && !game.keyboard.isDown("SHIFT")) {
+    if (Settings.snapToGrid() && !shiftPressed()) {
       const snapPos = canvas.grid.getSnappedPosition(
         endPoint[0],
         endPoint[1],
@@ -284,8 +299,7 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   _maybeSnappedRect(createData) {
-    // TODO: switch to downKeys() when we only support Foundry 9+
-    if (Settings.snapToGrid() && !game.keyboard.isDown("SHIFT")) {
+    if (Settings.snapToGrid() && !shiftPressed()) {
       const snapPos = canvas.grid.getSnappedPosition(
         createData.x + createData.width,
         createData.y + createData.height,
@@ -308,7 +322,7 @@ export class DungeonLayer extends PlaceablesLayer {
     if (length === 0) {
       return;
     }
-    if (Settings.snapToGrid() && !game.keyboard.isDown("SHIFT")) {
+    if (Settings.snapToGrid() && !shiftPressed()) {
       const snapPos = canvas.grid.getSnappedPosition(
         createData.points[length - 1][0],
         createData.points[length - 1][1],
@@ -336,7 +350,8 @@ export class DungeonLayer extends PlaceablesLayer {
     const { createState, destination, origin, preview } = event.data;
 
     // Successful drawing completion
-    if (createState === 2) {
+    // TODO: why is freehand not properly advancing createState?
+    if (createState === 2 || game.activeTool === "freehand") {
       // create a new dungeon if we don't already have one
       if (!this.dungeon) {
         await this.createNewDungeon();
@@ -410,6 +425,13 @@ export class DungeonLayer extends PlaceablesLayer {
         } else if (game.activeTool === "addrect") {
           const rect = this._maybeSnappedRect(createData);
           await this.dungeon.addRectangle(rect);
+        } else if (game.activeTool === "freehand") {
+          this._autoClosePolygon(createData);
+          const offsetPoints = createData.points.map((p) => [
+            p[0] + createData.x,
+            p[1] + createData.y,
+          ]);
+          await this.dungeon.addPolygon(offsetPoints);
         } else if (game.activeTool === "subtractdoor") {
           const rect = this._maybeSnappedRect(createData);
           await this.dungeon.subtractDoorsAndInteriorWalls(rect);
