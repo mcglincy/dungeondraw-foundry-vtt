@@ -47,17 +47,6 @@ export class Dungeon extends PlaceableObject {
   async saveToSceneBackground() {
     const tempContainer = new PIXI.Container();
 
-    // force container to scene dimensions
-    const sizeForcer = new PIXI.Sprite();
-    sizeForcer.height = canvas.scene.data.height;
-    sizeForcer.width = canvas.scene.data.width;
-    sizeForcer.position.x = canvas.scene.data.width * canvas.scene.data.padding;
-    sizeForcer.position.y =
-      canvas.scene.data.height * canvas.scene.data.padding;
-    tempContainer.addChild(sizeForcer);
-
-    tempContainer.addChild(this);
-
     // clip to just the scene
     const mask = new PIXI.Graphics();
     const xOffset = canvas.scene.data.width * canvas.scene.data.padding;
@@ -78,6 +67,18 @@ export class Dungeon extends PlaceableObject {
     mask.drawPolygon(maskCoords);
     mask.endFill();
     tempContainer.mask = mask;
+    this.mask = mask;
+
+    // force container to scene dimensions
+    const sizeForcer = new PIXI.Sprite();
+    sizeForcer.height = canvas.scene.data.height;
+    sizeForcer.width = canvas.scene.data.width;
+    sizeForcer.position.x = canvas.scene.data.width * canvas.scene.data.padding;
+    sizeForcer.position.y =
+      canvas.scene.data.height * canvas.scene.data.padding;
+    tempContainer.addChild(sizeForcer);
+
+    tempContainer.addChild(this);
 
     // TODO: decide if we want a folder, and if so, how to precreate
     // const folder = "Dungeon Draw";
@@ -99,6 +100,9 @@ export class Dungeon extends PlaceableObject {
       img: path,
     });
     await canvas.background.draw();
+
+    // remove our mask
+    this.mask = null;
   }
 
   /* -------------------------------------------- */
