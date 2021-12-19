@@ -49,8 +49,17 @@ export class Dungeon extends PlaceableObject {
 
     // clip to just the scene
     const mask = new PIXI.Graphics();
-    const xOffset = canvas.scene.data.width * canvas.scene.data.padding;
-    const yOffset = canvas.scene.data.height * canvas.scene.data.padding;
+    // padding is rounded up to the nearest grid size increment
+    const xOffset =
+      Math.ceil(
+        (canvas.scene.data.width * canvas.scene.data.padding) /
+          canvas.scene.data.grid
+      ) * canvas.scene.data.grid;
+    const yOffset =
+      Math.ceil(
+        (canvas.scene.data.height * canvas.scene.data.padding) /
+          canvas.scene.data.grid
+      ) * canvas.scene.data.grid;
     const maskCoords = [
       xOffset,
       yOffset,
@@ -73,9 +82,8 @@ export class Dungeon extends PlaceableObject {
     const sizeForcer = new PIXI.Sprite();
     sizeForcer.height = canvas.scene.data.height;
     sizeForcer.width = canvas.scene.data.width;
-    sizeForcer.position.x = canvas.scene.data.width * canvas.scene.data.padding;
-    sizeForcer.position.y =
-      canvas.scene.data.height * canvas.scene.data.padding;
+    sizeForcer.position.x = xOffset;
+    sizeForcer.position.y = yOffset;
     tempContainer.addChild(sizeForcer);
 
     tempContainer.addChild(this);

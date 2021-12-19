@@ -1,3 +1,7 @@
+# 0.15.1
+
+- Fix yet another "Save to Scene Background" offset bug when scene dimensions are unequal.
+
 # 0.15.0
 
 - New "Draw Freehand" tool.
