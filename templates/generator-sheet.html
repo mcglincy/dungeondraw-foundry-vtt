@@ -1,0 +1,42 @@
+<form class="flexcol" autocomplete="off" onsubmit="event.preventDefault();">
+  <!-- Sheet Navigation Tabs -->
+  <nav class="sheet-tabs tabs">
+    <a class="item" data-tab="settings"
+      ><i class="fas fa-cog"></i> {{localize "DD.TabGeneratorSettings"}}</a
+    >
+  </nav>
+
+  <!-- Settings Tab -->
+  <div class="tab" data-tab="settings">
+    <div class="form-group">
+      <label>{{localize "DD.Height"}}</label>
+      <div class="form-fields">
+        <input
+          type="number"
+          name="height"
+          value="{{height}}"
+          data-dtype="Number"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.Width"}}</label>
+      <div class="form-fields">
+        <input
+          type="number"
+          name="width"
+          value="{{width}}"
+          data-dtype="Number"
+        />
+      </div>
+    </div>
+    <hr />
+    <div style="display: flex">
+      <button type="button" name="generate" value="1">
+        <i class="fas fa-magic"></i> {{localize "DD.Generate"}}
+      </button>
+    </div>
+  </div>
+</form>
+<!--This is just to take up empty space after the form, helps with recalculating heights -->
+<div class="empty-space"></div>
