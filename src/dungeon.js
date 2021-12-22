@@ -31,14 +31,14 @@ export class Dungeon extends PlaceableObject {
 
   /* -------------------------------------------- */
 
-  deleteAll() {
+  async deleteAll() {
     // keep our most recent config around
     const lastState = this.state();
     const resetState = DungeonState.startState();
     resetState.config = lastState.config;
     this.history = [resetState];
     this.historyIndex = 0;
-    this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
+    await this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
     this.refresh();
   }
 
@@ -94,7 +94,10 @@ export class Dungeon extends PlaceableObject {
     // uncomment for jpg+compression
     //const filename = `${canvas.scene.name}-dungeon.jpg`;
     //const base64 = await canvas.app.renderer.extract.base64(this, "image/jpeg", 0.5);
-    const filename = `${canvas.scene.name}-dungeon.png`;
+    const randString =
+      Math.random().toString(36).substring(2, 6) +
+      Math.random().toString(36).substring(2, 6);
+    const filename = `${canvas.scene.name}-dungeon-${randString}.png`;
     const base64 = await canvas.app.renderer.extract.base64(tempContainer);
     const res = await fetch(base64);
     const blob = await res.blob();
@@ -103,11 +106,9 @@ export class Dungeon extends PlaceableObject {
     await FilePicker.upload("data", folder, file, {});
     const path = folder ? folder + "/" + filename : filename;
     // make sure we don't keep using a cached copy
-    TextureLoader.loader.cache.delete(path);
-    await canvas.scene.update({
-      img: path,
-    });
-    await canvas.background.draw();
+    // TODO: we only need to do this is we're keeping a fixed filename
+    // TextureLoader.loader.cache.delete(path);
+    await canvas.scene.update({ img: path });
 
     // remove our mask
     this.mask = null;
