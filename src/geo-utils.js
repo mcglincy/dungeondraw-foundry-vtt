@@ -7,6 +7,7 @@ import { BufferOp } from "jsts/org/locationtech/jts/operation/buffer";
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js";
 import RelateOp from "jsts/org/locationtech/jts/operation/relate/RelateOp.js";
 import UnionOp from "jsts/org/locationtech/jts/operation/union/UnionOp.js";
+import TopologyPreservingSimplifier from "jsts/org/locationtech/jts/simplify/TopologyPreservingSimplifier.js";
 
 // TODO: various geometry patched functions don't show up in node module
 // see jsts monkey.js for patching
@@ -200,4 +201,8 @@ export const rectangleForSegment = (thickness, x1, y1, x2, y2) => {
     x1 + dy,
     y1 - dx,
   ];
+};
+
+export const simplify = (geom) => {
+  return TopologyPreservingSimplifier.simplify(geom, 5.0);
 };

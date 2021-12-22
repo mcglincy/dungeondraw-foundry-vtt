@@ -64,7 +64,7 @@ const renderPass = async (container, state) => {
   const doorGfx = new PIXI.Graphics();
 
   // maybe draw an outer surrounding blurred shadow
-  addExteriorShadow(container, state.config, state.geometry);
+  //addExteriorShadow(container, state.config, state.geometry);
 
   // use a mask to clip the tiled background and interior shadows
   const clipMask = new PIXI.Graphics();

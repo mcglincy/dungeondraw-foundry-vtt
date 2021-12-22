@@ -1,6 +1,7 @@
 import { ConfigSheet } from "./configsheet.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 import * as constants from "./constants.js";
+import { GeneratorSheet } from "./generatorsheet.js";
 import { Settings } from "./settings";
 
 export class DungeonDraw {
@@ -90,6 +91,13 @@ export class DungeonDraw {
       icon: "fas fa-dungeon",
       visible: game.user.isTrusted,
       tools: [
+        {
+          name: "generate",
+          title: "DD.ButtonTitleGenerate",
+          icon: "fas fa-magic",
+          onClick: async () => new GeneratorSheet().render(true),
+          button: true,
+        },
         {
           name: "addrect",
           title: "DD.ButtonTitleAddRect",

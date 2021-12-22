@@ -9,6 +9,7 @@
   "DD.ButtonTitleClear": "Clear All",
   "DD.ButtonTitleConfig": "Configure",
   "DD.ButtonTitleFreehand": "Add Freehand",
+  "DD.ButtonTitleGenerate": "Generate a Dungeon",
   "DD.ButtonTitleRedo": "Redo",
   "DD.ButtonTitleSaveToSceneBackground": "Save to Scene Background",
   "DD.ButtonTitleSelect": "Select",
@@ -36,6 +37,9 @@
   "DD.FloorColor": "Floor Color",
   "DD.FloorTexture": "Floor Texture",
   "DD.FloorTextureTint": "Floor Texture Tint",
+  "DD.Generate": "Generate",
+  "DD.GeneratorSheetTitle": "Generate a Dungeon",
+  "DD.Height": "Height",
   "DD.InteriorShadowColor": "Interior Shadow Color",
   "DD.InteriorShadowOpacity": "Interior Shadow Opacity",
   "DD.InteriorShadowThickness": "Interior Shadow Thickness",
@@ -52,6 +56,7 @@
   "DD.ResetToDefaults": "Reset to Defaults",
   "DD.Save": "Save",
   "DD.SaveAsCustomTheme": "Save new Custom Theme",
+  "DD.TabGeneratorSettings": "Generator Settings",
   "DD.TabSettings": "Map Config",
   "DD.TabThemes": "Themes",
   "DD.TabThemePainter": "Theme Painter",
@@ -67,5 +72,6 @@
   "DD.WallColor": "Wall Color",
   "DD.WallTexture": "Wall Texture",
   "DD.WallTextureTint": "Wall Texture Tint",
-  "DD.WallThickness": "Wall Thickness"
+  "DD.WallThickness": "Wall Thickness",
+  "DD.Width": "Width"
 }

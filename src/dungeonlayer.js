@@ -1,5 +1,6 @@
 import * as constants from "./constants.js";
 import { Dungeon } from "./dungeon.js";
+import { regenerate } from "./generator.js";
 import { Settings } from "./settings.js";
 
 const FOLDER_NAME = "Dungeon Draw";
@@ -171,6 +172,11 @@ export class DungeonLayer extends PlaceablesLayer {
       content: `<p>${game.i18n.localize("DD.ClearAllDialogContent")}</p>`,
       yes: () => this.dungeon?.deleteAll(),
     });
+  }
+
+  async generate(config) {
+    await this.dungeon.deleteAll();
+    await regenerate(this.dungeon, config);
   }
 
   /* -------------------------------------------- */
