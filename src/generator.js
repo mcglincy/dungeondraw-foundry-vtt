@@ -1,19 +1,97 @@
 // import { Dungeon } from "./dungeon.js";
 import TwoDDungeon from "2d-dungeon";
-//import foo = require('foo');
 import * as dungeoneer from "dungeoneer";
 //import { generate } from '@halftheopposite/dungeon';
 import * as geo from "./geo-utils.js";
 
+import * as ROT from "rot-js";
+
+import * as cave from "cave-automata-2d";
+import * as ndarray from "ndarray";
+
 export const regenerate = async (dungeon, config = {}) => {
-  // await generateTwoDDungeon(dungeon, config);
-  await generateDungeoneer(dungeon, config);
+  switch (config.algorithm) {
+    case "2d-dungeon":
+      await generate2DDungeon(dungeon, config);
+      break;
+    case "rot-js-cellular":
+      await generateRotJsCellular(dungeon, config);
+      break;
+    case "dungeoneer":
+      await generateDungeoneer(dungeon, config);
+      break;
+  }
+};
+
+const xOffset = () => {
+  return (
+    Math.ceil(
+      (canvas.scene.data.width * canvas.scene.data.padding) /
+        canvas.scene.data.grid
+    ) * canvas.scene.data.grid
+  );
+};
+
+const yOffset = () => {
+  return (
+    Math.ceil(
+      (canvas.scene.data.height * canvas.scene.data.padding) /
+        canvas.scene.data.grid
+    ) * canvas.scene.data.grid
+  );
+};
+
+/**
+ *  http://ondras.github.io/rot.js/manual/#map/cellular
+ *
+ * @param {*} dungeon
+ * @param {*} config
+ */
+export const generateRotJsCellular = async (dungeon, config) => {
+  const scalingFactor = 1.0;
+  const height = config.height * scalingFactor;
+  const width = config.width * scalingFactor;
+  const map = new ROT.Map.Cellular(width, height);
+  map.randomize(0.5); // cells with 1/2 probability
+  for (let i = 0; i < 4; i++) {
+    map.create();
+  }
+  map.connect(null, 1);
+
+  const gridSize = canvas.scene.data.grid / scalingFactor;
+  const xOff = xOffset();
+  const yOff = yOffset();
+  let geometry;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (map._map[y][x]) {
+        const oneSquare = {
+          x: xOff + x * gridSize,
+          y: yOff + y * gridSize,
+          height: gridSize,
+          width: gridSize,
+        };
+        const poly = geo.rectToPolygon(oneSquare);
+        if (!geometry) {
+          geometry = poly;
+        } else {
+          geometry = geo.union(geometry, poly);
+        }
+      }
+    }
+  }
+  //geometry = geo.simplify(geometry, config.simplify);
+  //geometry = geo.expandGeometry(geometry, 0);
+  //geometry = geo.densify(geometry, 50.0);
+  const newState = dungeon.state().clone();
+  newState.geometry = geometry;
+  await dungeon.pushState(newState);
 };
 
 /**
  * 2D Dungeon - https://github.com/Prozi/dungeon-generator
  */
-export const generateTwoDDungeon = async (dungeon, config) => {
+export const generate2DDungeon = async (dungeon, config) => {
   const height = config.height;
   const width = config.height;
   const gridSize = canvas.scene.data.grid;

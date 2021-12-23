@@ -69,7 +69,7 @@ const renderPass = async (container, state) => {
   // use a mask to clip the tiled background and interior shadows
   const clipMask = new PIXI.Graphics();
   drawMultiPolygonMask(clipMask, state.geometry);
-  container.addChild(clipMask);
+  //XXX container.addChild(clipMask);
 
   interiorShadowGfx.mask = clipMask;
   // apply alpha filter once for entire shadow graphics, so overlaps aren't additive
