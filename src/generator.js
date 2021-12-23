@@ -1,13 +1,7 @@
-// import { Dungeon } from "./dungeon.js";
 import TwoDDungeon from "2d-dungeon";
 import * as dungeoneer from "dungeoneer";
-//import { generate } from '@halftheopposite/dungeon';
 import * as geo from "./geo-utils.js";
-
 import * as ROT from "rot-js";
-
-import * as cave from "cave-automata-2d";
-import * as ndarray from "ndarray";
 
 export const regenerate = async (dungeon, config = {}) => {
   switch (config.algorithm) {
@@ -42,10 +36,7 @@ const yOffset = () => {
 };
 
 /**
- *  http://ondras.github.io/rot.js/manual/#map/cellular
- *
- * @param {*} dungeon
- * @param {*} config
+ *  rot.js Cellular Automata - http://ondras.github.io/rot.js/manual/#map/cellular
  */
 export const generateRotJsCellular = async (dungeon, config) => {
   const scalingFactor = 1.0;
@@ -80,8 +71,8 @@ export const generateRotJsCellular = async (dungeon, config) => {
       }
     }
   }
-  //geometry = geo.simplify(geometry, config.simplify);
-  //geometry = geo.expandGeometry(geometry, 0);
+  geometry = geo.simplify(geometry, config.simplification);
+  // TODO: figure out / implement smoothing
   //geometry = geo.densify(geometry, 50.0);
   const newState = dungeon.state().clone();
   newState.geometry = geometry;
@@ -153,7 +144,7 @@ export const generate2DDungeon = async (dungeon, config) => {
       }
     }
   }
-  geometry = geo.simplify(geometry);
+  geometry = geo.simplify(geometry, config.simplification);
 
   // TODO: NaNs for the door coords?
   // for (let piece of twoDD.children) {
@@ -206,7 +197,7 @@ export const generateDungeoneer = async (dungeon, config) => {
       }
     }
   }
-  geometry = geo.simplify(geometry);
+  geometry = geo.simplify(geometry, config.simplification);
   geometry = geo.expandGeometry(geometry, 0);
   const newState = dungeon.state().clone();
   newState.geometry = geometry;

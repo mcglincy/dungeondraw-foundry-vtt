@@ -5,8 +5,6 @@
   "author": "mcglintlock",
   "dependencies": {
     "2d-dungeon": "0.0.7",
-    "@halftheopposite/dungeon": "^0.2.3",
-    "cave-automata-2d": "^0.3.1",
     "dungeoneer": "^2.1.5",
     "jsts": "^2.8.1",
     "rot-js": "^2.2.0"
