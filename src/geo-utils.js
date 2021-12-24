@@ -258,8 +258,35 @@ export const densify = (geom, distanceTolerance = 50.0) => {
   return new DensifyTransformer(distanceTolerance).transform(geom);
 };
 
-// need to smooth each area etc in a multipoly
-// export const smooth = (geom) => {
-//   const newPoints = []
+// need to smooth each area etc in a multipolygon
+export const smooth = (geometry) => {  
+  const polygons = [];
+  for (let i = 0; i < geometry.getNumGeometries(); i++) {
+    let smoothed = smoothPoly(geometry.getGeometryN(i));
+    smoothed = expandGeometry(smoothed, 0.0);
+    polygons.push(smoothed);
+  }
+  return new GeometryFactory().createMultiPolygon(polygons);
+};
 
-// }
+export const smoothPoly = (poly) => {
+  const oldCoords = poly.getCoordinates();
+  const newCoords = [];
+  newCoords.push(oldCoords[0]);
+  for (let i = 0; i < oldCoords.length - 1; i++) {
+    const c0 = oldCoords[i]
+    const c1 = oldCoords[i+1];
+    const q = new Coordinate(
+      0.75 * c0.x + 0.25 * c1.x,
+      0.75 * c0.y + 0.25 * c1.y
+    );
+    const r = new Coordinate(
+      0.25 * c0.x + 0.75 * c1.x,
+      0.25 * c0.y + 0.75 * c1.y
+    );
+    newCoords.push(q);
+    newCoords.push(r);
+  }
+  newCoords.push(oldCoords[oldCoords.length - 1]);
+  return new GeometryFactory().createPolygon(newCoords);
+};

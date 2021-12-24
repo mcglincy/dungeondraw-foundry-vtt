@@ -32,7 +32,7 @@ export class GeneratorSheet extends FormApplication {
     return {
       height: 20,
       width: 20,
-      simplification: 5,
+      smoothing: 0,
     };
   }
 

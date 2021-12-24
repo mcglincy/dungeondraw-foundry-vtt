@@ -71,9 +71,12 @@ export const generateRotJsCellular = async (dungeon, config) => {
       }
     }
   }
-  geometry = geo.simplify(geometry, config.simplification);
-  // TODO: figure out / implement smoothing
-  //geometry = geo.densify(geometry, 50.0);
+  geometry = geo.simplify(geometry);
+  if (config.smoothing) {
+    for (let i = 0; i < config.smoothing; i++) {
+      geometry = geo.smooth(geometry);
+    }
+  }
   const newState = dungeon.state().clone();
   newState.geometry = geometry;
   await dungeon.pushState(newState);
@@ -144,7 +147,12 @@ export const generate2DDungeon = async (dungeon, config) => {
       }
     }
   }
-  geometry = geo.simplify(geometry, config.simplification);
+  geometry = geo.simplify(geometry);
+  if (config.smoothing) {
+    for (let i = 0; i < config.smoothing; i++) {
+      geometry = geo.smooth(geometry);
+    }
+  }
 
   // TODO: NaNs for the door coords?
   // for (let piece of twoDD.children) {
@@ -197,8 +205,12 @@ export const generateDungeoneer = async (dungeon, config) => {
       }
     }
   }
-  geometry = geo.simplify(geometry, config.simplification);
-  geometry = geo.expandGeometry(geometry, 0);
+  geometry = geo.simplify(geometry);
+  if (config.smoothing) {
+    for (let i = 0; i < config.smoothing; i++) {
+      geometry = geo.smooth(geometry);
+    }
+  }
   const newState = dungeon.state().clone();
   newState.geometry = geometry;
   await dungeon.pushState(newState);
