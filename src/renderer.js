@@ -229,7 +229,7 @@ const addExteriorShadowForPoly = (exteriorShadowGfx, config, poly) => {
       .map((c) => [c.x, c.y])
       .flat()
   );
-  
+
   // draw inner hole shadows
   const numHoles = poly.getNumInteriorRing();
   for (let i = 0; i < numHoles; i++) {

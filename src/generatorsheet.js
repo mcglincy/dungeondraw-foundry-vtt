@@ -57,7 +57,9 @@ export class GeneratorSheet extends FormApplication {
   activateListeners(html) {
     super.activateListeners(html);
     html.find('button[name="generate"]').click(this.generate.bind(this));
-    html.find('select[name="algorithm"]').change(this.changeAlgorithm.bind(this));
+    html
+      .find('select[name="algorithm"]')
+      .change(this.changeAlgorithm.bind(this));
     this.changeAlgorithm();
   }
 

@@ -259,7 +259,7 @@ export const densify = (geom, distanceTolerance = 50.0) => {
 };
 
 // need to smooth each area etc in a multipolygon
-export const smooth = (geometry) => {  
+export const smooth = (geometry) => {
   const polygons = [];
   for (let i = 0; i < geometry.getNumGeometries(); i++) {
     let smoothed = smoothPoly(geometry.getGeometryN(i));
@@ -274,8 +274,8 @@ export const smoothPoly = (poly) => {
   const newCoords = [];
   newCoords.push(oldCoords[0]);
   for (let i = 0; i < oldCoords.length - 1; i++) {
-    const c0 = oldCoords[i]
-    const c1 = oldCoords[i+1];
+    const c0 = oldCoords[i];
+    const c1 = oldCoords[i + 1];
     const q = new Coordinate(
       0.75 * c0.x + 0.25 * c1.x,
       0.75 * c0.y + 0.25 * c1.y

@@ -15,10 +15,10 @@ export const regenerate = async (dungeon, config = {}) => {
       case "dungeoneer":
         await generateDungeoneer(dungeon, config);
         break;
-    }  
+    }
   } catch (err) {
     console.error(err);
-    ui.notifications.error("Error generating dungeon... please try again.");    
+    ui.notifications.error("Error generating dungeon... please try again.");
   }
 };
 
@@ -104,7 +104,7 @@ export const generate2DDungeon = async (dungeon, config) => {
         min_size: [config.minRoomSize, config.minRoomSize],
         max_size: [config.maxRoomSize, config.maxRoomSize],
         max_exits: 4,
-      }
+      },
     },
     min_corridor_length: 2,
     max_corridor_length: 6,
@@ -150,41 +150,41 @@ export const generate2DDungeon = async (dungeon, config) => {
       continue;
     }
     for (let exit of piece.exits) {
-      const [[doorX, doorY], direction, dest] = exit;
+      const [[doorX, doorY], direction] = exit;
       const x = piece.position[0] + doorX;
       const y = piece.position[1] + doorY;
       if (direction === 90) {
         // vertical, east side
         doors.push([
-          xOff + (x+1) * gridSize, 
-          yOff + y * gridSize, 
-          xOff + (x+1) * gridSize, 
-          yOff + (y+1) * gridSize
-        ]);  
+          xOff + (x + 1) * gridSize,
+          yOff + y * gridSize,
+          xOff + (x + 1) * gridSize,
+          yOff + (y + 1) * gridSize,
+        ]);
       } else if (direction === 270) {
         // vertical, west side
         doors.push([
-          xOff + x * gridSize, 
-          yOff + y * gridSize, 
-          xOff + x * gridSize, 
-          yOff + (y+1) * gridSize
-        ]);            
+          xOff + x * gridSize,
+          yOff + y * gridSize,
+          xOff + x * gridSize,
+          yOff + (y + 1) * gridSize,
+        ]);
       } else if (direction === 0) {
         // horizontal, north side
         doors.push([
-          xOff + x * gridSize, 
-          yOff + y * gridSize, 
-          xOff + (x+1) * gridSize, 
-          yOff + y * gridSize
-        ]);  
+          xOff + x * gridSize,
+          yOff + y * gridSize,
+          xOff + (x + 1) * gridSize,
+          yOff + y * gridSize,
+        ]);
       } else if (direction === 180) {
         // horizontal, south side
         doors.push([
-          xOff + x * gridSize, 
-          yOff + (y+1) * gridSize, 
-          xOff + (x+1) * gridSize, 
-          yOff + (y+1) * gridSize
-        ]);  
+          xOff + x * gridSize,
+          yOff + (y + 1) * gridSize,
+          xOff + (x + 1) * gridSize,
+          yOff + (y + 1) * gridSize,
+        ]);
       }
     }
   }
@@ -195,6 +195,9 @@ export const generate2DDungeon = async (dungeon, config) => {
   await dungeon.pushState(newState);
 };
 
+/**
+ * Dungeoneer - https://github.com/LucianBuzzo/dungeoneer
+ */
 export const generateDungeoneer = async (dungeon, config) => {
   const map = dungeoneer.build({
     width: config.width,
@@ -202,7 +205,7 @@ export const generateDungeoneer = async (dungeon, config) => {
   });
   const gridSize = canvas.scene.data.grid;
   const xOff = xOffset();
-  const yOff =yOffset();
+  const yOff = yOffset();
   let geometry;
   const doors = [];
   for (const row of map.tiles) {
@@ -225,19 +228,19 @@ export const generateDungeoneer = async (dungeon, config) => {
         if (cell.neighbours.w?.type === "floor") {
           // east-west passage, thus vertical door
           doors.push([
-            xOff + (cell.x+0.5) * gridSize, 
-            yOff + cell.y * gridSize, 
-            xOff + (cell.x+0.5) * gridSize, 
-            yOff + (cell.y+1) * gridSize
-          ]);  
+            xOff + (cell.x + 0.5) * gridSize,
+            yOff + cell.y * gridSize,
+            xOff + (cell.x + 0.5) * gridSize,
+            yOff + (cell.y + 1) * gridSize,
+          ]);
         } else {
           // horizontal door
           doors.push([
-            xOff + cell.x * gridSize, 
-            yOff + (cell.y+0.5) * gridSize, 
-            xOff + (cell.x+1) * gridSize, 
-            yOff + (cell.y+0.5) * gridSize
-          ]);  
+            xOff + cell.x * gridSize,
+            yOff + (cell.y + 0.5) * gridSize,
+            xOff + (cell.x + 1) * gridSize,
+            yOff + (cell.y + 0.5) * gridSize,
+          ]);
         }
       }
     }

@@ -8,7 +8,7 @@ export const makeWalls = async (state) => {
     return;
   }
   await deleteAllWalls();
-  if (state.geometry) {    
+  if (state.geometry) {
     // const expanded = geo.expandGeometry(state.geometry, state.config.wallThickness / 2.0);
     // const simplified = geo.simplify(expanded, 10.0);
     const simplified = geo.simplify(state.geometry, 10.0);
