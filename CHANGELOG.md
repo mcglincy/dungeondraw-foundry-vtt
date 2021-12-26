@@ -1,3 +1,8 @@
+# 0.15.2
+
+- Write saved background images to unique filenames each save.
+- Fix possible synchronization bug when deleting then saving dungeon.
+
 # 0.15.1
 
 - Fix yet another "Save to Scene Background" offset bug wrt grid size rounding.
