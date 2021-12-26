@@ -94,7 +94,7 @@ export const generate2DDungeon = async (dungeon, config) => {
   const height = config.height;
   const width = config.height;
 
-  let twoDD = new TwoDDungeon({
+  const map = new TwoDDungeon({
     max_iterations: 50,
     size: [width, height],
     rooms: {
@@ -111,7 +111,7 @@ export const generate2DDungeon = async (dungeon, config) => {
     // max_interconnect_length: 10,
     room_count: config.roomCount,
   });
-  twoDD.generate();
+  map.generate();
 
   const gridSize = canvas.scene.data.grid;
   const xOff = xOffset();
@@ -119,7 +119,7 @@ export const generate2DDungeon = async (dungeon, config) => {
   let geometry;
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
-      const isWall = twoDD.walls.get([x, y]);
+      const isWall = map.walls.get([x, y]);
       if (isWall === false) {
         const oneSquare = {
           x: xOff + x * gridSize,
@@ -137,11 +137,6 @@ export const generate2DDungeon = async (dungeon, config) => {
     }
   }
   geometry = geo.simplify(geometry);
-  if (config.smoothing) {
-    for (let i = 0; i < config.smoothing; i++) {
-      geometry = geo.smooth(geometry);
-    }
-  }
 
   // TODO: NaNs for the door coords?
   // for (let piece of twoDD.children) {
@@ -158,30 +153,20 @@ export const generate2DDungeon = async (dungeon, config) => {
 };
 
 export const generateDungeoneer = async (dungeon, config) => {
-  const gridSize = canvas.scene.data.grid;
-  const xOffset =
-    Math.ceil(
-      (canvas.scene.data.width * canvas.scene.data.padding) /
-        canvas.scene.data.grid
-    ) * canvas.scene.data.grid;
-  const yOffset =
-    Math.ceil(
-      (canvas.scene.data.height * canvas.scene.data.padding) /
-        canvas.scene.data.grid
-    ) * canvas.scene.data.grid;
-
-  const d = dungeoneer.build({
+  const map = dungeoneer.build({
     width: config.width,
     height: config.height,
   });
-
+  const gridSize = canvas.scene.data.grid;
+  const xOff = xOffset();
+  const yOff =yOffset();
   let geometry;
-  for (const row of d.tiles) {
+  for (const row of map.tiles) {
     for (const cell of row) {
       if (cell.type === "floor" || cell.type === "door") {
         const oneSquare = {
-          x: xOffset + cell.x * gridSize,
-          y: yOffset + cell.y * gridSize,
+          x: xOff + cell.x * gridSize,
+          y: yOff + cell.y * gridSize,
           height: gridSize,
           width: gridSize,
         };
@@ -195,11 +180,6 @@ export const generateDungeoneer = async (dungeon, config) => {
     }
   }
   geometry = geo.simplify(geometry);
-  if (config.smoothing) {
-    for (let i = 0; i < config.smoothing; i++) {
-      geometry = geo.smooth(geometry);
-    }
-  }
   const newState = dungeon.state().clone();
   newState.geometry = geometry;
   await dungeon.pushState(newState);
