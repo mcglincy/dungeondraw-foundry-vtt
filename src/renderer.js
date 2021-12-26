@@ -191,32 +191,56 @@ const addExteriorShadow = (container, config, geometry) => {
     !config.exteriorShadowOpacity ||
     !geometry
   ) {
+    // no visible shadows
     return;
   }
+
+  // one graphics for all exterior shadow
+  const exteriorShadowGfx = new PIXI.Graphics();
+  exteriorShadowGfx.lineStyle({
+    width: config.wallThickness + config.exteriorShadowThickness,
+    color: PIXI.utils.string2hex(config.interiorShadowColor),
+    alignment: 0.5, // middle
+    join: "round",
+  });
+
+  // draw exterior for each poly
   for (let i = 0; i < geometry.getNumGeometries(); i++) {
     const poly = geometry.getGeometryN(i);
-    addExteriorShadowForPoly(container, config, poly);
+    addExteriorShadowForPoly(exteriorShadowGfx, config, poly);
   }
+
+  // filters
+  const alphaFilter = new PIXI.filters.AlphaFilter(
+    config.exteriorShadowOpacity
+  );
+  const blurFilter = new PIXI.filters.BlurFilter();
+  exteriorShadowGfx.filters = [alphaFilter, blurFilter];
+  container.addChild(exteriorShadowGfx);
 };
 
 /** Add an exterior blurred shadow for the given polygon. */
-const addExteriorShadowForPoly = (container, config, poly) => {
-  const outerShadow = new PIXI.Graphics();
-  const expanded = geo.expandGeometry(poly, config.exteriorShadowThickness);
-  outerShadow.beginFill(
-    PIXI.utils.string2hex(config.exteriorShadowColor),
-    config.exteriorShadowOpacity
-  );
-  outerShadow.drawPolygon(
-    expanded
+const addExteriorShadowForPoly = (exteriorShadowGfx, config, poly) => {
+  // draw shadow around the exterior ring of the polygon
+  const exterior = poly.getExteriorRing();
+  exteriorShadowGfx.drawPolygon(
+    exterior
       .getCoordinates()
       .map((c) => [c.x, c.y])
       .flat()
   );
-  outerShadow.endFill();
-  const blurFilter = new PIXI.filters.BlurFilter();
-  outerShadow.filters = [blurFilter];
-  container.addChild(outerShadow);
+
+  // draw inner hole shadows
+  const numHoles = poly.getNumInteriorRing();
+  for (let i = 0; i < numHoles; i++) {
+    const hole = poly.getInteriorRingN(i);
+    exteriorShadowGfx.drawPolygon(
+      hole
+        .getCoordinates()
+        .map((c) => [c.x, c.y])
+        .flat()
+    );
+  }
 };
 
 const drawPolygonMask = (gfx, poly) => {
@@ -253,13 +277,12 @@ const drawPolygonWallMask = (gfx, poly, wallThickness) => {
   gfx.lineStyle(wallThickness, PIXI.utils.string2hex("#000000"), 1.0, 0.5);
   gfx.drawPolygon(flatCoords);
 
-  // draw interior hole walls/shadows
+  // draw interior hole wall polys
   const numHoles = poly.getNumInteriorRing();
   for (let i = 0; i < numHoles; i++) {
     const hole = poly.getInteriorRingN(i);
     const coords = hole.getCoordinates();
     const flatCoords = coords.map((c) => [c.x, c.y]).flat();
-    // draw hole wall poly
     gfx.lineStyle(wallThickness, PIXI.utils.string2hex("#000000"), 1.0);
     gfx.drawPolygon(flatCoords);
   }

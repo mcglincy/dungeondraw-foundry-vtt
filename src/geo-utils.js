@@ -7,6 +7,12 @@ import { BufferOp } from "jsts/org/locationtech/jts/operation/buffer";
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js";
 import RelateOp from "jsts/org/locationtech/jts/operation/relate/RelateOp.js";
 import UnionOp from "jsts/org/locationtech/jts/operation/union/UnionOp.js";
+import TopologyPreservingSimplifier from "jsts/org/locationtech/jts/simplify/TopologyPreservingSimplifier.js";
+import Densifier from "jsts/org/locationtech/jts/densify/Densifier.js";
+import GeometryTransformer from "jsts/org/locationtech/jts/geom/util/GeometryTransformer.js";
+// needed by Densifier
+import LineString from "jsts/org/locationtech/jts/geom/LineString.js";
+import MultiPolygon from "jsts/org/locationtech/jts/geom/MultiPolygon.js";
 
 // TODO: various geometry patched functions don't show up in node module
 // see jsts monkey.js for patching
@@ -200,4 +206,87 @@ export const rectangleForSegment = (thickness, x1, y1, x2, y2) => {
     x1 + dy,
     y1 - dx,
   ];
+};
+
+export const simplify = (geom, distanceTolerance = 5.0) => {
+  return TopologyPreservingSimplifier.simplify(geom, distanceTolerance);
+};
+
+// working around "e.buffer doesn't exist" monkey patching issue
+class DensifyTransformer extends GeometryTransformer {
+  constructor() {
+    super();
+    DensifyTransformer.constructor_.apply(this, arguments);
+  }
+  static constructor_() {
+    this.distanceTolerance = null;
+    const distanceTolerance = arguments[0];
+    this.distanceTolerance = distanceTolerance;
+  }
+  transformMultiPolygon(geom, parent) {
+    const roughGeom = super.transformMultiPolygon.call(this, geom, parent);
+    return this.createValidArea(roughGeom);
+  }
+  transformPolygon(geom, parent) {
+    const roughGeom = super.transformPolygon.call(this, geom, parent);
+    if (parent instanceof MultiPolygon) return roughGeom;
+
+    return this.createValidArea(roughGeom);
+  }
+  transformCoordinates(coords, parent) {
+    const inputPts = coords.toCoordinateArray();
+    let newPts = Densifier.densifyPoints(
+      inputPts,
+      this.distanceTolerance,
+      parent.getPrecisionModel()
+    );
+    if (parent instanceof LineString && newPts.length === 1)
+      newPts = new Array(0).fill(null);
+
+    return this._factory.getCoordinateSequenceFactory().create(newPts);
+  }
+  createValidArea(roughAreaGeom) {
+    // geometry.buffer function doesn't exist w/out monkey patching
+    //return roughAreaGeom.buffer(0.0)
+    return BufferOp.bufferOp(roughAreaGeom, 0.0);
+  }
+}
+
+export const densify = (geom, distanceTolerance = 50.0) => {
+  //return Densifier.densify(geom, distanceTolerance);
+  // return new DensifyTransformer(this._distanceTolerance).transform(this._inputGeom)
+  return new DensifyTransformer(distanceTolerance).transform(geom);
+};
+
+// need to smooth each area etc in a multipolygon
+export const smooth = (geometry) => {
+  const polygons = [];
+  for (let i = 0; i < geometry.getNumGeometries(); i++) {
+    let smoothed = smoothPoly(geometry.getGeometryN(i));
+    smoothed = expandGeometry(smoothed, 0.0);
+    polygons.push(smoothed);
+  }
+  return new GeometryFactory().createMultiPolygon(polygons);
+};
+
+export const smoothPoly = (poly) => {
+  const oldCoords = poly.getCoordinates();
+  const newCoords = [];
+  newCoords.push(oldCoords[0]);
+  for (let i = 0; i < oldCoords.length - 1; i++) {
+    const c0 = oldCoords[i];
+    const c1 = oldCoords[i + 1];
+    const q = new Coordinate(
+      0.75 * c0.x + 0.25 * c1.x,
+      0.75 * c0.y + 0.25 * c1.y
+    );
+    const r = new Coordinate(
+      0.25 * c0.x + 0.75 * c1.x,
+      0.25 * c0.y + 0.75 * c1.y
+    );
+    newCoords.push(q);
+    newCoords.push(r);
+  }
+  newCoords.push(oldCoords[oldCoords.length - 1]);
+  return new GeometryFactory().createPolygon(newCoords);
 };

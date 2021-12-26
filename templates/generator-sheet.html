@@ -1,0 +1,153 @@
+<form class="flexcol" autocomplete="off" onsubmit="event.preventDefault();">
+  <!-- Sheet Navigation Tabs -->
+  <nav class="sheet-tabs tabs">
+    <a class="item" data-tab="settings"
+      ><i class="fas fa-cog"></i> {{localize "DD.TabGeneratorSettings"}}</a
+    >
+  </nav>
+
+  <!-- Settings Tab -->
+  <div class="tab" data-tab="settings">
+    <div class="form-group">
+      <label>{{localize "DD.Algorithm"}}</label>
+      <div class="form-fields">
+        <select name="algorithm" data-dtype="String">
+          {{#select algorithm}}
+          <option value="2d-dungeon">2D Dungeon</option>
+          <option value="dungeoneer">Dungeoneer</option>
+          <option value="rot-js-cellular">Rot.js Cave System</option>
+          {{/select}}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.Height"}}</label>
+      <div class="form-fields">
+        <input
+          type="number"
+          name="height"
+          value="{{height}}"
+          data-dtype="Number"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.Width"}}</label>
+      <div class="form-fields">
+        <input
+          type="number"
+          name="width"
+          value="{{width}}"
+          data-dtype="Number"
+        />
+      </div>
+    </div>
+    <hr />
+    <div class="alg-fields 2d-dungeon">
+      <div class="form-group">
+        <label>{{localize "DD.CenterExits"}}</label>
+        <div class="form-fields">
+          <input
+            type="checkbox"
+            name="centerExits"
+            data-dtype="Boolean"
+            {{checked
+            centerExits}}
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DD.GenerateDoors"}}</label>
+        <div class="form-fields">
+          <input
+            type="checkbox"
+            name="generate2DDungeonDoors"
+            data-dtype="Boolean"
+            {{checked
+            generate2DDungeonDoors}}
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DD.RoomCount"}}</label>
+        <div class="form-fields">
+          <input
+            type="number"
+            name="roomCount"
+            value="{{roomCount}}"
+            data-dtype="Number"
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DD.MaxRoomSize"}}</label>
+        <div class="form-fields">
+          <input
+            type="number"
+            name="maxRoomSize"
+            value="{{maxRoomSize}}"
+            data-dtype="Number"
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DD.MinRoomSize"}}</label>
+        <div class="form-fields">
+          <input
+            type="number"
+            name="minRoomSize"
+            value="{{minRoomSize}}"
+            data-dtype="Number"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="alg-fields rot-js-cellular">
+      <div class="form-group">
+        <label>{{localize "DD.ConnectCaves"}}</label>
+        <div class="form-fields">
+          <input
+            type="checkbox"
+            name="connectCaves"
+            data-dtype="Boolean"
+            {{checked
+            connectCaves}}
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DD.Smoothing"}}</label>
+        <div class="form-fields">
+          <input
+            type="number"
+            name="smoothing"
+            value="{{smoothing}}"
+            data-dtype="Number"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="alg-fields dungeoneer">
+      <div class="form-group">
+        <label>{{localize "DD.GenerateDoors"}}</label>
+        <div class="form-fields">
+          <input
+            type="checkbox"
+            name="generateDungeoneerDoors"
+            data-dtype="Boolean"
+            {{checked
+            generateDungeoneerDoors}}
+          />
+        </div>
+      </div>
+    </div>
+    <hr />
+    <div style="display: flex">
+      <button type="button" name="generate" value="1">
+        <i class="fas fa-magic"></i> {{localize "DD.Generate"}}
+      </button>
+    </div>
+  </div>
+</form>
+<!--This is just to take up empty space after the form, helps with recalculating heights -->
+<div class="empty-space"></div>
