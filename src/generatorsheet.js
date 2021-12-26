@@ -32,21 +32,16 @@ export class GeneratorSheet extends FormApplication {
     return {
       height: 20,
       width: 20,
+
+      // 2d-dungeon
+      roomCount: 8,
+      maxRoomSize: 5,
+      minRoomSize: 2,
+      centerExits: false,
+
+      // rot-js-cellular
       smoothing: 0,
     };
-  }
-
-  /* -------------------------------------------- */
-
-  /** @override */
-  // TODO: kill this?
-  async _updateObject(event, formData) {}
-
-  /* -------------------------------------------- */
-
-  /** @override */
-  async close(options) {
-    await super.close(options);
   }
 
   /* -------------------------------------------- */
@@ -57,6 +52,16 @@ export class GeneratorSheet extends FormApplication {
   activateListeners(html) {
     super.activateListeners(html);
     html.find('button[name="generate"]').click(this.generate.bind(this));
+    html.find('select[name="algorithm"]').change(this.changeAlgorithm.bind(this));
+    this.changeAlgorithm();
+  }
+
+  async changeAlgorithm(event) {
+    event?.preventDefault();
+    const formData = this._getSubmitData();
+    const algClass = `.${formData.algorithm}`;
+    $(".alg-fields").filter(algClass).show();
+    $(".alg-fields").not(algClass).hide();
   }
 
   async generate(event) {

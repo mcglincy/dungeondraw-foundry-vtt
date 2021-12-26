@@ -4,16 +4,21 @@ import * as geo from "./geo-utils.js";
 import * as ROT from "rot-js";
 
 export const regenerate = async (dungeon, config = {}) => {
-  switch (config.algorithm) {
-    case "2d-dungeon":
-      await generate2DDungeon(dungeon, config);
-      break;
-    case "rot-js-cellular":
-      await generateRotJsCellular(dungeon, config);
-      break;
-    case "dungeoneer":
-      await generateDungeoneer(dungeon, config);
-      break;
+  try {
+    switch (config.algorithm) {
+      case "2d-dungeon":
+        await generate2DDungeon(dungeon, config);
+        break;
+      case "rot-js-cellular":
+        await generateRotJsCellular(dungeon, config);
+        break;
+      case "dungeoneer":
+        await generateDungeoneer(dungeon, config);
+        break;
+    }  
+  } catch (err) {
+    console.error(err);
+    ui.notifications.error("Error generating dungeon... please try again.");    
   }
 };
 
@@ -88,53 +93,37 @@ export const generateRotJsCellular = async (dungeon, config) => {
 export const generate2DDungeon = async (dungeon, config) => {
   const height = config.height;
   const width = config.height;
-  const gridSize = canvas.scene.data.grid;
-  const xOffset =
-    Math.ceil(
-      (canvas.scene.data.width * canvas.scene.data.padding) /
-        canvas.scene.data.grid
-    ) * canvas.scene.data.grid;
-  const yOffset =
-    Math.ceil(
-      (canvas.scene.data.height * canvas.scene.data.padding) /
-        canvas.scene.data.grid
-    ) * canvas.scene.data.grid;
 
   let twoDD = new TwoDDungeon({
     max_iterations: 50,
     size: [width, height],
-    //seed: 'abcd', //omit for generated seed
     rooms: {
-      initial: {
-        min_size: [3, 3],
-        max_size: [3, 3],
-        max_exits: 1,
-        //position: [0, 0] //OPTIONAL pos of initial room
-      },
       any: {
-        min_size: [2, 2],
-        max_size: [5, 5],
+        min_size: [config.minRoomSize, config.minRoomSize],
+        max_size: [config.maxRoomSize, config.maxRoomSize],
         max_exits: 4,
-      },
+      }
     },
-    max_corridor_length: 6,
     min_corridor_length: 2,
     corridor_density: 0.5, //corridors per room
-    symmetric_rooms: false, // exits must be in the center of a wall if true
+    symmetric_rooms: config.centerExits, // exits must be in the center of a wall if true
     interconnects: 1, //extra corridors to connect rooms and make circular paths. not 100% guaranteed
-    max_interconnect_length: 10,
-    room_count: 10,
+    // max_interconnect_length: 10,
+    room_count: config.roomCount,
   });
   twoDD.generate();
 
+  const gridSize = canvas.scene.data.grid;
+  const xOff = xOffset();
+  const yOff = yOffset();
   let geometry;
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       const isWall = twoDD.walls.get([x, y]);
       if (isWall === false) {
         const oneSquare = {
-          x: xOffset + x * gridSize,
-          y: yOffset + y * gridSize,
+          x: xOff + x * gridSize,
+          y: yOff + y * gridSize,
           height: gridSize,
           width: gridSize,
         };

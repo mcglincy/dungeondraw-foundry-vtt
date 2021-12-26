@@ -1,5 +1,6 @@
 import * as constants from "./constants.js";
 import { Settings } from "./settings.js";
+import * as geo from "./geo-utils.js";
 
 export const makeWalls = async (state) => {
   if (!game.user.isGM) {
@@ -7,8 +8,10 @@ export const makeWalls = async (state) => {
     return;
   }
   await deleteAllWalls();
-  if (state.geometry) {
-    await makeWallsFromMulti(state.config, state.geometry);
+  if (state.geometry) {    
+    const expanded = geo.expandGeometry(state.geometry, state.config.wallThickness / 2.0);
+    const simplified = geo.simplify(expanded, 10.0);
+    await makeWallsFromMulti(state.config, simplified);
   }
   await makeInteriorWalls(state.config, state.interiorWalls);
   await makeDoors(state.config, state.doors);
