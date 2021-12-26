@@ -52,7 +52,9 @@ export const generateRotJsCellular = async (dungeon, config) => {
   for (let i = 0; i < 4; i++) {
     map.create();
   }
-  map.connect(null, 1);
+  if (config.connectCaves) {
+    map.connect(null, 1);
+  }
 
   const gridSize = canvas.scene.data.grid / scalingFactor;
   const xOff = xOffset();
@@ -105,10 +107,12 @@ export const generate2DDungeon = async (dungeon, config) => {
       }
     },
     min_corridor_length: 2,
+    max_corridor_length: 6,
     corridor_density: 0.5, //corridors per room
     symmetric_rooms: config.centerExits, // exits must be in the center of a wall if true
-    interconnects: 1, //extra corridors to connect rooms and make circular paths. not 100% guaranteed
-    // max_interconnect_length: 10,
+    //interconnects: 1, //extra corridors to connect rooms and make circular paths. not 100% guaranteed
+    interconnects: 0,
+    max_interconnect_length: 10,
     room_count: config.roomCount,
   });
   map.generate();
@@ -119,6 +123,7 @@ export const generate2DDungeon = async (dungeon, config) => {
   let geometry;
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
+      // TODO: is this flipped / rotated, and we're iterating wrong?
       const isWall = map.walls.get([x, y]);
       if (isWall === false) {
         const oneSquare = {
@@ -138,17 +143,55 @@ export const generate2DDungeon = async (dungeon, config) => {
   }
   geometry = geo.simplify(geometry);
 
-  // TODO: NaNs for the door coords?
-  // for (let piece of twoDD.children) {
-  //   for (let exit of piece.exits) {
-  //     let {x, y, dest_piece} = exit; // local position of exit and piece it exits to
-  //     const foo = piece.global_pos([x, y]); // [x, y] global pos of the exit
-  //     console.log(foo);
-  //   }
-  // }
+  const doors = [];
+  for (let piece of map.children) {
+    if (piece.room_size[0] === 1 || piece.room_size[1] === 1) {
+      // skip doors in corridors
+      continue;
+    }
+    for (let exit of piece.exits) {
+      const [[doorX, doorY], direction, dest] = exit;
+      const x = piece.position[0] + doorX;
+      const y = piece.position[1] + doorY;
+      if (direction === 90) {
+        // vertical, east side
+        doors.push([
+          xOff + (x+1) * gridSize, 
+          yOff + y * gridSize, 
+          xOff + (x+1) * gridSize, 
+          yOff + (y+1) * gridSize
+        ]);  
+      } else if (direction === 270) {
+        // vertical, west side
+        doors.push([
+          xOff + x * gridSize, 
+          yOff + y * gridSize, 
+          xOff + x * gridSize, 
+          yOff + (y+1) * gridSize
+        ]);            
+      } else if (direction === 0) {
+        // horizontal, north side
+        doors.push([
+          xOff + x * gridSize, 
+          yOff + y * gridSize, 
+          xOff + (x+1) * gridSize, 
+          yOff + y * gridSize
+        ]);  
+      } else if (direction === 180) {
+        // horizontal, south side
+        doors.push([
+          xOff + x * gridSize, 
+          yOff + (y+1) * gridSize, 
+          xOff + (x+1) * gridSize, 
+          yOff + (y+1) * gridSize
+        ]);  
+      }
+    }
+  }
 
   const newState = dungeon.state().clone();
   newState.geometry = geometry;
+  newState.doors = config.generate2DDungeonDoors ? doors : [];
   await dungeon.pushState(newState);
 };
 
@@ -161,6 +204,7 @@ export const generateDungeoneer = async (dungeon, config) => {
   const xOff = xOffset();
   const yOff =yOffset();
   let geometry;
+  const doors = [];
   for (const row of map.tiles) {
     for (const cell of row) {
       if (cell.type === "floor" || cell.type === "door") {
@@ -177,10 +221,30 @@ export const generateDungeoneer = async (dungeon, config) => {
           geometry = geo.union(geometry, poly);
         }
       }
+      if (cell.type === "door") {
+        if (cell.neighbours.w?.type === "floor") {
+          // east-west passage, thus vertical door
+          doors.push([
+            xOff + (cell.x+0.5) * gridSize, 
+            yOff + cell.y * gridSize, 
+            xOff + (cell.x+0.5) * gridSize, 
+            yOff + (cell.y+1) * gridSize
+          ]);  
+        } else {
+          // horizontal door
+          doors.push([
+            xOff + cell.x * gridSize, 
+            yOff + (cell.y+0.5) * gridSize, 
+            xOff + (cell.x+1) * gridSize, 
+            yOff + (cell.y+0.5) * gridSize
+          ]);  
+        }
+      }
     }
   }
   geometry = geo.simplify(geometry);
   const newState = dungeon.state().clone();
   newState.geometry = geometry;
+  newState.doors = config.generateDungeoneerDoors ? doors : [];
   await dungeon.pushState(newState);
 };

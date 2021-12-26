@@ -9,8 +9,9 @@ export const makeWalls = async (state) => {
   }
   await deleteAllWalls();
   if (state.geometry) {    
-    const expanded = geo.expandGeometry(state.geometry, state.config.wallThickness / 2.0);
-    const simplified = geo.simplify(expanded, 10.0);
+    // const expanded = geo.expandGeometry(state.geometry, state.config.wallThickness / 2.0);
+    // const simplified = geo.simplify(expanded, 10.0);
+    const simplified = geo.simplify(state.geometry, 10.0);
     await makeWallsFromMulti(state.config, simplified);
   }
   await makeInteriorWalls(state.config, state.interiorWalls);

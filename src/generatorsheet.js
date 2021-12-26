@@ -34,12 +34,17 @@ export class GeneratorSheet extends FormApplication {
       width: 20,
 
       // 2d-dungeon
-      roomCount: 8,
+      centerExits: false,
+      generate2DDungeonDoors: true,
       maxRoomSize: 5,
       minRoomSize: 2,
-      centerExits: false,
+      roomCount: 8,
+
+      // dungeoneer
+      generateDungeoneerDoors: true,
 
       // rot-js-cellular
+      connectCaves: true,
       smoothing: 0,
     };
   }
@@ -67,6 +72,7 @@ export class GeneratorSheet extends FormApplication {
   async generate(event) {
     event.preventDefault();
     const formData = this._getSubmitData();
+    console.log(formData);
     await canvas.dungeon.generate(formData);
   }
 }
