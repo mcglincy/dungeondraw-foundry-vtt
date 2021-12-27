@@ -94,8 +94,7 @@ export const generateRotJsCellular = async (dungeon, config) => {
  */
 export const generate2DDungeon = async (dungeon, config) => {
   const height = config.height;
-  const width = config.height;
-
+  const width = config.width;
   const map = new TwoDDungeon({
     max_iterations: 50,
     size: [width, height],
@@ -107,11 +106,10 @@ export const generate2DDungeon = async (dungeon, config) => {
       },
     },
     min_corridor_length: 2,
-    max_corridor_length: 6,
-    corridor_density: 0.5, //corridors per room
+    max_corridor_length: 8,
+    corridor_density: 0.5, // corridors per room
     symmetric_rooms: config.centerExits, // exits must be in the center of a wall if true
-    //interconnects: 1, //extra corridors to connect rooms and make circular paths. not 100% guaranteed
-    interconnects: 0,
+    interconnects: config.circularPaths ? 1 : 0, //extra corridors to connect rooms and make circular paths. not 100% guaranteed
     max_interconnect_length: 10,
     room_count: config.roomCount,
   });

@@ -30,15 +30,16 @@ export class GeneratorSheet extends FormApplication {
   /** @override */
   getData() {
     return {
-      height: 20,
-      width: 20,
+      height: 30,
+      width: 30,
 
       // 2d-dungeon
       centerExits: false,
+      circularPaths: false,
       generate2DDungeonDoors: true,
-      maxRoomSize: 5,
-      minRoomSize: 2,
-      roomCount: 8,
+      maxRoomSize: 7,
+      minRoomSize: 3,
+      roomCount: 15,
 
       // dungeoneer
       generateDungeoneerDoors: true,
