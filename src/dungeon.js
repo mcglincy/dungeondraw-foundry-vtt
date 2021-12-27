@@ -94,10 +94,6 @@ export class Dungeon extends PlaceableObject {
     // uncomment for jpg+compression
     //const filename = `${canvas.scene.name}-dungeon.jpg`;
     //const base64 = await canvas.app.renderer.extract.base64(this, "image/jpeg", 0.5);
-    // const randString =
-    //   Math.random().toString(36).substring(2, 6) +
-    //   Math.random().toString(36).substring(2, 6);
-    // const filename = `${canvas.scene.name}-dungeon-${randString}.png`;
     const filename = `${canvas.scene.name}-dungeon.png`;
     const base64 = await canvas.app.renderer.extract.base64(tempContainer);
     const res = await fetch(base64);
@@ -107,7 +103,6 @@ export class Dungeon extends PlaceableObject {
     await FilePicker.upload("data", folder, file, {});
     const path = folder ? folder + "/" + filename : filename;
     // make sure we don't keep using a cached copy
-    // TODO: we only need to do this is we're keeping a fixed filename
     TextureLoader.loader.cache.delete(path);
     if (canvas.scene.data.img === path) {
       // cheat to force a scene update when we're re-saving to the same filename
