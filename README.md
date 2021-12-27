@@ -8,6 +8,7 @@ A dungeon-drawing module for Foundry VTT.
 
 ## Tools
 
+- Generate a Dungeon - Let Dungeon Draw make the map for you!
 - Add rectangle - Draw a rectangular room or corridor.
 - Remove rectangle - Remove rooms/corridors, or remove inner chunks of rooms.
 - Add polygon - Draw a polygon; works like Foundry's polygon Drawing tool.
@@ -36,13 +37,21 @@ A dungeon-drawing module for Foundry VTT.
   - To delete: delete the Note and/or the JournalEntry.
   - For Trusted Player: to allow editing, you may need to them as the owner of Journal Entries that were previously created by the GM.
 
-## Using floor textures
+## Using floor and wall textures
 
 If you choose a floor texture it will be used in preference to the floor fill color.
 
 Dungeon Draw currently assumes square texture files.
 
 Want some good floor textures? Check out this free Texture Pack 3 from Forgotten Adventures: https://www.patreon.com/posts/texture-pack-3-24886718
+
+## Dungeon Generators
+
+Dungeon Draw includes a magic wand tool to make a dungeon map for you, along with several dungeon generation algorithms.
+
+- [2D-Dungeon](https://github.com/Prozi/dungeon-generator) by Prozi / domas2x
+- [Dungeoneer](https://github.com/LucianBuzzo/dungeoneer) by Lucian Buzzo
+- [Rot.js cellular](https://github.com/ondras/rot.js) by Ondřej Žára
 
 ## Known issues
 
