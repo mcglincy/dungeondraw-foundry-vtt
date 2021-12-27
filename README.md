@@ -55,6 +55,7 @@ Dungeon Draw includes a magic wand tool to make a dungeon map for you, along wit
 
 ## Known issues
 
+- Sometimes generating a rot.js cave system with smoothing can cause errors. I'm still debugging this, but in the meantime you can just retry - it usually succeeds after an attempt or two.
 - Dungeon Draw isn't compatible with a scene background image (which will cover up the dungeon map). Dungeon Draw's map layer is below Foundry's normal background layer. This lets you use placeable background tiles as you'd expect (they appear on top of the dungeon map), but also means a scene background image appears on top of the dungeon map, too. As a workaround, you can specify a background image in the Dungeon Draw config for the particular scene, which will show your background below the dungeon map.
 - Simultaneous map editors can trample each other's changes and cause save errors. It's best to stick to one map-maker at a time (either the GM or a single player).
 
