@@ -1,3 +1,8 @@
+# 0.16.0
+
+- Add new "magic wand" dungeon generator tool, along with 3 different generator algorithms. Woo!!!
+- Go back to single save-to-background file name per scene.
+
 # 0.15.2
 
 - Write saved background images to unique filenames each save.
