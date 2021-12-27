@@ -51,7 +51,7 @@ Dungeon Draw includes a magic wand tool to make a dungeon map for you, along wit
 
 - [2D-Dungeon](https://github.com/Prozi/dungeon-generator) by Prozi / domas2x
 - [Dungeoneer](https://github.com/LucianBuzzo/dungeoneer) by Lucian Buzzo
-- [Rot.js cellular](https://github.com/ondras/rot.js) by Ondřej Žára
+- [Rot.js cellular automata](https://github.com/ondras/rot.js) by Ondřej Žára
 
 ## Known issues
 

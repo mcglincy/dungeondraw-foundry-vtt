@@ -175,7 +175,11 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   async generate(config) {
-    await this.dungeon.deleteAll();
+    if (this.dungeon) {
+      await this.dungeon.deleteAll();
+    } else {
+      await this.createNewDungeon();
+    }
     await regenerate(this.dungeon, config);
   }
 

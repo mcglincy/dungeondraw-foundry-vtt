@@ -1,3 +1,7 @@
+# 0.16.1
+
+- Fix bug when generating dungeon on a new scene without a preexisting dungeon.
+
 # 0.16.0
 
 - Add new "magic wand" dungeon generator tool, along with 3 different generator algorithms. Woo!!!
