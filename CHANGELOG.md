@@ -1,3 +1,8 @@
+# 0.16.2
+
+- Change wall creation to create new walls as a single step before deleting old ones.
+- Only show 3D fields on config and theme sheets if 3D module setting is enabled.
+
 # 0.16.1
 
 - Fix bug when generating dungeon on a new scene without a preexisting dungeon.

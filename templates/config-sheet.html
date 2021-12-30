@@ -423,6 +423,7 @@
         />
       </div>
     </div>
+    {{#if threeDCanvasEnabled}}
     <hr />
     <div class="form-group">
       <label>{{localize "DD.ThreeDDoorTexture"}}</label>
@@ -506,7 +507,8 @@
         />
       </div>
     </div>
-    <hr />
+    {{/if}}
+    <br />
     <div style="display: flex">
       <button type="button" name="resetDefault" value="1">
         <i class="fas fa-sync"></i> {{localize "DD.ResetToDefaults"}}

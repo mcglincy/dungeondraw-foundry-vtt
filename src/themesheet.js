@@ -1,5 +1,6 @@
 // TODO: fix this circular dependency
 // import { ConfigSheet } from "./configsheet.js";
+import { Settings } from "./settings.js";
 import { getCustomThemes, setCustomThemes } from "./themes.js";
 
 /**
@@ -19,7 +20,7 @@ export class ThemeSheet extends FormApplication {
       classes: ["sheet"],
       template: "modules/dungeon-draw/templates/theme-sheet.html",
       width: 480,
-      height: 1020,
+      height: Settings.threeDCanvasEnabled() ? 1020 : 900,
       tabs: [
         { navSelector: ".tabs", contentSelector: "form", initial: "position" },
       ],
@@ -35,9 +36,11 @@ export class ThemeSheet extends FormApplication {
   getData() {
     const customThemes = getCustomThemes();
     const theme = customThemes[this.themeKey];
+    const threeDCanvasEnabled = Settings.threeDCanvasEnabled();
     return {
       config: theme.config,
       themeName: theme.name,
+      threeDCanvasEnabled,
     };
   }
 

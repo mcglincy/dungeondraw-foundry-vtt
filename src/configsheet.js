@@ -1,3 +1,4 @@
+import { Settings } from "./settings.js";
 import {
   defaultConfig,
   getCustomThemes,
@@ -25,7 +26,7 @@ export class ConfigSheet extends FormApplication {
       classes: ["sheet"],
       template: "modules/dungeon-draw/templates/config-sheet.html",
       width: 480,
-      height: 1100,
+      height: Settings.threeDCanvasEnabled() ? 1100 : 980,
       tabs: [
         { navSelector: ".tabs", contentSelector: "form", initial: "position" },
       ],
@@ -47,6 +48,7 @@ export class ConfigSheet extends FormApplication {
     const customThemeKeys = Object.keys(customThemes).sort();
     const themeKeys = Object.keys(themes).sort();
     const themePainterThemeKey = getThemePainterThemeKey();
+    const threeDCanvasEnabled = Settings.threeDCanvasEnabled();
     return {
       config,
       customThemes,
@@ -54,6 +56,7 @@ export class ConfigSheet extends FormApplication {
       themes,
       themeKeys,
       themePainterThemeKey,
+      threeDCanvasEnabled,
     };
   }
 
