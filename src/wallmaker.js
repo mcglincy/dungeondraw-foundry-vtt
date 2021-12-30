@@ -7,50 +7,65 @@ export const makeWalls = async (state) => {
     // need GM privs to delete/create walls
     return;
   }
-  await deleteAllWalls();
-  if (state.geometry) {
-    // const expanded = geo.expandGeometry(state.geometry, state.config.wallThickness / 2.0);
-    // const simplified = geo.simplify(expanded, 10.0);
-    const simplified = geo.simplify(state.geometry, 10.0);
-    await makeWallsFromMulti(state.config, simplified);
-  }
-  await makeInteriorWalls(state.config, state.interiorWalls);
-  await makeDoors(state.config, state.doors);
-  await makeSecretDoors(state.config, state.secretDoors);
-};
 
-const deleteAllWalls = async () => {
+  // find our current DD walls
+  const idsToDelete = wallIdsToDelete();
+
+  // calculate a new set of walls
+  let walls = [];
+  if (state.geometry) {
+    // simplify our geometry to downsample the amount of walls created
+    const simplified = geo.simplify(state.geometry, 10.0);
+    walls = makeWallsFromMulti(state.config, simplified);
+  }
+  const interiorWalls = makeInteriorWalls(state.config, state.interiorWalls);
+  const doors = makeDoors(state.config, state.doors);
+  const secretDoors = makeSecretDoors(state.config, state.secretDoors);
+  const allWalls = walls.concat(interiorWalls, doors, secretDoors);
+
+  // create our new walls before deleting old ones,
+  // to prevent any unwanted vision reveals.
+  //
+  // scene.update() triggers a redraw, which causes an infinite loop of redraw/refresh.
+  // so we avoid using it :P
+  if (allWalls.length) {
+    await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
+  }
+
+  // finally, delete the previous set of walls
   try {
-    // scene.update() triggers a redraw,
-    // which causes an infinite loop of redraw/refresh.
-    // so avoid it :P
-    const walls = canvas.scene.getEmbeddedCollection("Wall");
-    const ids = [];
-    for (const wall of walls) {
-      const flag = wall.getFlag(constants.MODULE_NAME, "dungeonVersion");
-      if (flag) {
-        ids.push(wall.id);
-      }
-    }
-    await canvas.scene.deleteEmbeddedDocuments("Wall", ids);
+    await canvas.scene.deleteEmbeddedDocuments("Wall", idsToDelete);
   } catch (error) {
     console.error(error);
   }
 };
 
-const makeWallsFromMulti = async (config, multi) => {
-  for (let i = 0; i < multi.getNumGeometries(); i++) {
-    const poly = multi.getGeometryN(i);
-    await makeWallsFromPoly(config, poly);
+const wallIdsToDelete = () => {
+  const walls = canvas.scene.getEmbeddedCollection("Wall");
+  const ids = [];
+  for (const wall of walls) {
+    const flag = wall.getFlag(constants.MODULE_NAME, "dungeonVersion");
+    if (flag) {
+      ids.push(wall.id);
+    }
   }
+  return ids;
 };
 
-const makeWallsFromPoly = async (config, poly) => {
+const makeWallsFromMulti = (config, multi) => {
+  let walls = [];
+  for (let i = 0; i < multi.getNumGeometries(); i++) {
+    const poly = multi.getGeometryN(i);
+    walls = walls.concat(makeWallsFromPoly(config, poly));
+  }
+  return walls;
+};
+
+const makeWallsFromPoly = (config, poly) => {
   const allWalls = [];
   const exterior = poly.getExteriorRing();
   const coords = exterior.getCoordinates();
   for (let i = 0; i < coords.length - 1; i++) {
-    // constants.MODULE_NAME
     const data = wallData(
       config,
       coords[i].x,
@@ -75,45 +90,37 @@ const makeWallsFromPoly = async (config, poly) => {
       allWalls.push(data);
     }
   }
-  if (allWalls.length) {
-    await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
-  }
+  return allWalls;
 };
 
 /** [[x1,y1,x2,y2],...] */
-const makeInteriorWalls = async (config, walls) => {
+const makeInteriorWalls = (config, walls) => {
   const allWalls = [];
   for (const wall of walls) {
     const data = wallData(config, wall[0], wall[1], wall[2], wall[3]);
     allWalls.push(data);
   }
-  if (allWalls.length) {
-    await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
-  }
+  return allWalls;
 };
 
 /** [[x1,y1,x2,y2],...] */
-const makeDoors = async (config, doors) => {
+const makeDoors = (config, doors) => {
   const allDoors = [];
   for (const door of doors) {
     const data = doorData(config, door[0], door[1], door[2], door[3]);
     allDoors.push(data);
   }
-  if (allDoors.length) {
-    await canvas.scene.createEmbeddedDocuments("Wall", allDoors);
-  }
+  return allDoors;
 };
 
 /** [[x1,y1,x2,y2],...] */
-const makeSecretDoors = async (config, doors) => {
+const makeSecretDoors = (config, doors) => {
   const allDoors = [];
   for (const door of doors) {
     const data = secretDoorData(config, door[0], door[1], door[2], door[3]);
     allDoors.push(data);
   }
-  if (allDoors.length) {
-    await canvas.scene.createEmbeddedDocuments("Wall", allDoors);
-  }
+  return allDoors;
 };
 
 const wallData = (config, x1, y1, x2, y2) => {
