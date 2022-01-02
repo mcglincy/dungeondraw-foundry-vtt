@@ -19,5 +19,6 @@
   "rules": {
     // TODO: decide if we want no-shadow. Will likely need to omit minified.
     //"no-shadow": ["error", { "builtinGlobals": true, "hoist": "all", "allow": ["event"] }]
+    "prefer-const": 2
   }
 }

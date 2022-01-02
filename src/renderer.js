@@ -15,7 +15,7 @@ export const render = async (container, state) => {
 };
 
 const drawThemeAreas = async (container, state) => {
-  for (let area of state.themeAreas) {
+  for (const area of state.themeAreas) {
     const theme = getTheme(area.themeKey);
     if (!theme) {
       console.log(`No such ${area.themeType} theme: ${area.themeKey}`);
@@ -96,7 +96,7 @@ const renderPass = async (container, state) => {
   maskConfig.wallColor = "#000000";
 
   // draw interior walls
-  for (let wall of state.interiorWalls) {
+  for (const wall of state.interiorWalls) {
     drawInteriorWallShadow(interiorShadowGfx, state.config, wall);
     if (state.config.wallTexture) {
       drawInteriorWall(wallMask, maskConfig, wall);
@@ -106,11 +106,11 @@ const renderPass = async (container, state) => {
   }
 
   // draw doors
-  for (let door of state.doors) {
+  for (const door of state.doors) {
     drawDoorShadow(interiorShadowGfx, state.config, door);
     drawDoor(doorGfx, wallGfx, wallMask, state.config, door);
   }
-  for (let secretDoor of state.secretDoors) {
+  for (const secretDoor of state.secretDoors) {
     drawInteriorWallShadow(interiorShadowGfx, state.config, secretDoor);
     drawSecretDoor(doorGfx, wallGfx, wallMask, state.config, secretDoor);
   }

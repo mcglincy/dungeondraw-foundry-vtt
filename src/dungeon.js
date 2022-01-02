@@ -205,7 +205,7 @@ export class Dungeon extends PlaceableObject {
     // possibly split interior walls
     const wallsToDelete = [];
     const wallsToAdd = [];
-    for (let wall of newState.interiorWalls) {
+    for (const wall of newState.interiorWalls) {
       const wallPoly = geo.twoPointsToLineString(
         wall[0],
         wall[1],
@@ -254,7 +254,7 @@ export class Dungeon extends PlaceableObject {
   _maybeSplitWall(x1, y1, x2, y2, doors) {
     // TODO: this logic doesn't handle two doors side by side
     const wallPoly = geo.twoPointsToLineString(x1, y1, x2, y2);
-    for (let door of doors) {
+    for (const door of doors) {
       const doorPoly = geo.twoPointsToLineString(
         door[0],
         door[1],

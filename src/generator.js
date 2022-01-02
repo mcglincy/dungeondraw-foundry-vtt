@@ -142,12 +142,12 @@ export const generate2DDungeon = async (dungeon, config) => {
   geometry = geo.simplify(geometry);
 
   const doors = [];
-  for (let piece of map.children) {
+  for (const piece of map.children) {
     if (piece.room_size[0] === 1 || piece.room_size[1] === 1) {
       // skip doors in corridors
       continue;
     }
-    for (let exit of piece.exits) {
+    for (const exit of piece.exits) {
       const [[doorX, doorY], direction] = exit;
       const x = piece.position[0] + doorX;
       const y = piece.position[1] + doorY;
