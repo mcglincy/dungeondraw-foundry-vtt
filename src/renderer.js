@@ -48,6 +48,7 @@ const drawThemeAreas = async (container, state) => {
     const clipPoly = geo.pointsToPolygon(area.points);
     await renderPass(areaContainer, areaState, { clipPoly });
 
+    // TODO: verify mask add
     container.addChild(areaMask);
     container.addChild(areaContainer);
   }
@@ -69,6 +70,8 @@ const renderPass = async (container, state) => {
   // use a mask to clip the tiled background and interior shadows
   const clipMask = new PIXI.Graphics();
   drawMultiPolygonMask(clipMask, state.geometry);
+  // TODO: verify mask add
+  // the add seems necessary for inner shadows to show?
   container.addChild(clipMask);
 
   interiorShadowGfx.mask = clipMask;
@@ -121,6 +124,7 @@ const renderPass = async (container, state) => {
       state.geometry,
       state.config.wallThickness
     );
+    // TODO: verify mask add
     container.addChild(wallMask);
     // expand our geometry, so we add sprites
     // under the half of the wall thickness that expands past the geometry
