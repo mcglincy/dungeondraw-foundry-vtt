@@ -26,7 +26,7 @@ export class ConfigSheet extends FormApplication {
       classes: ["sheet"],
       template: "modules/dungeon-draw/templates/config-sheet.html",
       width: 480,
-      height: Settings.threeDCanvasEnabled() ? 1100 : 980,
+      height: Settings.threeDCanvasEnabled() ? 1160 : 1040,
       tabs: [
         { navSelector: ".tabs", contentSelector: "form", initial: "position" },
       ],
@@ -109,6 +109,12 @@ export class ConfigSheet extends FormApplication {
     html
       .find('select[name="themePainterThemeKey"]')
       .change(this._onThemePainterThemeSelect.bind(this));
+    html
+      .find(".dd-export-themes-button")
+      .click(this._onExportThemesClick.bind(this));
+    html
+      .find(".dd-import-themes-button")
+      .click(this._onImportThemesClick.bind(this));
   }
 
   /* -------------------------------------------- */
@@ -210,6 +216,56 @@ export class ConfigSheet extends FormApplication {
     delete customThemes[themeKey];
     setCustomThemes(customThemes);
     this.render();
+  }
+
+  _onExportThemesClick(event) {
+    event.preventDefault();
+    const customThemesString = JSON.stringify(getCustomThemes(), null, 2);
+    saveDataToFile(
+      customThemesString,
+      "application/json",
+      "dd-custom-themes.json"
+    );
+  }
+
+  async _onImportThemesClick(event) {
+    event.preventDefault();
+    // this Dialog based on Foundry's importFromJSONDialog()
+    new Dialog(
+      {
+        title: game.i18n.localize("DD.ImportCustomThemes"),
+        content: await renderTemplate("templates/apps/import-data.html", {
+          hint1: game.i18n.localize("DD.ImportCustomThemesHint"),
+        }),
+        buttons: {
+          import: {
+            icon: '<i class="fas fa-file-import"></i>',
+            label: game.i18n.localize("DD.Import"),
+            callback: (html) => {
+              const form = html.find("form")[0];
+              if (!form.data.files.length) {
+                return ui.notifications.error(
+                  "You did not upload a data file!"
+                );
+              }
+              readTextFromFile(form.data.files[0]).then((text) => {
+                const json = JSON.parse(text);
+                setCustomThemes(json);
+                this.render();
+              });
+            },
+          },
+          no: {
+            icon: '<i class="fas fa-times"></i>',
+            label: game.i18n.localize("DD.Cancel"),
+          },
+        },
+        default: "import",
+      },
+      {
+        width: 400,
+      }
+    ).render(true);
   }
 
   _onThemePainterThemeSelect(event) {
