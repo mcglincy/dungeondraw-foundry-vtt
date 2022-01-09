@@ -3,57 +3,61 @@ import { getTheme } from "./themes.js";
 // importing a local copy of PIXI filters, to avoid a long chain of npm pixi dependencies
 import "./lib/pixi-filters.min.js";
 
+/**
+ * Render the given dungeon state into the given container.
+ */
 export const render = async (container, state) => {
+  // clear everything
   container.clear();
-
   // add a background image if specified
   await addBackgroundImage(container, state.config);
-  // floor render pass, no additional clipping
+  // main geometry/config render pass
   await renderPass(container, state);
   // draw theme-painted areas as additional render passes
   await drawThemeAreas(container, state);
 };
 
-const drawThemeAreas = async (container, state) => {
-  for (const area of state.themeAreas) {
-    const theme = getTheme(area.themeKey);
-    if (!theme) {
-      console.log(`No such ${area.themeType} theme: ${area.themeKey}`);
-      continue;
+/**
+ * Possibly add a background image to the container.
+ */
+const addBackgroundImage = async (container, config) => {
+  if (config.backgroundImage) {
+    // mimicking MapLayer._drawBackground() behavior
+    const texture = await getTexture(config.backgroundImage);
+    if (texture?.valid) {
+      const d = canvas.dimensions;
+      const bg = new PIXI.Sprite(texture);
+      bg.position.set(d.paddingX - d.shiftX, d.paddingY - d.shiftY);
+      // resize the background image to match the scene dimensions
+      bg.width = d.sceneWidth;
+      bg.height = d.sceneHeight;
+      maybeStartSpriteVideo(bg);
+      container.addChild(bg);
     }
-    // TODO: hacky way to pass down the actual theme to paint
-    const areaState = state.clone();
-    // TODO: how should we deal with different wall thicknesses, door colors, etc
-    // which look jarring/off when two different themes meet up
-    areaState.config = theme.config;
-    // TODO: for now, just keep certain values from the main state config,
-    // so the dungeon walls etc look consistent at meet up areas
-    areaState.config.doorColor = state.config.doorColor;
-    areaState.config.doorFillColor = state.config.doorFillColor;
-    areaState.config.doorFillOpacity = state.config.doorFillOpacity;
-    areaState.config.doorThickness = state.config.doorThickness;
-    areaState.config.wallColor = state.config.wallColor;
-    areaState.config.wallThickness = state.config.wallThickness;
-    areaState.config.exteriorShadowOpacity = 0.0; // don't draw additional exterior shadows
-
-    // mask for our area shape
-    const areaContainer = new PIXI.Container();
-    const areaMask = new PIXI.Graphics();
-    areaMask.beginFill(0xffffff, 1.0);
-    areaMask.drawPolygon(area.points.flat());
-    areaMask.endFill();
-    areaContainer.mask = areaMask;
-
-    // render the theme, clipping to our rectangle
-    const clipPoly = geo.pointsToPolygon(area.points);
-    await renderPass(areaContainer, areaState, { clipPoly });
-
-    // TODO: verify mask add
-    container.addChild(areaMask);
-    container.addChild(areaContainer);
   }
 };
 
+/** If sprite is a video, start playing it. */
+const maybeStartSpriteVideo = (sprite) => {
+  const source = sprite.texture.baseTexture.resource.source;
+  const isVideo = source && source.tagName === "VIDEO";
+  if (isVideo) {
+    source.loop = true;
+    source.volume = game.settings.get("core", "globalAmbientVolume");
+    game.video.play(source);
+  }
+};
+
+/**
+ * Render pass: draw the given dungeon state/config into the given container.
+ *
+ * Child graphics ordering:
+ * - exterior shadow
+ * - floor
+ * - interior shadow
+ * - walls
+ * - doors
+ */
 const renderPass = async (container, state) => {
   if (!state.geometry) {
     return;
@@ -133,7 +137,16 @@ const renderPass = async (container, state) => {
       state.config.wallThickness / 2.0
     );
     const tex = await getTexture(state.config.wallTexture);
-    wallGfx.beginTextureFill({ texture: tex });
+    let matrix = null;
+    if (state.config.wallTextureRotation) {
+      matrix = PIXI.Matrix.IDENTITY.clone();
+      matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
+    }
+    wallGfx.beginTextureFill({
+      texture: tex,
+      alpha: state.config.wallOpacity,
+      matrix,
+    });
     const flatCoords = expandedGeometry
       .getCoordinates()
       .map((c) => [c.x, c.y])
@@ -149,6 +162,48 @@ const renderPass = async (container, state) => {
   container.addChild(doorGfx);
 };
 
+const drawThemeAreas = async (container, state) => {
+  for (const area of state.themeAreas) {
+    const theme = getTheme(area.themeKey);
+    if (!theme) {
+      console.log(`No such ${area.themeType} theme: ${area.themeKey}`);
+      continue;
+    }
+    // TODO: hacky way to pass down the actual theme to paint
+    const areaState = state.clone();
+    // TODO: how should we deal with different wall thicknesses, door colors, etc
+    // which look jarring/off when two different themes meet up
+    areaState.config = theme.config;
+    // TODO: for now, just keep certain values from the main state config,
+    // so the dungeon doors etc look consistent at meet up areas
+    areaState.config.doorColor = state.config.doorColor;
+    areaState.config.doorFillColor = state.config.doorFillColor;
+    areaState.config.doorFillOpacity = state.config.doorFillOpacity;
+    areaState.config.doorThickness = state.config.doorThickness;
+    areaState.config.wallColor = state.config.wallColor;
+    areaState.config.wallTexture = state.config.wallTexture;
+    areaState.config.wallThickness = state.config.wallThickness;
+    areaState.config.exteriorShadowOpacity = 0.0; // don't draw additional exterior shadows
+    //areaState.config.interiorShadowOpacity = 0.0; // don't draw additional interior shadows
+
+    // mask for our area shape
+    const areaContainer = new PIXI.Container();
+    const areaMask = new PIXI.Graphics();
+    areaMask.beginFill(0xffffff, 1.0);
+    areaMask.drawPolygon(area.points.flat());
+    areaMask.endFill();
+    areaContainer.mask = areaMask;
+
+    // render the theme, clipping to our rectangle
+    const clipPoly = geo.pointsToPolygon(area.points);
+    await renderPass(areaContainer, areaState, { clipPoly });
+
+    // TODO: verify mask add
+    container.addChild(areaMask);
+    container.addChild(areaContainer);
+  }
+};
+
 /** Try-catch wrapper around loadTexture. */
 const getTexture = async (path) => {
   try {
@@ -156,35 +211,6 @@ const getTexture = async (path) => {
     return texture;
   } catch (error) {
     console.log(error);
-  }
-};
-
-/** Possibly add a background image. */
-const addBackgroundImage = async (container, config) => {
-  if (config.backgroundImage) {
-    // mimicking MapLayer._drawBackground() behavior
-    const texture = await getTexture(config.backgroundImage);
-    if (texture?.valid) {
-      const d = canvas.dimensions;
-      const bg = new PIXI.Sprite(texture);
-      bg.position.set(d.paddingX - d.shiftX, d.paddingY - d.shiftY);
-      // resize the background image to match the scene dimensions
-      bg.width = d.sceneWidth;
-      bg.height = d.sceneHeight;
-      maybeStartSpriteVideo(bg);
-      container.addChild(bg);
-    }
-  }
-};
-
-const maybeStartSpriteVideo = (sprite) => {
-  // if video, start playing it
-  const source = sprite.texture.baseTexture.resource.source;
-  const isVideo = source && source.tagName === "VIDEO";
-  if (isVideo) {
-    source.loop = true;
-    source.volume = game.settings.get("core", "globalAmbientVolume");
-    game.video.play(source);
   }
 };
 
@@ -323,18 +349,30 @@ const drawPolygonRoom = async (
   const coords = exterior.getCoordinates();
   const flatCoords = coords.map((c) => [c.x, c.y]).flat();
 
-  // if no floor texture is specified, draw a solid-color floor
+  // draw a floor texture if specified, otherwise solid-color floor
   if (config.floorTexture) {
     // TODO: optimize to not load the texture each pass
     const tex = await getTexture(config.floorTexture);
-    floorGfx.beginTextureFill({ texture: tex });
+    let matrix = null;
+    if (config.floorTextureRotation) {
+      matrix = PIXI.Matrix.IDENTITY.clone();
+      matrix.rotate(config.floorTextureRotation * PIXI.DEG_TO_RAD);
+    }
+    floorGfx.beginTextureFill({
+      texture: tex,
+      alpha: config.floorOpacity,
+      matrix,
+    });
     floorGfx.drawPolygon(flatCoords);
     floorGfx.endFill();
     if (config.floorTextureTint) {
       floorGfx.tint = PIXI.utils.string2hex(config.floorTextureTint);
     }
   } else {
-    floorGfx.beginFill(PIXI.utils.string2hex(config.floorColor), 1.0);
+    floorGfx.beginFill(
+      PIXI.utils.string2hex(config.floorColor),
+      config.floorOpacity
+    );
     floorGfx.drawPolygon(flatCoords);
     floorGfx.endFill();
   }
@@ -371,7 +409,7 @@ const drawPolygonRoom = async (
     wallGfx.lineStyle(
       config.wallThickness,
       PIXI.utils.string2hex(config.wallColor),
-      1.0,
+      config.wallOpacity,
       0.5
     );
     wallGfx.drawPolygon(flatCoords);
@@ -391,7 +429,7 @@ const drawPolygonRoom = async (
       wallGfx.lineStyle(
         config.wallThickness,
         PIXI.utils.string2hex(config.wallColor),
-        1.0
+        config.wallOpacity
       );
       wallGfx.drawPolygon(flatCoords);
     }
@@ -403,7 +441,7 @@ const drawInteriorWall = (wallGfx, config, wall) => {
   wallGfx.lineStyle({
     width: config.wallThickness,
     color: PIXI.utils.string2hex(config.wallColor),
-    alpha: 1.0,
+    alpha: config.wallOpacity,
     alignment: 0.5, // middle
     cap: "round",
   });
@@ -461,7 +499,7 @@ const drawDoor = (doorGfx, wallGfx, wallMask, config, door) => {
     wallMask.lineStyle({
       width: config.wallThickness,
       color: PIXI.utils.string2hex(config.wallColor),
-      alpha: 1.0,
+      alpha: config.wallOpacity,
       alignment: 0.5, // middle
       cap: "round",
     });
@@ -475,7 +513,7 @@ const drawDoor = (doorGfx, wallGfx, wallMask, config, door) => {
     wallGfx.lineStyle({
       width: config.wallThickness,
       color: PIXI.utils.string2hex(config.wallColor),
-      alpha: 1.0,
+      alpha: config.wallOpacity,
       alignment: 0.5, // middle
       cap: "round",
     });
@@ -573,7 +611,7 @@ const drawSecretDoor = (doorGfx, wallGfx, wallMask, config, door) => {
     wallGfx.lineStyle({
       width: config.wallThickness,
       color: PIXI.utils.string2hex(config.wallColor),
-      alpha: 1.0,
+      alpha: config.wallOpacity,
       alignment: 0.5, // middle
       cap: "round",
     });

@@ -43,6 +43,7 @@
   "DD.FloorColor": "Floor Color",
   "DD.FloorOpacity": "Floor Opacity",
   "DD.FloorTexture": "Floor Texture",
+  "DD.FloorTextureRotation": "Floor Texture Rotation",
   "DD.FloorTextureTint": "Floor Texture Tint",
   "DD.Generate": "Generate",
   "DD.GenerateDoors": "Generate Doors",
@@ -87,6 +88,7 @@
   "DD.WallColor": "Wall Color",
   "DD.WallOpacity": "Wall Opacity",
   "DD.WallTexture": "Wall Texture",
+  "DD.WallTextureRotation": "Wall Texture Rotation",
   "DD.WallTextureTint": "Wall Texture Tint",
   "DD.WallThickness": "Wall Thickness",
   "DD.Width": "Width"

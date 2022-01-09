@@ -14,6 +14,7 @@ export const defaultConfig = () => {
     floorColor: "#F2EDDF",
     floorOpacity: 1.0,
     floorTexture: "",
+    floorTextureRotation: 0,
     floorTextureTint: "",
     interiorShadowColor: "#000000",
     interiorShadowThickness: 8,
@@ -32,6 +33,7 @@ export const defaultConfig = () => {
     wallColor: "#000000",
     wallOpacity: 1.0,
     wallTexture: "",
+    wallTextureRotation: 0,
     wallTextureTint: "",
     wallThickness: 8,
   };
