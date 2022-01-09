@@ -180,8 +180,8 @@ const drawThemeAreas = async (container, state) => {
     areaState.config.doorFillColor = state.config.doorFillColor;
     areaState.config.doorFillOpacity = state.config.doorFillOpacity;
     areaState.config.doorThickness = state.config.doorThickness;
-    areaState.config.wallColor = state.config.wallColor;
-    areaState.config.wallTexture = state.config.wallTexture;
+    // areaState.config.wallColor = state.config.wallColor;
+    // areaState.config.wallTexture = state.config.wallTexture;
     areaState.config.wallThickness = state.config.wallThickness;
     areaState.config.exteriorShadowOpacity = 0.0; // don't draw additional exterior shadows
     //areaState.config.interiorShadowOpacity = 0.0; // don't draw additional interior shadows
