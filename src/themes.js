@@ -19,6 +19,7 @@ export const defaultConfig = () => {
     interiorShadowColor: "#000000",
     interiorShadowThickness: 8,
     interiorShadowOpacity: 0.5,
+    matchBaseWalls: true,
     sceneBackgroundColor: "#999999",
     sceneGridColor: "#000000",
     sceneGridOpacity: 0.2,
@@ -31,9 +32,7 @@ export const defaultConfig = () => {
     threeDWallTexture: "",
     threeDWallTextureTint: "",
     wallColor: "#000000",
-    wallOpacity: 1.0,
     wallTexture: "",
-    wallTextureRotation: 0,
     wallTextureTint: "",
     wallThickness: 8,
   };

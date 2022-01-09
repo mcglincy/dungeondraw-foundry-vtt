@@ -49,8 +49,6 @@ export class ConfigSheet extends FormApplication {
     const themeKeys = Object.keys(themes).sort();
     const themePainterThemeKey = getThemePainterThemeKey();
     const threeDCanvasEnabled = Settings.threeDCanvasEnabled();
-    console.log("**** getData");
-    console.log(config);
     return {
       config,
       customThemes,
@@ -69,8 +67,6 @@ export class ConfigSheet extends FormApplication {
     // TODO: handle customThemeName vs. config better
     delete formData.customThemeName;
     delete formData.themePainterTheme;
-    console.log("_updateObject");
-    console.log(formData);
     canvas.dungeon.dungeon?.setConfig(formData);
     if (game.user.isGM) {
       // need GM privs to update scene

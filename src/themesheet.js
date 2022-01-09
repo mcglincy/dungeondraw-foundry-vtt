@@ -57,6 +57,13 @@ export class ThemeSheet extends FormApplication {
       config: formData,
     };
     setCustomThemes(customThemes);
+    // re-draw the dungeon
+    // draw() and refresh() on the layer makes the dungeon disappear
+    //canvas.dungeon.draw();
+    //canvas.dungeon.refresh();
+    // refresh on the dungeon does nothing
+    await canvas.dungeon.dungeon?.refresh();
+
     // force already-open config sheet to re-render
     // TODO: fix this circular dependency
     // new ConfigSheet("themes").render(true);

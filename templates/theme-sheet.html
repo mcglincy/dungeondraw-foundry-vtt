@@ -370,20 +370,13 @@
     </div>
     <hr />
     <div class="form-group">
-      <label>{{localize "DD.WallColor"}}</label>
+      <label>{{localize "DD.MatchBaseWalls"}}</label>
       <div class="form-fields">
         <input
-          type="text"
-          class="color"
-          name="wallColor"
-          value="{{config.wallColor}}"
-          data-dtype="String"
-        />
-        <input
-          type="color"
-          value="{{config.wallColor}}"
-          data-dtype="String"
-          data-edit="wallColor"
+          type="checkbox"
+          name="matchBaseWalls"
+          {{checked
+          config.matchBaseWalls}}
         />
       </div>
     </div>
@@ -425,16 +418,20 @@
       </div>
     </div>
     <div class="form-group">
-      <label>{{localize "DD.WallTextureRotation"}}</label>
+      <label>{{localize "DD.WallTextureTint"}}</label>
       <div class="form-fields">
         <input
-          type="number"
-          name="wallTextureRotation"
-          value="{{config.wallTextureRotation}}"
-          data-dtype="Number"
-          min="-360"
-          max="360"
-          step="1"
+          type="text"
+          class="color"
+          name="wallTextureTint"
+          value="{{config.wallTextureTint}}"
+          data-dtype="String"
+        />
+        <input
+          type="color"
+          value="{{config.wallTextureTint}}"
+          data-edit="wallTextureTint"
+          data-dtype="String"
         />
       </div>
     </div>

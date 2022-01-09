@@ -144,7 +144,7 @@ const renderPass = async (container, state) => {
     }
     wallGfx.beginTextureFill({
       texture: tex,
-      alpha: state.config.wallOpacity,
+      alpha: 1.0,
       matrix,
     });
     const flatCoords = expandedGeometry
@@ -180,11 +180,13 @@ const drawThemeAreas = async (container, state) => {
     areaState.config.doorFillColor = state.config.doorFillColor;
     areaState.config.doorFillOpacity = state.config.doorFillOpacity;
     areaState.config.doorThickness = state.config.doorThickness;
-    // areaState.config.wallColor = state.config.wallColor;
-    // areaState.config.wallTexture = state.config.wallTexture;
-    areaState.config.wallThickness = state.config.wallThickness;
+    if (areaState.config.matchBaseWalls) {
+      areaState.config.wallColor = state.config.wallColor;
+      areaState.config.wallTexture = state.config.wallTexture;
+      areaState.config.wallTextureTint = state.config.wallTextureTint;
+      areaState.config.wallThickness = state.config.wallThickness;
+    }
     areaState.config.exteriorShadowOpacity = 0.0; // don't draw additional exterior shadows
-    //areaState.config.interiorShadowOpacity = 0.0; // don't draw additional interior shadows
 
     // mask for our area shape
     const areaContainer = new PIXI.Container();
@@ -409,7 +411,7 @@ const drawPolygonRoom = async (
     wallGfx.lineStyle(
       config.wallThickness,
       PIXI.utils.string2hex(config.wallColor),
-      config.wallOpacity,
+      1.0,
       0.5
     );
     wallGfx.drawPolygon(flatCoords);
@@ -429,7 +431,7 @@ const drawPolygonRoom = async (
       wallGfx.lineStyle(
         config.wallThickness,
         PIXI.utils.string2hex(config.wallColor),
-        config.wallOpacity
+        1.0
       );
       wallGfx.drawPolygon(flatCoords);
     }
@@ -441,7 +443,7 @@ const drawInteriorWall = (wallGfx, config, wall) => {
   wallGfx.lineStyle({
     width: config.wallThickness,
     color: PIXI.utils.string2hex(config.wallColor),
-    alpha: config.wallOpacity,
+    alpha: 1.0,
     alignment: 0.5, // middle
     cap: "round",
   });
@@ -499,7 +501,7 @@ const drawDoor = (doorGfx, wallGfx, wallMask, config, door) => {
     wallMask.lineStyle({
       width: config.wallThickness,
       color: PIXI.utils.string2hex(config.wallColor),
-      alpha: config.wallOpacity,
+      alpha: 1.0,
       alignment: 0.5, // middle
       cap: "round",
     });
@@ -513,7 +515,7 @@ const drawDoor = (doorGfx, wallGfx, wallMask, config, door) => {
     wallGfx.lineStyle({
       width: config.wallThickness,
       color: PIXI.utils.string2hex(config.wallColor),
-      alpha: config.wallOpacity,
+      alpha: 1.0,
       alignment: 0.5, // middle
       cap: "round",
     });
@@ -611,7 +613,7 @@ const drawSecretDoor = (doorGfx, wallGfx, wallMask, config, door) => {
     wallGfx.lineStyle({
       width: config.wallThickness,
       color: PIXI.utils.string2hex(config.wallColor),
-      alpha: config.wallOpacity,
+      alpha: 1.0,
       alignment: 0.5, // middle
       cap: "round",
     });
