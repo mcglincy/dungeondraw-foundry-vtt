@@ -7,6 +7,7 @@ import { BufferOp } from "jsts/org/locationtech/jts/operation/buffer";
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js";
 import RelateOp from "jsts/org/locationtech/jts/operation/relate/RelateOp.js";
 import UnionOp from "jsts/org/locationtech/jts/operation/union/UnionOp.js";
+import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
 import TopologyPreservingSimplifier from "jsts/org/locationtech/jts/simplify/TopologyPreservingSimplifier.js";
 import Densifier from "jsts/org/locationtech/jts/densify/Densifier.js";
 import GeometryTransformer from "jsts/org/locationtech/jts/geom/util/GeometryTransformer.js";
@@ -16,6 +17,10 @@ import MultiPolygon from "jsts/org/locationtech/jts/geom/MultiPolygon.js";
 
 // TODO: various geometry patched functions don't show up in node module
 // see jsts monkey.js for patching
+
+export const isValid = (geometry) => {
+  return IsValidOp.isValid(geometry);
+};
 
 export const difference = (g1, g2) => {
   return OverlayOp.difference(g1, g2);

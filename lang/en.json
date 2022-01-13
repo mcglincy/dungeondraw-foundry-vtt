@@ -52,6 +52,8 @@
   "DD.Import": "Import",
   "DD.ImportCustomThemes": "Import Custom Themes",
   "DD.ImportCustomThemesHint": "Choose a JSON file to import as your custom themes. This cannot be undone.",
+  "DD.ErrorAddingPolygon": "Error adding polygon - see JS console for details.",
+  "DD.ErrorInvalidShape": "Invalid shape - try drawing a simpler closed polygon.",
   "DD.InteriorShadowColor": "Interior Shadow Color",
   "DD.InteriorShadowOpacity": "Interior Shadow Opacity",
   "DD.InteriorShadowThickness": "Interior Shadow Thickness",

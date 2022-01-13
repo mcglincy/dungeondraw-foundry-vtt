@@ -395,11 +395,16 @@ export class Dungeon extends PlaceableObject {
 
   // [[x,y]...]
   async addPolygon(points) {
+    const poly = geo.pointsToPolygon(points);
+    if (!geo.isValid(poly)) {
+      ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));
+      return;
+    }
     try {
-      const poly = geo.pointsToPolygon(points);
       await this._addPoly(poly);
     } catch (error) {
       console.log(error);
+      ui.notifications.error(game.i18n.localize("DD.ErrorAddingPolygon"));
     }
   }
 
@@ -411,11 +416,10 @@ export class Dungeon extends PlaceableObject {
    * @param {Number} rect.width
    */
   async addThemeArea(points) {
-    try {
-      // make sure we can create a polygon from the points
-      geo.pointsToPolygon(points);
-    } catch (error) {
-      console.log(error);
+    // make sure we can create a valid polygon from the points
+    const poly = geo.pointsToPolygon(points);
+    if (!geo.isValid(poly)) {
+      ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));
       return;
     }
 

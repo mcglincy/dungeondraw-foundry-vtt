@@ -1,3 +1,10 @@
+# 0.17.0
+
+- Add "match base walls" theme setting, defaulting to true.
+- Add floor opacity and texture rotation settings.
+- Check for invalid/unhandleable shapes before attempting to add them to the map.
+- Show error notifications for invalid shapes or other problems when adding geometry to the map.
+
 # 0.16.2
 
 - Change wall creation to create new walls as a single step before deleting old ones.
