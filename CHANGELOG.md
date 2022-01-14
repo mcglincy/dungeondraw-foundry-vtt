@@ -1,3 +1,9 @@
+# 0.18.0
+
+- Japanese localization by BrotherSharper.
+- Add setting for whether to show Dungeon Draw controls to trusted players.
+- Make 3D Canvas setting world-scoped rather than client-scoped.
+
 # 0.17.0
 
 - Add "match base walls" theme setting, defaulting to true.

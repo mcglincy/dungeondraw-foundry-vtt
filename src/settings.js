@@ -4,10 +4,21 @@ export class Settings {
   static register() {
     game.settings.register(
       constants.MODULE_NAME,
+      constants.SETTING_ALLOW_TRUSTED_PLAYER,
+      {
+        name: game.i18n.localize("DD.SettingAllowTrustedPlayers"),
+        scope: "world",
+        default: true,
+        type: Boolean,
+        config: true,
+      }
+    );
+    game.settings.register(
+      constants.MODULE_NAME,
       constants.SETTING_3DCANVAS_ENABLED,
       {
-        name: "Enable support for 3D Canvas module",
-        scope: "client",
+        name: game.i18n.localize("DD.SettingSupport3DCanvas"),
+        scope: "world",
         default: true,
         type: Boolean,
         config: true,
@@ -17,7 +28,7 @@ export class Settings {
       constants.MODULE_NAME,
       constants.SETTING_SNAP_TO_GRID,
       {
-        name: "Snap to grid",
+        name: game.i18n.localize("DD.SettingSnapToGrid"),
         scope: "client",
         default: true,
         type: Boolean,

@@ -65,6 +65,17 @@ export class DungeonDraw {
     );
   }
 
+  static controlsVisible() {
+    if (game.user.isGM) {
+      return true;
+    }
+    const allowTrustedPlayer = game.settings.get(
+      constants.MODULE_NAME,
+      constants.SETTING_ALLOW_TRUSTED_PLAYER
+    );
+    return allowTrustedPlayer && game.user.isTrusted;
+  }
+
   static getSceneControlButtons(controls) {
     if (CONFIG.Canvas.layers.background?.group) {
       // v9+ layer setup
@@ -89,7 +100,7 @@ export class DungeonDraw {
       title: "DD.SceneControlTitle",
       layer: DungeonLayer.LAYER_NAME,
       icon: "fas fa-dungeon",
-      visible: game.user.isTrusted,
+      visible: DungeonDraw.controlsVisible(),
       tools: [
         {
           name: "generate",
