@@ -234,9 +234,12 @@ export class ConfigSheet extends FormApplication {
     new Dialog(
       {
         title: game.i18n.localize("DD.ImportCustomThemes"),
-        content: await renderTemplate("templates/apps/import-data.html", {
-          hint1: game.i18n.localize("DD.ImportCustomThemesHint"),
-        }),
+        content: await renderTemplate(
+          "modules/dungeon-draw/templates/import-data.html",
+          {
+            hint: game.i18n.localize("DD.ImportCustomThemesHint"),
+          }
+        ),
         buttons: {
           import: {
             icon: '<i class="fas fa-file-import"></i>',
@@ -249,8 +252,21 @@ export class ConfigSheet extends FormApplication {
                 );
               }
               readTextFromFile(form.data.files[0]).then((text) => {
-                const json = JSON.parse(text);
-                setCustomThemes(json);
+                const newJson = JSON.parse(text);
+                console.log(`form wipe ${form.wipe.checked}`);
+                if (form.wipe.checked) {
+                  // replace existing JSON
+                  setCustomThemes(newJson);
+                } else {
+                  // merge
+                  const oldJson = getCustomThemes();
+                  const mergedJson = foundry.utils.mergeObject(
+                    oldJson,
+                    newJson
+                  );
+                  console.log(mergedJson);
+                  setCustomThemes(mergedJson);
+                }
                 this.render();
               });
             },
