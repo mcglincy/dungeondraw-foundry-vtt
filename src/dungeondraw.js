@@ -10,7 +10,7 @@ export class DungeonDraw {
   }
 
   static ready() {
-    DungeonDraw.maybeShowReleaseNotes();
+    // DungeonDraw.maybeShowReleaseNotes();
   }
 
   static async maybeShowReleaseNotes() {

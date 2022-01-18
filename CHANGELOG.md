@@ -1,3 +1,8 @@
+# 0.19.1
+
+- Fix missing import template html file.
+- Don't show changelog popup.
+
 # 0.19.0
 
 - Add custom themes import checkbox to control wipe vs. merge.
