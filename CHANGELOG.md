@@ -1,7 +1,7 @@
 # 0.19.1
 
 - Fix missing import template html file.
-- Don't show changelog popup.
+- Don't show changelog popup at startup.
 
 # 0.19.0
 
