@@ -1,0 +1,11 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+  <p class="notes">{{hint}}</p>
+  <div class="form-group">
+    <label for="data">{{ localize 'DD.ImportJsonFile' }}</label>
+    <input type="file" name="data" />
+  </div>
+  <div class="form-group">
+    <label for="wipe">{{ localize 'DD.ImportWipeExistingData' }}</label>
+    <input type="checkbox" name="wipe" />
+  </div>
+</form>
