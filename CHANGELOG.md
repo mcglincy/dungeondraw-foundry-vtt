@@ -1,6 +1,6 @@
 # 0.19.0
 
-- Add import checkbox to control wipe vs. merge.
+- Add custom themes import checkbox to control wipe vs. merge.
 
 # 0.18.0
 
