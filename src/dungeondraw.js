@@ -2,68 +2,16 @@ import { ConfigSheet } from "./configsheet.js";
 import { DungeonLayer } from "./dungeonlayer.js";
 import * as constants from "./constants.js";
 import { GeneratorSheet } from "./generatorsheet.js";
+import { Keybindings } from "./keybindings";
 import { Settings } from "./settings";
 
 export class DungeonDraw {
   static init() {
     Settings.register();
+    Keybindings.register();
   }
 
-  static ready() {
-    // DungeonDraw.maybeShowReleaseNotes();
-  }
-
-  static async maybeShowReleaseNotes() {
-    if (!game.user.isGM) {
-      // GMs only
-      return;
-    }
-    const moduleVersion = game.modules.get(constants.MODULE_NAME).data.version;
-    const settingsVersion = game.settings.get(
-      constants.MODULE_NAME,
-      constants.SETTING_RELEASE_NOTES_VERSION
-    );
-    if (moduleVersion === settingsVersion) {
-      // they've already seen it
-      return;
-    }
-    const resp = await fetch("modules/dungeon-draw/CHANGELOG.md");
-    const changelog = await resp.text();
-    // keep only the most recent changelog section
-    const firstChangelog = "#" + changelog.split("#")[1];
-    // show it in a Dialog
-    const html = await renderTemplate(
-      "modules/dungeon-draw/templates/release-notes.html",
-      {
-        data: {
-          version: moduleVersion,
-          changelog: firstChangelog,
-        },
-      }
-    );
-    const dialog = new Dialog(
-      {
-        title: game.i18n.localize("DD.ReleaseNotes"),
-        content: html,
-        buttons: {
-          roll: {
-            icon: '<i class="fas fa-check"></i>',
-            label: "OK",
-          },
-        },
-      },
-      {
-        width: 600,
-      }
-    );
-    dialog.render(true);
-    // mark this version as shown
-    await game.settings.set(
-      constants.MODULE_NAME,
-      "releaseNotesVersion",
-      moduleVersion
-    );
-  }
+  static ready() {}
 
   static controlsVisible() {
     if (game.user.isGM) {
@@ -90,9 +38,7 @@ export class DungeonDraw {
     }
 
     CONFIG.Dungeon = {
-      //documentClass: DungeonDocument,
       layerClass: DungeonLayer,
-      //sheetClass: DungeonConfig
     };
 
     controls.push({

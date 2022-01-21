@@ -163,6 +163,12 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   /** @override */
+  async undoHistory() {
+    console.log("******* undoHistory");
+    return super.undoHistory();
+  }
+
+  /** @override */
   async deleteAll() {
     if (!game.user.isGM) {
       throw new Error(`You do not have permission to clear all.`);
