@@ -1,3 +1,7 @@
+# 0.20.0
+
+- Add ctrl-z/ctrl-y (cmd-z/cmd-y) keybindings for undo and redo.
+
 # 0.19.1
 
 - Fix missing import template html file.
