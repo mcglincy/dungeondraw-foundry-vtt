@@ -66,6 +66,11 @@ export class DungeonDraw {
           icon: "fas fa-minus-square",
         },
         {
+          name: "addellipse",
+          title: "DD.ButtonTitleAddEllipse",
+          icon: "fas fa-circle",
+        },
+        {
           name: "addpoly",
           title: "DD.ButtonTitleAddPoly",
           icon: "fas fa-draw-polygon",

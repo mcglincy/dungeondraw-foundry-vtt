@@ -408,6 +408,20 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  async addEllipse(x, y, width, height) {
+    const poly = geo.ellipse(x, y, width, height);
+    if (!geo.isValid(poly)) {
+      ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));
+      return;
+    }
+    try {
+      await this._addPoly(poly);
+    } catch (error) {
+      console.log(error);
+      ui.notifications.error(game.i18n.localize("DD.ErrorAddingPolygon"));
+    }
+  }
+
   /**
    * @param {Object} rect
    * @param {Number} rect.x
