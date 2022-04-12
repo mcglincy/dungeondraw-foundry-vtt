@@ -67,7 +67,7 @@ export class DungeonDraw {
         },
         {
           name: "addellipse",
-          title: "DD.ButtonTitleAddCircle",
+          title: "DD.ButtonTitleAddEllipse",
           icon: "fas fa-circle",
         },
         {

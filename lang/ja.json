@@ -4,6 +4,7 @@
   "DD.BackgroundImage": "背景画像",
   "DD.ButtonTitleAddDoor": "扉追加",
   "DD.ButtonTitleAddPoly": "多角形追加",
+  "DD.ButtonTitleAddEllipse": "楕円を追加",
   "DD.ButtonTitleAddRect": "正方形追加",
   "DD.ButtonTitleAddSecretDoor": "シークレットドア追加",
   "DD.ButtonTitleAddWall": "内壁追加",

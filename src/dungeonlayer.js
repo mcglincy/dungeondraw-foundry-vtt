@@ -442,10 +442,6 @@ export class DungeonLayer extends PlaceablesLayer {
           const rect = this._maybeSnappedRect(createData);
           await this.dungeon.addRectangle(rect);
         } else if (game.activeTool === "addellipse") {
-          //const rect = this._maybeSnappedRect(createData);
-          // const hw = createData.width / 2;
-          // const hh = createData.height / 2;
-          // const hs = createData.strokeWidth / 2;
           const x = createData.x + createData.width / 2;
           const y = createData.y + createData.height / 2;
           await this.dungeon.addEllipse(
