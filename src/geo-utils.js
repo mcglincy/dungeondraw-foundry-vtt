@@ -1,5 +1,10 @@
+import Densifier from "jsts/org/locationtech/jts/densify/Densifier.js";
 import Coordinate from "jsts/org/locationtech/jts/geom/Coordinate.js";
 import GeometryFactory from "jsts/org/locationtech/jts/geom/GeometryFactory.js";
+// needed by Densifier
+import LineString from "jsts/org/locationtech/jts/geom/LineString.js";
+// needed by Densifier
+import MultiPolygon from "jsts/org/locationtech/jts/geom/MultiPolygon.js";
 import PrecisionModel from "jsts/org/locationtech/jts/geom/PrecisionModel.js";
 import WKTReader from "jsts/org/locationtech/jts/io/WKTReader.js";
 import WKTWriter from "jsts/org/locationtech/jts/io/WKTWriter.js";
@@ -9,11 +14,8 @@ import RelateOp from "jsts/org/locationtech/jts/operation/relate/RelateOp.js";
 import UnionOp from "jsts/org/locationtech/jts/operation/union/UnionOp.js";
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
 import TopologyPreservingSimplifier from "jsts/org/locationtech/jts/simplify/TopologyPreservingSimplifier.js";
-import Densifier from "jsts/org/locationtech/jts/densify/Densifier.js";
+import GeometricShapeFactory from "jsts/org/locationtech/jts/util/GeometricShapeFactory.js";
 import GeometryTransformer from "jsts/org/locationtech/jts/geom/util/GeometryTransformer.js";
-// needed by Densifier
-import LineString from "jsts/org/locationtech/jts/geom/LineString.js";
-import MultiPolygon from "jsts/org/locationtech/jts/geom/MultiPolygon.js";
 
 // TODO: various geometry patched functions don't show up in node module
 // see jsts monkey.js for patching
@@ -104,6 +106,15 @@ export const twoPointsToLineString = (x1, y1, x2, y2) => {
 export const pointsToPolygon = (points) => {
   const coords = points.map((p) => new Coordinate(p[0], p[1]));
   return new GeometryFactory().createPolygon(coords);
+};
+
+export const ellipse = (x, y, width, height) => {
+  const gsf = new GeometricShapeFactory();
+  const centre = gsf.coord(x, y);
+  gsf.setCentre(centre);
+  gsf.setWidth(width);
+  gsf.setHeight(height);
+  return gsf.createEllipse();
 };
 
 export const slope = (x1, y1, x2, y2) => {

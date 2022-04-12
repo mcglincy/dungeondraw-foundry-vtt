@@ -154,7 +154,7 @@ export class DungeonLayer extends PlaceablesLayer {
         data.points = [[0, 0]];
         data.bezierFactor = data.bezierFactor ?? 0.5;
         break;
-      case "ellipse":
+      case "addellipse":
         data.type = CONST.DRAWING_TYPES.ELLIPSE;
         data.points = [];
         break;
@@ -441,6 +441,19 @@ export class DungeonLayer extends PlaceablesLayer {
         } else if (game.activeTool === "addrect") {
           const rect = this._maybeSnappedRect(createData);
           await this.dungeon.addRectangle(rect);
+        } else if (game.activeTool === "addellipse") {
+          //const rect = this._maybeSnappedRect(createData);
+          // const hw = createData.width / 2;
+          // const hh = createData.height / 2;
+          // const hs = createData.strokeWidth / 2;
+          const x = createData.x + createData.width / 2;
+          const y = createData.y + createData.height / 2;
+          await this.dungeon.addEllipse(
+            x,
+            y,
+            createData.width,
+            createData.height
+          );
         } else if (game.activeTool === "freehand") {
           this._autoClosePolygon(createData);
           const offsetPoints = createData.points.map((p) => [

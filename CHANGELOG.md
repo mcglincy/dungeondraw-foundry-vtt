@@ -1,3 +1,7 @@
+# 0.20.0
+
+- Add ellipse tool.
+
 # 0.19.1
 
 - Fix missing import template html file.
