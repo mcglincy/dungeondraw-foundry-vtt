@@ -1,6 +1,10 @@
-# 0.20.0
+# 0.21.0
 
 - Add ellipse tool.
+
+# 0.20.0
+
+- Add ctrl-z/ctrl-y (cmd-z/cmd-y) keybindings for undo and redo.
 
 # 0.19.1
 
