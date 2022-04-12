@@ -94,6 +94,7 @@
   "DD.ThreeDDoorTextureTint": "3D Door Texture Tint",
   "DD.ThreeDWallTexture": "3D Wall Texture",
   "DD.ThreeDWallTextureTint": "3D Wall Texture Tint",
+  "DD.TextureLoadFailure": "Failed to load texture",
   "DD.WallColor": "Wall Color",
   "DD.WallOpacity": "Wall Opacity",
   "DD.WallTexture": "Wall Texture",

@@ -83,6 +83,7 @@
   "DD.TabSettings": "マップ設定",
   "DD.TabThemes": "テーマ",
   "DD.TabThemePainter": "テーマブラシ",
+  "DD.TextureLoadFailure": "テクスチャの読み込みに失敗しました",
   "DD.Theme": "テーマ",
   "DD.ThemeName": "テーマ名",
   "DD.ThemeNamePlaceholder": "テーマ名を入力",

@@ -136,26 +136,28 @@ const renderPass = async (container, state) => {
       state.geometry,
       state.config.wallThickness / 2.0
     );
-    const tex = await getTexture(state.config.wallTexture);
-    let matrix = null;
-    if (state.config.wallTextureRotation) {
-      matrix = PIXI.Matrix.IDENTITY.clone();
-      matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
-    }
-    wallGfx.beginTextureFill({
-      texture: tex,
-      alpha: 1.0,
-      matrix,
-    });
-    const flatCoords = expandedGeometry
-      .getCoordinates()
-      .map((c) => [c.x, c.y])
-      .flat();
-    wallGfx.drawPolygon(flatCoords);
-    wallGfx.endFill();
-    wallGfx.mask = wallMask;
-    if (state.config.wallTextureTint) {
-      wallGfx.tint = PIXI.utils.string2hex(state.config.wallTextureTint);
+    const texture = await getTexture(state.config.wallTexture);
+    if (texture?.valid) {
+      let matrix = null;
+      if (state.config.wallTextureRotation) {
+        matrix = PIXI.Matrix.IDENTITY.clone();
+        matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
+      }
+      wallGfx.beginTextureFill({
+        texture,
+        alpha: 1.0,
+        matrix,
+      });
+      const flatCoords = expandedGeometry
+        .getCoordinates()
+        .map((c) => [c.x, c.y])
+        .flat();
+      wallGfx.drawPolygon(flatCoords);
+      wallGfx.endFill();
+      wallGfx.mask = wallMask;
+      if (state.config.wallTextureTint) {
+        wallGfx.tint = PIXI.utils.string2hex(state.config.wallTextureTint);
+      }
     }
   }
   container.addChild(wallGfx);
@@ -210,6 +212,11 @@ const drawThemeAreas = async (container, state) => {
 const getTexture = async (path) => {
   try {
     const texture = await loadTexture(path);
+    if (!texture) {
+      ui.notifications.error(
+        `${game.i18n.localize("DD.TextureLoadFailure")}: ${path}`
+      );
+    }
     return texture;
   } catch (error) {
     console.log(error);
@@ -354,21 +361,23 @@ const drawPolygonRoom = async (
   // draw a floor texture if specified, otherwise solid-color floor
   if (config.floorTexture) {
     // TODO: optimize to not load the texture each pass
-    const tex = await getTexture(config.floorTexture);
-    let matrix = null;
-    if (config.floorTextureRotation) {
-      matrix = PIXI.Matrix.IDENTITY.clone();
-      matrix.rotate(config.floorTextureRotation * PIXI.DEG_TO_RAD);
-    }
-    floorGfx.beginTextureFill({
-      texture: tex,
-      alpha: config.floorOpacity,
-      matrix,
-    });
-    floorGfx.drawPolygon(flatCoords);
-    floorGfx.endFill();
-    if (config.floorTextureTint) {
-      floorGfx.tint = PIXI.utils.string2hex(config.floorTextureTint);
+    const texture = await getTexture(config.floorTexture);
+    if (texture?.valid) {
+      let matrix = null;
+      if (config.floorTextureRotation) {
+        matrix = PIXI.Matrix.IDENTITY.clone();
+        matrix.rotate(config.floorTextureRotation * PIXI.DEG_TO_RAD);
+      }
+      floorGfx.beginTextureFill({
+        texture,
+        alpha: config.floorOpacity,
+        matrix,
+      });
+      floorGfx.drawPolygon(flatCoords);
+      floorGfx.endFill();
+      if (config.floorTextureTint) {
+        floorGfx.tint = PIXI.utils.string2hex(config.floorTextureTint);
+      }
     }
   } else {
     floorGfx.beginFill(

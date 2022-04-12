@@ -1,3 +1,7 @@
+# 0.21.1
+
+- Handle missing texture files more gracefully.
+
 # 0.21.0
 
 - Add ellipse tool.
