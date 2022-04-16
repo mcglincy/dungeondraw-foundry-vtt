@@ -232,20 +232,6 @@ export class Dungeon extends PlaceableObject {
     await this.pushState(newState);
   }
 
-  // {x:, y:, height:, width:}
-  async subtractDoors(rect) {
-    const rectPoly = geo.rectToPolygon(rect);
-    const doorsToKeep = this.history[this.historyIndex].doors.filter((d) => {
-      const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
-      return !geo.intersects(rectPoly, doorPoly);
-    });
-    if (doorsToKeep.length != this.history[this.historyIndex].doors.length) {
-      const newState = this.history[this.historyIndex].clone();
-      newState.doors = doorsToKeep;
-      await this.pushState(newState);
-    }
-  }
-
   /**
    * Split the wall if it's drawn over an existing door.
    *
@@ -286,7 +272,7 @@ export class Dungeon extends PlaceableObject {
   }
 
   // {x:, y:, height:, width:}
-  async subtractInteriorWalls(rect) {
+  async removeInteriorWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(
       (w) => {
@@ -304,30 +290,31 @@ export class Dungeon extends PlaceableObject {
   }
 
   // {x:, y:, height:, width:}
-  async subtractDoorsAndInteriorWalls(rect) {
+  async removeDoors(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const oldState = this.history[this.historyIndex];
     const doorsToKeep = oldState.doors.filter((d) => {
       const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
       return !geo.intersects(rectPoly, doorPoly);
     });
+    if (doorsToKeep.length != oldState.doors.length) {
+      const newState = oldState.clone();
+      newState.doors = doorsToKeep;
+      await this.pushState(newState);
+    }
+  }
+
+  // {x:, y:, height:, width:}
+  async removeSecretDoors(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const oldState = this.history[this.historyIndex];
     const secretDoorsToKeep = oldState.secretDoors.filter((d) => {
       const doorPoly = geo.twoPointsToLineString(d[0], d[1], d[2], d[3]);
       return !geo.intersects(rectPoly, doorPoly);
     });
-    const wallsToKeep = oldState.interiorWalls.filter((w) => {
-      const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
-      return !geo.intersects(rectPoly, wallPoly);
-    });
-    if (
-      doorsToKeep.length != oldState.doors.length ||
-      secretDoorsToKeep.length != oldState.secretDoors.length ||
-      wallsToKeep.length != oldState.interiorWalls.length
-    ) {
+    if (secretDoorsToKeep.length != oldState.secretDoors.length) {
       const newState = oldState.clone();
-      newState.doors = doorsToKeep;
       newState.secretDoors = secretDoorsToKeep;
-      newState.interiorWalls = wallsToKeep;
       await this.pushState(newState);
     }
   }
@@ -378,12 +365,16 @@ export class Dungeon extends PlaceableObject {
   }
 
   // {x:, y:, height:, width:}
-  async subtractRectangle(rect) {
-    // only makes sense to subtract if we have geometry
+  async removeRectangle(rect) {
+    const poly = geo.rectToPolygon(rect);
+    await this._removePoly(poly);
+  }
+
+  async _removePoly(poly) {
+    // only makes sense to remove if we have geometry
     if (!this.history[this.historyIndex].geometry) {
       return;
     }
-    const poly = geo.rectToPolygon(rect);
     // and if the poly intersects existing geometry
     if (!geo.intersects(this.history[this.historyIndex].geometry, poly)) {
       return;
@@ -408,6 +399,21 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
+  // [[x,y]...]
+  async removePolygon(points) {
+    const poly = geo.pointsToPolygon(points);
+    if (!geo.isValid(poly)) {
+      ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));
+      return;
+    }
+    try {
+      await this._removePoly(poly);
+    } catch (error) {
+      console.log(error);
+      ui.notifications.error(game.i18n.localize("DD.ErrorRemovingPolygon"));
+    }
+  }
+
   async addEllipse(x, y, width, height) {
     const poly = geo.ellipse(x, y, width, height);
     if (!geo.isValid(poly)) {
@@ -419,6 +425,20 @@ export class Dungeon extends PlaceableObject {
     } catch (error) {
       console.log(error);
       ui.notifications.error(game.i18n.localize("DD.ErrorAddingPolygon"));
+    }
+  }
+
+  async removeEllipse(x, y, width, height) {
+    const poly = geo.ellipse(x, y, width, height);
+    if (!geo.isValid(poly)) {
+      ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));
+      return;
+    }
+    try {
+      await this._removePoly(poly);
+    } catch (error) {
+      console.log(error);
+      ui.notifications.error(game.i18n.localize("DD.ErrorRemovingPolygon"));
     }
   }
 

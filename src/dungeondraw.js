@@ -4,11 +4,17 @@ import * as constants from "./constants.js";
 import { GeneratorSheet } from "./generatorsheet.js";
 import { Keybindings } from "./keybindings";
 import { Settings } from "./settings";
+import { Toolbar } from "./toolbar";
+
+const toolbar = new Toolbar();
 
 export class DungeonDraw {
   static init() {
     Settings.register();
     Keybindings.register();
+
+    game.activeDungeonDrawTool = "rectangle";
+    game.activeDungeonDrawMode = "add";
   }
 
   static ready() {}
@@ -49,67 +55,65 @@ export class DungeonDraw {
       visible: DungeonDraw.controlsVisible(),
       tools: [
         {
-          name: "generate",
-          title: "DD.ButtonTitleGenerate",
-          icon: "fas fa-magic",
-          onClick: async () => new GeneratorSheet().render(true),
-          button: true,
+          name: "drawmap",
+          title: "DD.ButtonTitleDrawMap",
+          icon: "fas fa-dungeon",
         },
-        {
-          name: "addrect",
-          title: "DD.ButtonTitleAddRect",
-          icon: "fas fa-plus-square",
-        },
-        {
-          name: "subtractrect",
-          title: "DD.ButtonTitleSubtractRect",
-          icon: "fas fa-minus-square",
-        },
-        {
-          name: "addellipse",
-          title: "DD.ButtonTitleAddEllipse",
-          icon: "fas fa-circle",
-        },
-        {
-          name: "addpoly",
-          title: "DD.ButtonTitleAddPoly",
-          icon: "fas fa-draw-polygon",
-        },
-        {
-          name: "freehand",
-          title: "DD.ButtonTitleFreehand",
-          icon: "fas fa-signature",
-        },
-        {
-          name: "addwall",
-          title: "DD.ButtonTitleAddWall",
-          icon: "fas fa-bars",
-        },
-        {
-          name: "adddoor",
-          title: "DD.ButtonTitleAddDoor",
-          icon: "fas fa-door-open",
-        },
-        {
-          name: "addsecretdoor",
-          title: "DD.ButtonTitleAddSecretDoor",
-          icon: "fas fa-mask",
-        },
-        {
-          name: "subtractdoor",
-          title: "DD.ButtonTitleSubtractDoorsAndWalls",
-          icon: "fas fa-window-close",
-        },
-        {
-          name: "themepainter",
-          title: "DD.ButtonTitleThemePainter",
-          icon: "fas fa-brush",
-        },
-        {
-          name: "themeeraser",
-          title: "DD.ButtonTitleThemeEraser",
-          icon: "fas fa-eraser",
-        },
+        // {
+        //   name: "addrect",
+        //   title: "DD.ButtonTitleAddRect",
+        //   icon: "fas fa-plus-square",
+        // },
+        // {
+        //   name: "subtractrect",
+        //   title: "DD.ButtonTitleSubtractRect",
+        //   icon: "fas fa-minus-square",
+        // },
+        // {
+        //   name: "addellipse",
+        //   title: "DD.ButtonTitleAddEllipse",
+        //   icon: "fas fa-circle",
+        // },
+        // {
+        //   name: "addpoly",
+        //   title: "DD.ButtonTitleAddPoly",
+        //   icon: "fas fa-draw-polygon",
+        // },
+        // {
+        //   name: "freehand",
+        //   title: "DD.ButtonTitleFreehand",
+        //   icon: "fas fa-signature",
+        // },
+        // {
+        //   name: "addwall",
+        //   title: "DD.ButtonTitleAddWall",
+        //   icon: "fas fa-bars",
+        // },
+        // {
+        //   name: "adddoor",
+        //   title: "DD.ButtonTitleAddDoor",
+        //   icon: "fas fa-door-open",
+        // },
+        // {
+        //   name: "addsecretdoor",
+        //   title: "DD.ButtonTitleAddSecretDoor",
+        //   icon: "fas fa-mask",
+        // },
+        // {
+        //   name: "subtractdoor",
+        //   title: "DD.ButtonTitleSubtractDoorsAndWalls",
+        //   icon: "fas fa-window-close",
+        // },
+        // {
+        //   name: "themepainter",
+        //   title: "DD.ButtonTitleThemePainter",
+        //   icon: "fas fa-brush",
+        // },
+        // {
+        //   name: "themeeraser",
+        //   title: "DD.ButtonTitleThemeEraser",
+        //   icon: "fas fa-eraser",
+        // },
         {
           name: "undo",
           title: "DD.ButtonTitleUndo",
@@ -126,6 +130,13 @@ export class DungeonDraw {
           onClick: async () => {
             await canvas.dungeon.dungeon.redo();
           },
+          button: true,
+        },
+        {
+          name: "generate",
+          title: "DD.ButtonTitleGenerate",
+          icon: "fas fa-magic",
+          onClick: async () => new GeneratorSheet().render(true),
           button: true,
         },
         {
@@ -147,14 +158,14 @@ export class DungeonDraw {
         },
         {
           name: "clear",
-          title: "DD.ButtonTitleClear",
+          title: "DD.ButtonTitleClearAll",
           icon: "fas fa-trash",
           visible: game.user.isGM,
           onClick: () => canvas.dungeon.deleteAll(),
           button: true,
         },
       ],
-      activeTool: "addrect",
+      activeTool: "drawmap",
     });
   }
 
@@ -168,6 +179,15 @@ export class DungeonDraw {
       await canvas.dungeon.dungeon?.maybeRefresh(document);
     }
   }
+
+  static async renderSceneControls(controls) {
+    if (controls.activeControl !== "dungeondraw") {
+      // TODO: not found?
+      await toolbar.close();
+      return;
+    }
+    toolbar.render(true);
+  }
 }
 
 Hooks.on("init", DungeonDraw.init);
@@ -175,3 +195,4 @@ Hooks.on("ready", DungeonDraw.ready);
 Hooks.on("getSceneControlButtons", DungeonDraw.getSceneControlButtons);
 Hooks.on("canvasReady", DungeonDraw.canvasReady);
 Hooks.on("updateJournalEntry", DungeonDraw.updateJournalEntry);
+Hooks.on("renderSceneControls", DungeonDraw.renderSceneControls);

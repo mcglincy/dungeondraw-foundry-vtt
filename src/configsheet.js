@@ -253,7 +253,6 @@ export class ConfigSheet extends FormApplication {
               }
               readTextFromFile(form.data.files[0]).then((text) => {
                 const newJson = JSON.parse(text);
-                console.log(`form wipe ${form.wipe.checked}`);
                 if (form.wipe.checked) {
                   // replace existing JSON
                   setCustomThemes(newJson);
@@ -264,7 +263,6 @@ export class ConfigSheet extends FormApplication {
                     oldJson,
                     newJson
                   );
-                  console.log(mergedJson);
                   setCustomThemes(mergedJson);
                 }
                 this.render();
