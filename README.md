@@ -8,19 +8,12 @@ A dungeon-drawing module for Foundry VTT.
 
 ## Tools
 
-- Generate a Dungeon - Let Dungeon Draw make the map for you!
-- Add rectangle - Draw a rectangular room or corridor.
-- Remove rectangle - Remove rooms/corridors, or remove inner chunks of rooms.
-- Add polygon - Draw a polygon; works like Foundry's polygon Drawing tool.
-- Add interior wall - Draw a new interior wall.
-- Add door - Draw a new door.
-- Add secret door - Draw a new secret door.
-- Remove interior walls and doors - Remove all interior walls and doors within a rectangle you draw.
+- Draw map: add or remove room shapes, interior walls, or regular/secret doors.
 - Theme painter - Select a theme in Config > Theme Painter, then "paint" it as a polygon on top of the map's main theme.
-- Theme eraser - Remove all painted theme polygons within a rectangle you draw.
-- Undo - Undoes last change.
-- Redo - Redoes next change.
+- Undo/Redo
+- Generate a Dungeon - Let Dungeon Draw make the map for you!
 - Config - Change various scene-specific drawing values: floor and wall color, wall width, optional background or floor texture, etc. Also edit/copy/delete custom themes, and select the active theme for the theme painter tool.
+- Export the current dungeon as an image and set to scene background (useful for 3D Canvas module).
 - Delete all - Nuke everything on the current dungeon/scene.
 
 ## Themes
