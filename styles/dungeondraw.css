@@ -26,3 +26,92 @@
   flex: 0 0 80px;
   justify-content: space-around;
 }
+#dd-control-tools {
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid black;
+  border-radius: 5px;
+  color: white;
+  left: 107px;
+  padding: 10px;
+  position: absolute;
+  top: 84px;
+}
+#dd-control-tools .addremove-toggle-row {
+  display: flex;
+  font-size: 16px;
+}
+#dd-control-tools .addremove-toggle-row .addremove-toggle {
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  margin-right: 10px;
+  padding: 4px;
+  width: 90px;
+}
+#dd-control-tools .addremove-toggle-row .addremove-toggle:hover {
+  box-shadow: 0 0 10px red;
+}
+#dd-control-tools .addremove-toggle-row input[type="radio"] + label {
+  color: rgba(255, 255, 255, 0.4);
+}
+#dd-control-tools .addremove-toggle-row input[type="radio"]:checked + label {
+  color: white;
+}
+#dd-control-tools .addremove-toggle-row .addremove-toggle.toggle-on {
+  background-color: black;
+  box-shadow: 0 0 10px red;
+}
+#dd-control-tools .control-tool-row {
+  display: flex;
+  height: 40px;
+}
+#dd-control-tools .control-row-separator {
+  background-color: rgba(255, 255, 255, 0.2);
+  height: 2px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  width: 100%;
+}
+#dd-control-tools .control-tool {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #000;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #000;
+  box-sizing: content-box;
+  color: #bbb;
+  cursor: pointer;
+  height: 36px;
+  font-size: 24px;
+  line-height: 36px;
+  /* margin: 0 0 8px; */
+  margin-right: 10px;
+  padding: 0;
+  text-align: center;
+  width: 36px;
+}
+#dd-control-tools .control-tool:hover {
+  color: #fff;
+  border: 1px solid red;
+  border-bottom: 1px solid #ff6400;
+  box-shadow: 0 0 10px red;
+}
+#dd-control-tools .control-tool.toggle {
+}
+#dd-control-tools .control-tool.toggle:hover {
+  background-color: black;
+  box-shadow: 0 0 10px red;
+  border: 1px solid red;
+  border-bottom: 1px solid #ff6400;
+}
+#dd-control-tools .control-tool.toggle.active {
+  background-color: black;
+  border: 1px solid red;
+  border-bottom: 1px solid #ff6400;
+  box-shadow: 0 0 10px red;
+}
+#dd-control-tools select {
+  border: 1px solid black;
+  color: white;
+  font-family: Signika, sans-serif;
+  font-size: 16px;
+}

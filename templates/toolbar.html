@@ -1,0 +1,50 @@
+{{#*inline "toolPartial"}}
+<div
+  class="control-tool toggle {{#if isActive}}active{{/if}}"
+  title="{{localize title}}"
+  data-tool="{{name}}"
+>
+  <i class="{{icon}}"></i>
+</div>
+{{/inline}}
+
+<div id="dd-control-tools">
+  <div class="addremove-toggle-row">
+    <div class="addremove-toggle toggle-on">
+      <input
+        type="radio"
+        name="addremove"
+        id="addremove-add"
+        value="add"
+        checked
+      />
+      <label for="addremove-add">{{localize "DD.Add"}}</label>
+    </div>
+    <div class="addremove-toggle">
+      <input
+        type="radio"
+        name="addremove"
+        id="addremove-remove"
+        value="remove"
+      />
+      <label for="addremove-remove">{{localize "DD.Remove"}}</label>
+    </div>
+  </div>
+  <div class="control-row-separator"></div>
+  <div class="control-tool-row">{{#each row1}} {{> toolPartial}} {{/each}}</div>
+  <div class="control-row-separator"></div>
+  <div class="control-tool-row">{{#each row2}} {{> toolPartial}} {{/each}}</div>
+  <div class="control-row-separator"></div>
+  <div class="control-tool-row">
+    {{#each row3}} {{> toolPartial}} {{/each}}
+    <select name="themePainterThemeKey" data-dtype="string">
+      {{#select themePainterThemeKey}} {{#each customThemeKeys as |themeKey|}}
+      {{name}} {{#with (lookup ../customThemes themeKey)~}}
+      <option value="custom.{{themeKey}}">{{name}}</option>
+      {{/with}} {{/each}} {{#each themeKeys as |themeKey|}} {{name}} {{#with
+      (lookup ../themes themeKey)~}}
+      <option value="module.{{themeKey}}">{{name}}</option>
+      {{/with}} {{/each}} {{/select}}
+    </select>
+  </div>
+</div>

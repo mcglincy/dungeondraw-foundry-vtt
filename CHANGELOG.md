@@ -1,3 +1,11 @@
+# 0.22.1
+
+- Add missing button text.
+
+# 0.22.0
+
+- Reorganize drawing tools into a new tool window and add/remove toggle.
+
 # 0.21.1
 
 - Handle missing texture files more gracefully.

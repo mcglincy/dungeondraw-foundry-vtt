@@ -122,7 +122,6 @@ export class DungeonLayer extends PlaceablesLayer {
    * @return {Object}           The new drawing data
    */
   _getNewDrawingData(origin) {
-    const tool = game.activeTool;
     const data = {
       fillColor: game.user.color,
       strokeColor: game.user.color,
@@ -132,39 +131,61 @@ export class DungeonLayer extends PlaceablesLayer {
     data.x = origin.x;
     data.y = origin.y;
     data.author = game.user.id;
-    // Tool-based settings
-    switch (tool) {
-      case "addrect":
-      case "subtractdoor":
-      case "subtractrect":
-      case "themeeraser":
-        data.type = CONST.DRAWING_TYPES.RECTANGLE;
-        data.points = [];
-        break;
-      case "adddoor":
-      case "addpoly":
-      case "addsecretdoor":
-      case "addwall":
-      case "themepainter":
-        data.type = CONST.DRAWING_TYPES.POLYGON;
-        data.points = [[0, 0]];
-        break;
-      case "freehand":
-        data.type = CONST.DRAWING_TYPES.FREEHAND;
-        data.points = [[0, 0]];
-        data.bezierFactor = data.bezierFactor ?? 0.5;
-        break;
-      case "addellipse":
-        data.type = CONST.DRAWING_TYPES.ELLIPSE;
-        data.points = [];
-        break;
+
+    if (game.activeDungeonDrawMode === "add") {
+      switch (game.activeDungeonDrawTool) {
+        case "rectangle":
+          data.type = CONST.DRAWING_TYPES.RECTANGLE;
+          data.points = [];
+          break;
+        case "polygon":
+        case "interiorwall":
+        case "door":
+        case "secretdoor":
+        case "themepainter":
+          data.type = CONST.DRAWING_TYPES.POLYGON;
+          data.points = [[0, 0]];
+          break;
+        case "freehand":
+          data.type = CONST.DRAWING_TYPES.FREEHAND;
+          data.points = [[0, 0]];
+          data.bezierFactor = data.bezierFactor ?? 0.5;
+          break;
+        case "ellipse":
+          data.type = CONST.DRAWING_TYPES.ELLIPSE;
+          data.points = [];
+          break;
+      }
+    } else if (game.activeDungeonDrawMode === "remove") {
+      switch (game.activeDungeonDrawTool) {
+        case "rectangle":
+        case "interiorwall":
+        case "door":
+        case "secretdoor":
+        case "themepainter":
+          data.type = CONST.DRAWING_TYPES.RECTANGLE;
+          data.points = [];
+          break;
+        case "polygon":
+          data.type = CONST.DRAWING_TYPES.POLYGON;
+          data.points = [[0, 0]];
+          break;
+        case "freehand":
+          data.type = CONST.DRAWING_TYPES.FREEHAND;
+          data.points = [[0, 0]];
+          data.bezierFactor = data.bezierFactor ?? 0.5;
+          break;
+        case "ellipse":
+          data.type = CONST.DRAWING_TYPES.ELLIPSE;
+          data.points = [];
+          break;
+      }
     }
     return data;
   }
 
   /** @override */
   async undoHistory() {
-    console.log("******* undoHistory");
     return super.undoHistory();
   }
 
@@ -279,6 +300,9 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   _onDragLeftMove(event) {
+    // easy single opcode
+    const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
+
     const { preview, createState } = event.data;
     if (!preview) {
       return;
@@ -291,9 +315,9 @@ export class DungeonLayer extends PlaceablesLayer {
       preview._onMouseDraw(event);
       if (
         preview.data.type !== CONST.DRAWING_TYPES.POLYGON ||
-        game.activeTool === "adddoor" ||
-        game.activeTool === "addsecretdoor" ||
-        game.activeTool === "addwall"
+        opcode === "adddoor" ||
+        opcode === "addinteriorwall" ||
+        opcode === "addsecretdoor"
       ) {
         event.data.createState = 2;
       }
@@ -365,9 +389,12 @@ export class DungeonLayer extends PlaceablesLayer {
   async _onDragLeftDrop(event) {
     const { createState, destination, origin, preview } = event.data;
 
+    // easy single opcode
+    const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
+
     // Successful drawing completion
     // TODO: why is freehand not properly advancing createState?
-    if (createState === 2 || game.activeTool === "freehand") {
+    if (createState === 2 || game.activeDungeonDrawTool === "freehand") {
       // create a new dungeon if we don't already have one
       if (!this.dungeon) {
         await this.createNewDungeon();
@@ -382,7 +409,7 @@ export class DungeonLayer extends PlaceablesLayer {
         preview.isPolygon && preview.data.points.length > 2;
 
       // Clean up and DRY up these if/else blocks
-      if (game.activeTool === "adddoor") {
+      if (opcode === "adddoor") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
@@ -396,7 +423,7 @@ export class DungeonLayer extends PlaceablesLayer {
           data.x + data.points[1][0],
           data.y + data.points[1][1]
         );
-      } else if (game.activeTool === "addsecretdoor") {
+      } else if (opcode === "addsecretdoor") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
@@ -410,7 +437,7 @@ export class DungeonLayer extends PlaceablesLayer {
           data.x + data.points[1][0],
           data.y + data.points[1][1]
         );
-      } else if (game.activeTool === "addwall") {
+      } else if (opcode === "addinteriorwall") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
@@ -430,18 +457,7 @@ export class DungeonLayer extends PlaceablesLayer {
         preview._chain = false;
         // TODO: do we care about normalizing the shape? maybe for freehand curves/lines?
         const createData = this.constructor.placeableClass.normalizeShape(data);
-        if (game.activeTool === "addpoly") {
-          this._maybeSnapLastPoint(createData);
-          this._autoClosePolygon(createData);
-          const offsetPoints = createData.points.map((p) => [
-            p[0] + createData.x,
-            p[1] + createData.y,
-          ]);
-          await this.dungeon.addPolygon(offsetPoints);
-        } else if (game.activeTool === "addrect") {
-          const rect = this._maybeSnappedRect(createData);
-          await this.dungeon.addRectangle(rect);
-        } else if (game.activeTool === "addellipse") {
+        if (opcode === "addellipse") {
           const x = createData.x + createData.width / 2;
           const y = createData.y + createData.height / 2;
           await this.dungeon.addEllipse(
@@ -450,23 +466,25 @@ export class DungeonLayer extends PlaceablesLayer {
             createData.width,
             createData.height
           );
-        } else if (game.activeTool === "freehand") {
+        } else if (opcode === "addfreehand") {
           this._autoClosePolygon(createData);
           const offsetPoints = createData.points.map((p) => [
             p[0] + createData.x,
             p[1] + createData.y,
           ]);
           await this.dungeon.addPolygon(offsetPoints);
-        } else if (game.activeTool === "subtractdoor") {
+        } else if (opcode === "addpolygon") {
+          this._maybeSnapLastPoint(createData);
+          this._autoClosePolygon(createData);
+          const offsetPoints = createData.points.map((p) => [
+            p[0] + createData.x,
+            p[1] + createData.y,
+          ]);
+          await this.dungeon.addPolygon(offsetPoints);
+        } else if (opcode === "addrectangle") {
           const rect = this._maybeSnappedRect(createData);
-          await this.dungeon.subtractDoorsAndInteriorWalls(rect);
-        } else if (game.activeTool === "subtractrect") {
-          const rect = this._maybeSnappedRect(createData);
-          await this.dungeon.subtractRectangle(rect);
-        } else if (game.activeTool === "themeeraser") {
-          const rect = this._maybeSnappedRect(createData);
-          await this.dungeon.removeThemeAreas(rect);
-        } else if (game.activeTool === "themepainter") {
+          await this.dungeon.addRectangle(rect);
+        } else if (opcode === "addthemepainter") {
           this._maybeSnapLastPoint(createData);
           this._autoClosePolygon(createData);
           const offsetPoints = createData.points.map((p) => [
@@ -474,6 +492,48 @@ export class DungeonLayer extends PlaceablesLayer {
             p[1] + createData.y,
           ]);
           await this.dungeon.addThemeArea(offsetPoints);
+        } else if (opcode === "removedoor") {
+          const rect = this._maybeSnappedRect(createData);
+          // TODO: need to spam out methods to various different flavor deletions
+          await this.dungeon.removeDoors(rect);
+        } else if (opcode === "removeellipse") {
+          const x = createData.x + createData.width / 2;
+          const y = createData.y + createData.height / 2;
+          await this.dungeon.removeEllipse(
+            x,
+            y,
+            createData.width,
+            createData.height
+          );
+        } else if (opcode === "removefreehand") {
+          this._autoClosePolygon(createData);
+          const offsetPoints = createData.points.map((p) => [
+            p[0] + createData.x,
+            p[1] + createData.y,
+          ]);
+          await this.dungeon.removePolygon(offsetPoints);
+        } else if (opcode === "removesecretdoor") {
+          const rect = this._maybeSnappedRect(createData);
+          // TODO: need to spam out methods to various different flavor deletions
+          await this.dungeon.removeSecretDoors(rect);
+        } else if (opcode === "removeinteriorwall") {
+          const rect = this._maybeSnappedRect(createData);
+          // TODO: need to spam out methods to various different flavor deletions
+          await this.dungeon.removeInteriorWalls(rect);
+        } else if (opcode === "removepolygon") {
+          this._maybeSnapLastPoint(createData);
+          this._autoClosePolygon(createData);
+          const offsetPoints = createData.points.map((p) => [
+            p[0] + createData.x,
+            p[1] + createData.y,
+          ]);
+          await this.dungeon.removePolygon(offsetPoints);
+        } else if (opcode === "removerectangle") {
+          const rect = this._maybeSnappedRect(createData);
+          await this.dungeon.removeRectangle(rect);
+        } else if (opcode === "removethemepainter") {
+          const rect = this._maybeSnappedRect(createData);
+          await this.dungeon.removeThemeAreas(rect);
         }
       }
 
