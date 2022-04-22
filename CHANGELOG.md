@@ -1,3 +1,9 @@
+# 0.23.0
+
+- Reorganize drawing tools into a new tool window and add/remove toggle.
+- Start playing & looping any webm video used for wall or floor texture.
+- Fix 0.22.0 and 0.22.1 earlier github release borkage.
+
 # 0.22.1
 
 - Add missing button text.
