@@ -8,11 +8,10 @@ A dungeon-drawing module for Foundry VTT.
 
 ## Tools
 
-- Draw map: add or remove room shapes, interior walls, or regular/secret doors.
-- Theme painter - Select a theme in Config > Theme Painter, then "paint" it as a polygon on top of the map's main theme.
+- Draw map: add or remove room shapes, interior walls, regular/secret doors, or theme overlays.
 - Undo/Redo
 - Generate a Dungeon - Let Dungeon Draw make the map for you!
-- Config - Change various scene-specific drawing values: floor and wall color, wall width, optional background or floor texture, etc. Also edit/copy/delete custom themes, and select the active theme for the theme painter tool.
+- Config - Change various scene-specific drawing values, or create & edit your own custom themes.
 - Export the current dungeon as an image and set to scene background (useful for 3D Canvas module).
 - Delete all - Nuke everything on the current dungeon/scene.
 
