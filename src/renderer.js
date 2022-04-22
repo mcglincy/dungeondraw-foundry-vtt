@@ -31,19 +31,21 @@ const addBackgroundImage = async (container, config) => {
       // resize the background image to match the scene dimensions
       bg.width = d.sceneWidth;
       bg.height = d.sceneHeight;
-      maybeStartSpriteVideo(bg);
+      //maybeStartSpriteVideo(bg);
+      maybeStartTextureVideo(bg.texture);
       container.addChild(bg);
     }
   }
 };
 
-/** If sprite is a video, start playing it. */
-const maybeStartSpriteVideo = (sprite) => {
-  const source = sprite.texture.baseTexture.resource.source;
+/** If texture is a video, start playing it. */
+const maybeStartTextureVideo = (texture) => {
+  const source = texture?.baseTexture?.resource?.source;
   const isVideo = source && source.tagName === "VIDEO";
   if (isVideo) {
     source.loop = true;
-    source.volume = game.settings.get("core", "globalAmbientVolume");
+    // set to muted to avoid "play() failed because the user didn't interact with the document first" error
+    source.muted = true;
     game.video.play(source);
   }
 };
@@ -143,6 +145,7 @@ const renderPass = async (container, state) => {
         matrix = PIXI.Matrix.IDENTITY.clone();
         matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
       }
+      maybeStartTextureVideo(texture);
       wallGfx.beginTextureFill({
         texture,
         alpha: 1.0,
@@ -368,6 +371,7 @@ const drawPolygonRoom = async (
         matrix = PIXI.Matrix.IDENTITY.clone();
         matrix.rotate(config.floorTextureRotation * PIXI.DEG_TO_RAD);
       }
+      maybeStartTextureVideo(texture);
       floorGfx.beginTextureFill({
         texture,
         alpha: config.floorOpacity,
