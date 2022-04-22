@@ -4,7 +4,7 @@ A dungeon-drawing module for Foundry VTT.
 
 ![Latest Release Download Count](https://img.shields.io/github/downloads/mcglincy/dungeondraw-foundry-vtt/latest/module.zip)
 
-![Screen Shot 2021-11-28 at 8 25 49 PM](https://user-images.githubusercontent.com/189172/143799176-d798823d-a990-4ff9-b660-763dbfd0082a.png)
+![Screen Shot 2022-04-22 at 1 37 51 PM](https://user-images.githubusercontent.com/189172/164774555-fc82af48-d586-4edd-a3f5-6afd603eb1be.png)
 
 ## Tools
 
