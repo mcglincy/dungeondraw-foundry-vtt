@@ -123,15 +123,14 @@ export class Toolbar extends Application {
 
   addRemoveRadioChange(event) {
     game.activeDungeonDrawMode = $(event.target).val();
+    this._element.find(".addremove-toggle").removeClass("toggle-on");
+    $(event.currentTarget).closest(".addremove-toggle").addClass("toggle-on");
   }
 
   controlToolClick(event) {
     const activeTool = $(event.currentTarget).data("tool");
     game.activeDungeonDrawTool = activeTool;
     this.updateActiveCss();
-    // const top = $(event.currentTarget).closest("#dd-control-tools");
-    // top.find(".control-tool").removeClass("active");
-    // top.find(`[data-tool='${selectedTool}']`).addClass("active");
   }
 
   themeSelectChange(event) {

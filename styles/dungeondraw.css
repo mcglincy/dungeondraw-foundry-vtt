@@ -39,16 +39,27 @@
 #dd-control-tools .addremove-toggle-row {
   display: flex;
   font-size: 16px;
-  padding: 5px;
 }
 #dd-control-tools .addremove-toggle-row .addremove-toggle {
-  margin-right: 20px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  margin-right: 10px;
+  padding: 4px;
+  width: 90px;
+}
+#dd-control-tools .addremove-toggle-row .addremove-toggle:hover {
+  box-shadow: 0 0 10px red;
 }
 #dd-control-tools .addremove-toggle-row input[type="radio"] + label {
   color: rgba(255, 255, 255, 0.4);
 }
 #dd-control-tools .addremove-toggle-row input[type="radio"]:checked + label {
   color: white;
+}
+#dd-control-tools .addremove-toggle-row .addremove-toggle.toggle-on {
+  background-color: black;
+  box-shadow: 0 0 10px red;
 }
 #dd-control-tools .control-tool-row {
   display: flex;

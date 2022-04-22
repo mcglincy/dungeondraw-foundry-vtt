@@ -300,8 +300,6 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   _onDragLeftMove(event) {
-    console.log("***** onDragLeftMove");
-    console.log(game);
     // easy single opcode
     const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
 
@@ -321,7 +319,6 @@ export class DungeonLayer extends PlaceablesLayer {
         opcode === "addinteriorwall" ||
         opcode === "addsecretdoor"
       ) {
-        console.log("***** onDragLeftMove createState 2");
         event.data.createState = 2;
       }
     }
