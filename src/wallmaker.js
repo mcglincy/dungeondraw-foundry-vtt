@@ -8,9 +8,6 @@ export const makeWalls = async (state) => {
     return;
   }
 
-  // find our current DD walls
-  const idsToDelete = wallIdsToDelete();
-
   // calculate a new set of walls
   let walls = [];
   if (state.geometry) {
@@ -23,33 +20,66 @@ export const makeWalls = async (state) => {
   const secretDoors = makeSecretDoors(state.config, state.secretDoors);
   const allWalls = walls.concat(interiorWalls, doors, secretDoors);
 
+  // figure out what walls need to be created, deleted, or left in place
+  const wallDocs = dungeonDrawWallDocuments();
+  const wallDocsStillNeeded = [];
+  const wallsToCreate = [];
+  for (const wall of allWalls) {
+    let found = false;
+    for (const wallDoc of wallDocs) {
+      if (wallCoordsEqual(wall, wallDoc.data)) {
+        wallDocsStillNeeded.push(wallDoc);
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      wallsToCreate.push(wall);
+    }
+  }
+  const idsStillNeeded = wallDocsStillNeeded.map((x) => x.id);
+  const idsToDelete = wallDocs
+    .filter((x) => !idsStillNeeded.includes(x.id))
+    .map((x) => x.id);
+
   // create our new walls before deleting old ones,
   // to prevent any unwanted vision reveals.
   //
   // scene.update() triggers a redraw, which causes an infinite loop of redraw/refresh.
   // so we avoid using it :P
-  if (allWalls.length) {
-    await canvas.scene.createEmbeddedDocuments("Wall", allWalls);
+  if (wallsToCreate.length) {
+    await canvas.scene.createEmbeddedDocuments("Wall", wallsToCreate);
   }
-
   // finally, delete the previous set of walls
-  try {
-    await canvas.scene.deleteEmbeddedDocuments("Wall", idsToDelete);
-  } catch (error) {
-    console.error(error);
+  if (idsToDelete.length) {
+    try {
+      await canvas.scene.deleteEmbeddedDocuments("Wall", idsToDelete);
+    } catch (error) {
+      console.error(error);
+    }
   }
 };
 
-const wallIdsToDelete = () => {
+const wallCoordsEqual = (w1, w2) => {
+  return (
+    w1.c.length == w2.c.length &&
+    w1.c[0] == w2.c[0] &&
+    w1.c[1] == w2.c[1] &&
+    w1.c[2] == w2.c[2] &&
+    w1.c[3] == w2.c[3]
+  );
+};
+
+const dungeonDrawWallDocuments = () => {
   const walls = canvas.scene.getEmbeddedCollection("Wall");
-  const ids = [];
+  const ddWalls = [];
   for (const wall of walls) {
     const flag = wall.getFlag(constants.MODULE_NAME, "dungeonVersion");
     if (flag) {
-      ids.push(wall.id);
+      ddWalls.push(wall);
     }
   }
-  return ids;
+  return ddWalls;
 };
 
 const makeWallsFromMulti = (config, multi) => {

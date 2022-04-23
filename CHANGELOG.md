@@ -1,3 +1,7 @@
+# 0.23.1
+
+- Only create or delete walls that need to change. This means opened doors will not be recreated and closed for each dungeon change.
+
 # 0.23.0
 
 - Reorganize drawing tools into a new tool window and add/remove toggle.
@@ -12,7 +16,7 @@
 
 - Reorganize drawing tools into a new tool window and add/remove toggle.
 
-# 0.21.1
+# 0.21.1p
 
 - Handle missing texture files more gracefully.
 
