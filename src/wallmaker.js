@@ -25,15 +25,15 @@ export const makeWalls = async (state) => {
   const wallDocsStillNeeded = [];
   const wallsToCreate = [];
   for (const wall of allWalls) {
-    let found = false;
+    let foundDoc = false;
     for (const wallDoc of wallDocs) {
-      if (wallCoordsEqual(wall, wallDoc.data)) {
+      if (wallDataEqual(wall, wallDoc.data)) {
         wallDocsStillNeeded.push(wallDoc);
-        found = true;
+        foundDoc = true;
         break;
       }
     }
-    if (!found) {
+    if (!foundDoc) {
       wallsToCreate.push(wall);
     }
   }
@@ -60,13 +60,14 @@ export const makeWalls = async (state) => {
   }
 };
 
-const wallCoordsEqual = (w1, w2) => {
+const wallDataEqual = (w1, w2) => {
   return (
     w1.c.length == w2.c.length &&
     w1.c[0] == w2.c[0] &&
     w1.c[1] == w2.c[1] &&
     w1.c[2] == w2.c[2] &&
-    w1.c[3] == w2.c[3]
+    w1.c[3] == w2.c[3] &&
+    w1.door == w2.door
   );
 };
 
