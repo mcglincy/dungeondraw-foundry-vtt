@@ -1,3 +1,7 @@
+# 0.23.2
+
+- Split exterior walls around overlapping doors.
+
 # 0.23.1
 
 - Only create or delete walls that need to change. This means opened doors will not be recreated and closed for each dungeon change.
