@@ -13,8 +13,10 @@ export const makeWalls = async (state) => {
   if (state.geometry) {
     // simplify our geometry to downsample the amount of walls created
     const simplified = geo.simplify(state.geometry, 10.0);
-    walls = makeWallsFromMulti(state.config, simplified);
+    const allDoors = state.doors.concat(state.secretDoors);
+    walls = makeWallsFromMulti(state.config, simplified, allDoors);
   }
+
   const interiorWalls = makeInteriorWalls(state.config, state.interiorWalls);
   const doors = makeDoors(state.config, state.doors);
   const secretDoors = makeSecretDoors(state.config, state.secretDoors);
@@ -83,28 +85,29 @@ const dungeonDrawWallDocuments = () => {
   return ddWalls;
 };
 
-const makeWallsFromMulti = (config, multi) => {
+const makeWallsFromMulti = (config, multi, doors) => {
   let walls = [];
   for (let i = 0; i < multi.getNumGeometries(); i++) {
     const poly = multi.getGeometryN(i);
-    walls = walls.concat(makeWallsFromPoly(config, poly));
+    walls = walls.concat(makeWallsFromPoly(config, poly, doors));
   }
   return walls;
 };
 
-const makeWallsFromPoly = (config, poly) => {
+const makeWallsFromPoly = (config, poly, doors) => {
   const allWalls = [];
   const exterior = poly.getExteriorRing();
   const coords = exterior.getCoordinates();
   for (let i = 0; i < coords.length - 1; i++) {
-    const data = wallData(
-      config,
-      coords[i].x,
-      coords[i].y,
-      coords[i + 1].x,
-      coords[i + 1].y
-    );
-    allWalls.push(data);
+    const x1 = coords[i].x;
+    const y1 = coords[i].y;
+    const x2 = coords[i + 1].x;
+    const y2 = coords[i + 1].y;
+    const splits = geo.maybeSplitWall(x1, y1, x2, y2, doors);
+    for (const split of splits) {
+      const data = wallData(config, split[0], split[1], split[2], split[3]);
+      allWalls.push(data);
+    }
   }
   const numHoles = poly.getNumInteriorRing();
   for (let i = 0; i < numHoles; i++) {
@@ -159,6 +162,7 @@ const wallData = (config, x1, y1, x2, y2) => {
     // From Foundry API docs:
     // "The wall coordinates, a length-4 array of finite numbers [x0,y0,x1,y1]"
     c: [x1, y1, x2, y2],
+    door: 0, // wall
     flags: {},
   };
   data.flags[constants.MODULE_NAME] = {};

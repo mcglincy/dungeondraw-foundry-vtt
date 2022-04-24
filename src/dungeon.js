@@ -232,41 +232,9 @@ export class Dungeon extends PlaceableObject {
     await this.pushState(newState);
   }
 
-  /**
-   * Split the wall if it's drawn over an existing door.
-   *
-   * @returns [[x1, y1, x2, y2], ...]
-   */
-  _maybeSplitWall(x1, y1, x2, y2, doors) {
-    // TODO: this logic doesn't handle two doors side by side
-    const wallPoly = geo.twoPointsToLineString(x1, y1, x2, y2);
-    for (const door of doors) {
-      const doorPoly = geo.twoPointsToLineString(
-        door[0],
-        door[1],
-        door[2],
-        door[3]
-      );
-      const contains = geo.contains(wallPoly, doorPoly);
-      if (contains) {
-        // make sure points are consistently ordered
-        const w1 = geo.lesserPoint(x1, y1, x2, y2);
-        const w2 = geo.greaterPoint(x1, y1, x2, y2);
-        const d1 = geo.lesserPoint(door[0], door[1], door[2], door[3]);
-        const d2 = geo.greaterPoint(door[0], door[1], door[2], door[3]);
-        return [
-          [w1[0], w1[1], d1[0], d1[1]],
-          [d2[0], d2[1], w2[0], w2[1]],
-        ];
-      }
-    }
-    // wall didn't contain any door, so return as-is
-    return [[x1, y1, x2, y2]];
-  }
-
   async addInteriorWall(x1, y1, x2, y2) {
     const newState = this.history[this.historyIndex].clone();
-    const wallsToAdd = this._maybeSplitWall(x1, y1, x2, y2, newState.doors);
+    const wallsToAdd = geo.maybeSplitWall(x1, y1, x2, y2, newState.doors);
     newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
     await this.pushState(newState);
   }
@@ -332,7 +300,7 @@ export class Dungeon extends PlaceableObject {
         // this coordinate 2-step is flimsy
         if (coordinates.length > 1 && coordinates.length % 2 === 0) {
           for (let i = 0; i < coordinates.length; i += 2) {
-            const wallsToAdd = this._maybeSplitWall(
+            const wallsToAdd = geo.maybeSplitWall(
               coordinates[i].x,
               coordinates[i].y,
               coordinates[i + 1].x,

@@ -306,3 +306,30 @@ export const smoothPoly = (poly) => {
   newCoords.push(oldCoords[oldCoords.length - 1]);
   return new GeometryFactory().createPolygon(newCoords);
 };
+
+/**
+ * Split the wall if it's drawn over an existing door.
+ *
+ * @returns [[x1, y1, x2, y2], ...]
+ */
+export const maybeSplitWall = (x1, y1, x2, y2, doors) => {
+  // TODO: this logic doesn't handle two doors side by side
+  const wallPoly = twoPointsToLineString(x1, y1, x2, y2);
+  for (const door of doors) {
+    const doorPoly = twoPointsToLineString(door[0], door[1], door[2], door[3]);
+    const overlap = contains(wallPoly, doorPoly);
+    if (overlap) {
+      // make sure points are consistently ordered
+      const w1 = lesserPoint(x1, y1, x2, y2);
+      const w2 = greaterPoint(x1, y1, x2, y2);
+      const d1 = lesserPoint(door[0], door[1], door[2], door[3]);
+      const d2 = greaterPoint(door[0], door[1], door[2], door[3]);
+      return [
+        [w1[0], w1[1], d1[0], d1[1]],
+        [d2[0], d2[1], w2[0], w2[1]],
+      ];
+    }
+  }
+  // wall didn't contain any door, so return as-is
+  return [[x1, y1, x2, y2]];
+};
