@@ -27,9 +27,7 @@ export class Toolbar extends Application {
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
-    html
-      .find("input[type=radio][name=addremove]")
-      .change(this.addRemoveRadioChange.bind(this));
+    html.find(".addremove-toggle").click(this.addRemoveClick.bind(this));
     html
       .find('select[name="themePainterThemeKey"]')
       .change(this.themeSelectChange.bind(this));
@@ -121,10 +119,10 @@ export class Toolbar extends Application {
       .addClass("active");
   }
 
-  addRemoveRadioChange(event) {
-    game.activeDungeonDrawMode = $(event.target).val();
+  addRemoveClick(event) {
+    game.activeDungeonDrawMode = $(event.target).data("addremove");
     this._element.find(".addremove-toggle").removeClass("toggle-on");
-    $(event.currentTarget).closest(".addremove-toggle").addClass("toggle-on");
+    $(event.currentTarget).addClass("toggle-on");
   }
 
   controlToolClick(event) {

@@ -1,3 +1,7 @@
+# 0.23.3
+
+- Ditch radio for add/remove in favor of clickable div.
+
 # 0.23.2
 
 - Split exterior walls around overlapping doors.

@@ -10,24 +10,11 @@
 
 <div id="dd-control-tools">
   <div class="addremove-toggle-row">
-    <div class="addremove-toggle toggle-on">
-      <input
-        type="radio"
-        name="addremove"
-        id="addremove-add"
-        value="add"
-        checked
-      />
-      <label for="addremove-add">{{localize "DD.Add"}}</label>
+    <div class="addremove-toggle toggle-on" data-addremove="add">
+      {{localize "DD.Add"}}
     </div>
-    <div class="addremove-toggle">
-      <input
-        type="radio"
-        name="addremove"
-        id="addremove-remove"
-        value="remove"
-      />
-      <label for="addremove-remove">{{localize "DD.Remove"}}</label>
+    <div class="addremove-toggle" data-addremove="remove">
+      {{localize "DD.Remove"}}
     </div>
   </div>
   <div class="control-row-separator"></div>
