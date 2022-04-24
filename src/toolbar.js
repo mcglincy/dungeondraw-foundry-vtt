@@ -43,6 +43,11 @@ export class Toolbar extends Application {
     const customThemeKeys = Object.keys(customThemes).sort();
     const themeKeys = Object.keys(themes).sort();
     const themePainterThemeKey = getThemePainterThemeKey();
+    const toggleAddClass =
+      game.activeDungeonDrawMode === "add" ? "toggle-on" : "";
+    const toggleRemoveClass =
+      game.activeDungeonDrawMode === "remove" ? "toggle-on" : "";
+
     const data = {
       customThemes,
       customThemeKeys,
@@ -104,6 +109,8 @@ export class Toolbar extends Application {
       themeKeys,
       themePainterThemeKey,
       themes,
+      toggleAddClass,
+      toggleRemoveClass,
     };
     return data;
   }
