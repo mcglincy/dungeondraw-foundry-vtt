@@ -1,6 +1,7 @@
 # 0.23.3
 
-- Ditch radio for add/remove in favor of clickable div.
+- Ditch radio for add/remove in favor of clickable div button.
+- Fix bug where add toggle button is on but the mode is actually remove.
 
 # 0.23.2
 
