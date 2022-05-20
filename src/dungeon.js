@@ -1,7 +1,7 @@
 import { DungeonState } from "./dungeonstate.js";
 import { render } from "./renderer.js";
 import * as geo from "./geo-utils.js";
-import { getThemePainterThemeKey } from "./themes.js";
+import { getTheme, getThemePainterThemeKey } from "./themes.js";
 
 /**
  * @extends {PlaceableObject}
@@ -410,13 +410,6 @@ export class Dungeon extends PlaceableObject {
     }
   }
 
-  /**
-   * @param {Object} rect
-   * @param {Number} rect.x
-   * @param {Number} rect.y
-   * @param {Number} rect.height
-   * @param {Number} rect.width
-   */
   async addThemeArea(points) {
     // make sure we can create a valid polygon from the points
     const poly = geo.pointsToPolygon(points);
@@ -426,9 +419,10 @@ export class Dungeon extends PlaceableObject {
     }
 
     const themeKey = getThemePainterThemeKey();
+    const theme = getTheme(themeKey);
     const newArea = {
       points,
-      themeKey,
+      config: theme.config,
     };
     const newState = this.history[this.historyIndex].clone();
     newState.themeAreas.push(newArea);

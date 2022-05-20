@@ -1,6 +1,6 @@
 import { makeWalls } from "./wallmaker.js";
 import * as geo from "./geo-utils.js";
-import { defaultConfig } from "./themes.js";
+import { defaultConfig, getTheme } from "./themes.js";
 
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
@@ -80,10 +80,35 @@ export class DungeonState {
   static async loadFromJournalEntry(journalEntry) {
     if (journalEntry.data.content) {
       console.log(`Loading dungeon from JournalEntry ${journalEntry.name}`);
-      return DungeonState.fromString(journalEntry.data.content);
+      const dungeonState = DungeonState.fromString(journalEntry.data.content);
+      await dungeonState.maybeMigrateAndSave(journalEntry);
+      return dungeonState;
     } else {
       console.log("Loading dungeon from start state");
       return DungeonState.startState();
+    }
+  }
+
+  async maybeMigrateAndSave(journalEntry) {
+    if (!game.user.isGM) {
+      return;
+    }
+
+    let needsSave = false;
+
+    // fix any old themeArea.themeKey fields
+    for (const themeArea of this.themeAreas) {
+      if (themeArea.themeKey) {
+        const theme = getTheme(themeArea.themeKey);
+        if (theme) {
+          themeArea.config = theme.config;
+          delete themeArea.themeKey;
+          needsSave = true;
+        }
+      }
+    }
+    if (needsSave) {
+      await this.saveToJournalEntry(journalEntry);
     }
   }
 }
