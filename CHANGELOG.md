@@ -1,3 +1,7 @@
+# 0.24.0
+
+- Embed theme config info with each theme-painted area in the Dungeon Draw journal entry. This means any custom theme area will be properly visible to all players.
+
 # 0.23.3
 
 - Ditch radio for add/remove in favor of clickable div button.
