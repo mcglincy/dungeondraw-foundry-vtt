@@ -90,6 +90,10 @@ export class DungeonState {
   }
 
   async maybeMigrateAndSave(journalEntry) {
+    if (!game.user.isGM) {
+      return;
+    }
+
     let needsSave = false;
 
     // fix any old themeArea.themeKey fields
