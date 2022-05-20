@@ -51,16 +51,6 @@ export class DungeonState {
     const obj = JSON.parse(s);
     const geometry = geo.wktToGeometry(obj.wkt);
     const themeAreas = obj.themeAreas ? obj.themeAreas : [];
-    // migrate any themeAreas with legacy themeKey
-    for (const themeArea of themeAreas) {
-      if (themeArea.themeKey) {
-        const theme = getTheme(themeArea.themeKey);
-        if (theme) {
-          themeArea.config = theme.config;
-          delete themeArea.themeKey;
-        }
-      }
-    }
     const doors = obj.doors ? obj.doors : [];
     const secretDoors = obj.secretDoors ? obj.secretDoors : [];
     const interiorWalls = obj.interiorWalls ? obj.interiorWalls : [];
@@ -91,7 +81,7 @@ export class DungeonState {
     if (journalEntry.data.content) {
       console.log(`Loading dungeon from JournalEntry ${journalEntry.name}`);
       const dungeonState = DungeonState.fromString(journalEntry.data.content);
-      dungeonState.maybeMigrate(journalEntry);
+      await dungeonState.maybeMigrateAndSave(journalEntry);
       return dungeonState;
     } else {
       console.log("Loading dungeon from start state");
@@ -99,20 +89,22 @@ export class DungeonState {
     }
   }
 
-  async maybeMigrate(journalEntry) {
+  async maybeMigrateAndSave(journalEntry) {
     let needsSave = false;
+
+    // fix any old themeArea.themeKey fields
     for (const themeArea of this.themeAreas) {
       if (themeArea.themeKey) {
         const theme = getTheme(themeArea.themeKey);
         if (theme) {
           themeArea.config = theme.config;
-          needsSave = true;
           delete themeArea.themeKey;
+          needsSave = true;
         }
       }
     }
     if (needsSave) {
-      this.saveToJournalEntry(journalEntry);
+      await this.saveToJournalEntry(journalEntry);
     }
   }
 }
