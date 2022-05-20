@@ -90,10 +90,29 @@ export class DungeonState {
   static async loadFromJournalEntry(journalEntry) {
     if (journalEntry.data.content) {
       console.log(`Loading dungeon from JournalEntry ${journalEntry.name}`);
-      return DungeonState.fromString(journalEntry.data.content);
+      const dungeonState = DungeonState.fromString(journalEntry.data.content);
+      dungeonState.maybeMigrate(journalEntry);
+      return dungeonState;
     } else {
       console.log("Loading dungeon from start state");
       return DungeonState.startState();
+    }
+  }
+
+  async maybeMigrate(journalEntry) {
+    let needsSave = false;
+    for (const themeArea of this.themeAreas) {
+      if (themeArea.themeKey) {
+        const theme = getTheme(themeArea.themeKey);
+        if (theme) {
+          themeArea.config = theme.config;
+          needsSave = true;
+          delete themeArea.themeKey;
+        }
+      }
+    }
+    if (needsSave) {
+      this.saveToJournalEntry(journalEntry);
     }
   }
 }
