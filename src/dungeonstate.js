@@ -1,6 +1,6 @@
 import { makeWalls } from "./wallmaker.js";
 import * as geo from "./geo-utils.js";
-import { defaultConfig } from "./themes.js";
+import { defaultConfig, getTheme } from "./themes.js";
 
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
@@ -51,6 +51,16 @@ export class DungeonState {
     const obj = JSON.parse(s);
     const geometry = geo.wktToGeometry(obj.wkt);
     const themeAreas = obj.themeAreas ? obj.themeAreas : [];
+    // migrate any themeAreas with legacy themeKey
+    for (const themeArea of themeAreas) {
+      if (themeArea.themeKey) {
+        const theme = getTheme(themeArea.themeKey);
+        if (theme) {
+          themeArea.config = theme.config;
+          delete themeArea.themeKey;
+        }
+      }
+    }
     const doors = obj.doors ? obj.doors : [];
     const secretDoors = obj.secretDoors ? obj.secretDoors : [];
     const interiorWalls = obj.interiorWalls ? obj.interiorWalls : [];

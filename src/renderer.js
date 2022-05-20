@@ -1,5 +1,4 @@
 import * as geo from "./geo-utils.js";
-import { getTheme } from "./themes.js";
 // importing a local copy of PIXI filters, to avoid a long chain of npm pixi dependencies
 import "./lib/pixi-filters.min.js";
 
@@ -169,17 +168,10 @@ const renderPass = async (container, state) => {
 
 const drawThemeAreas = async (container, state) => {
   for (const area of state.themeAreas) {
-    const theme = getTheme(area.themeKey);
-    if (!theme) {
-      console.log(`No such ${area.themeType} theme: ${area.themeKey}`);
-      continue;
-    }
-    // TODO: hacky way to pass down the actual theme to paint
+    // hacky way to pass down the actual theme to paint
     const areaState = state.clone();
-    // TODO: how should we deal with different wall thicknesses, door colors, etc
-    // which look jarring/off when two different themes meet up
-    areaState.config = theme.config;
-    // TODO: for now, just keep certain values from the main state config,
+    areaState.config = area.config;
+    // For now, just keep certain values from the main state config,
     // so the dungeon doors etc look consistent at meet up areas
     areaState.config.doorColor = state.config.doorColor;
     areaState.config.doorFillColor = state.config.doorFillColor;
