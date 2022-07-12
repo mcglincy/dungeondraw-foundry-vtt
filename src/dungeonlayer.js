@@ -195,7 +195,7 @@ export class DungeonLayer extends PlaceablesLayer {
       throw new Error(`You do not have permission to clear all.`);
     }
     return Dialog.confirm({
-      title: game.i18n.localize("DD.ButtonTitleClear"),
+      title: game.i18n.localize("DD.ButtonTitleClearAll"),
       content: `<p>${game.i18n.localize("DD.ClearAllDialogContent")}</p>`,
       yes: () => this.dungeon?.deleteAll(),
     });
