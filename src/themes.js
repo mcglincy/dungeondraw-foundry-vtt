@@ -31,6 +31,8 @@ export const defaultConfig = () => {
     threeDDoorTextureTint: "",
     threeDWallTexture: "",
     threeDWallTextureTint: "",
+    threeDWallSidesTexture: "",
+    threeDWallSidesTextureTint: "",
     wallColor: "#000000",
     wallTexture: "",
     wallTextureTint: "",

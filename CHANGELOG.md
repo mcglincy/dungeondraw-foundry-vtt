@@ -1,6 +1,7 @@
 # 0.25.0
 
-- Add wallSidesTexture setting to 3dcanvas options.
+- Add wallSidesTexture and wallSidesTextureTint settings for 3dcanvas.
+- Check wall flag data when deciding whether to delete/recreate walls.
 
 # 0.24.1
 

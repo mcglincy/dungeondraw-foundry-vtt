@@ -69,7 +69,8 @@ const wallDataEqual = (w1, w2) => {
     w1.c[1] == w2.c[1] &&
     w1.c[2] == w2.c[2] &&
     w1.c[3] == w2.c[3] &&
-    w1.door == w2.door
+    w1.door == w2.door &&
+    JSON.stringify(w1.flags) == JSON.stringify(w2.flags)
   );
 };
 
@@ -173,20 +174,10 @@ const wallData = (config, x1, y1, x2, y2) => {
     data.flags["levels-3d-preview"] = {
       joinWall: true,
       wallDepth: config.wallThickness,
-      wallSidesTexture:
-        config.threeDWallSidesTexture ??
-        config.threeDWallTexture ??
-        config.wallTexture,
-      wallSidesTint:
-        config.threeDWallSidesTextureTint ??
-        config.threeDWallTextureTint ??
-        config.wallTextureTint ??
-        config.wallColor,
-      wallTexture: config.threeDWallTexture ?? config.wallTexture,
-      wallTint:
-        config.threeDWallTextureTint ??
-        config.wallTextureTint ??
-        config.wallColor,
+      wallSidesTexture: config.threeDWallSidesTexture,
+      wallSidesTint: config.threeDWallSidesTextureTint,
+      wallTexture: config.threeDWallTexture,
+      wallTint: config.threeDWallTextureTint,
     };
   }
   return data;
