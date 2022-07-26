@@ -546,6 +546,47 @@
         />
       </div>
     </div>
+    <div class="form-group">
+      <label>{{localize "DD.ThreeDWallSidesTexture"}}</label>
+      <div class="form-fields">
+        <button
+          type="button"
+          class="file-picker"
+          data-type="imagevideo"
+          data-target="threeDWallSidesTexture"
+          title="Browse Files"
+          tabindex="-1"
+        >
+          <i class="fas fa-file-import fa-fw"></i>
+        </button>
+        <input
+          class="image"
+          type="text"
+          name="threeDWallSidesTexture"
+          value="{{config.threeDWallSidesTexture}}"
+          data-dtype="String"
+          placeholder="File Path"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.ThreeDWallSidesTextureTint"}}</label>
+      <div class="form-fields">
+        <input
+          type="text"
+          class="color"
+          name="threeDWallSidesTextureTint"
+          value="{{config.threeDWallSidesTextureTint}}"
+          data-dtype="String"
+        />
+        <input
+          type="color"
+          value="{{config.threeDWallSidesTextureTint}}"
+          data-edit="threeDWallSidesTextureTint"
+          data-dtype="String"
+        />
+      </div>
+    </div>
     {{/if}}
     <br />
     <div style="display: flex">

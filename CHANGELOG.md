@@ -1,3 +1,7 @@
+# 0.25.0
+
+- Add wallSidesTexture setting to 3dcanvas options.
+
 # 0.24.1
 
 - Fix clear all dialog title.

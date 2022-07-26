@@ -173,16 +173,20 @@ const wallData = (config, x1, y1, x2, y2) => {
     data.flags["levels-3d-preview"] = {
       joinWall: true,
       wallDepth: config.wallThickness,
-      wallSidesTexture: config.wallTexture,
-      wallSidesTint: config.wallTexture
-        ? config.wallTextureTint
-        : config.wallColor,
+      wallSidesTexture:
+        config.threeDWallSidesTexture ??
+        config.threeDWallTexture ??
+        config.wallTexture,
+      wallSidesTint:
+        config.threeDWallSidesTextureTint ??
+        config.threeDWallTextureTint ??
+        config.wallTextureTint ??
+        config.wallColor,
       wallTexture: config.threeDWallTexture ?? config.wallTexture,
-      wallTint: config.threeDWallTexture
-        ? config.threeDWallTextureTint
-        : config.wallTexture
-        ? config.wallTextureTint
-        : config.wallColor,
+      wallTint:
+        config.threeDWallTextureTint ??
+        config.wallTextureTint ??
+        config.wallColor,
     };
   }
   return data;
