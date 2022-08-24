@@ -464,8 +464,8 @@ const drawInteriorWall = (wallGfx, config, wall) => {
 
 const drawInvisibleWall = (wallGfx, config, wall) => {
   wallGfx.lineStyle({
-    width: config.wallThickness,
-    color: PIXI.utils.string2hex(config.wallColor),
+    width: config.invisibleWallThickness,
+    color: PIXI.utils.string2hex(config.invisibleWallColor),
     alpha: 1.0,
     alignment: 0.5, // middle
 
