@@ -5,17 +5,18 @@ import { defaultConfig, getTheme } from "./themes.js";
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
 
-  constructor(geometry, themeAreas, doors, secretDoors, interiorWalls, config) {
+  constructor(geometry, themeAreas, doors, secretDoors, interiorWalls, invisibleWalls, config) {
     this.geometry = geometry;
     this.themeAreas = themeAreas;
     this.doors = doors;
     this.secretDoors = secretDoors;
     this.interiorWalls = interiorWalls;
+    this.invisibleWalls = invisibleWalls;
     this.config = config;
   }
 
   static startState() {
-    return new DungeonState(null, [], [], [], [], defaultConfig());
+    return new DungeonState(null, [], [], [], [], [], defaultConfig());
   }
 
   clone() {
@@ -25,6 +26,7 @@ export class DungeonState {
       JSON.parse(JSON.stringify(this.doors)),
       this.secretDoors ? [...this.secretDoors] : [],
       this.interiorWalls ? [...this.interiorWalls] : [],
+      this.invisibleWalls ? [...this.invisibleWalls] : [],
       JSON.parse(JSON.stringify(this.config))
     );
   }
@@ -39,6 +41,7 @@ export class DungeonState {
       doors: this.doors,
       secretDoors: this.secretDoors,
       interiorWalls: this.interiorWalls,
+      invisibleWalls: this.invisibleWalls,
       config: this.config,
     });
   }
@@ -54,6 +57,7 @@ export class DungeonState {
     const doors = obj.doors ? obj.doors : [];
     const secretDoors = obj.secretDoors ? obj.secretDoors : [];
     const interiorWalls = obj.interiorWalls ? obj.interiorWalls : [];
+    const invisibleWalls = obj.invisibleWalls ? obj.invisibleWalls : [];
     // fill in any new defaults
     const config = foundry.utils.mergeObject(defaultConfig(), obj.config);
     return new DungeonState(
@@ -62,6 +66,7 @@ export class DungeonState {
       doors,
       secretDoors,
       interiorWalls,
+      invisibleWalls,
       config
     );
   }

@@ -142,6 +142,7 @@ export class DungeonLayer extends PlaceablesLayer {
         case "interiorwall":
         case "door":
         case "secretdoor":
+        case "invisiblewall":
         case "themepainter":
           data.type = CONST.DRAWING_TYPES.POLYGON;
           data.points = [[0, 0]];
@@ -162,6 +163,7 @@ export class DungeonLayer extends PlaceablesLayer {
         case "interiorwall":
         case "door":
         case "secretdoor":
+        case "invisiblewall":
         case "themepainter":
           data.type = CONST.DRAWING_TYPES.RECTANGLE;
           data.points = [];
@@ -317,7 +319,8 @@ export class DungeonLayer extends PlaceablesLayer {
         preview.data.type !== CONST.DRAWING_TYPES.POLYGON ||
         opcode === "adddoor" ||
         opcode === "addinteriorwall" ||
-        opcode === "addsecretdoor"
+        opcode === "addsecretdoor" ||
+        opcode === "addinvisiblewall"
       ) {
         event.data.createState = 2;
       }
@@ -451,7 +454,23 @@ export class DungeonLayer extends PlaceablesLayer {
           data.x + data.points[1][0],
           data.y + data.points[1][1]
         );
-      } else if (minDistance || completePolygon) {
+      }
+       else if (opcode === "addinvisiblewall") {
+        event.data.createState = 0;
+        const data = preview.data.toObject(false);
+        preview._chain = false;
+        // const endPoint = this._maybeSnappedEndPoint(data);
+        this._maybeSnapLastPoint(data);
+        await this.dungeon.addInvisibleWall(
+          data.x,
+          data.y,
+          // data.x + endPoint[0],
+          // data.y + endPoint[1]
+          data.x + data.points[1][0],
+          data.y + data.points[1][1]
+        );
+      }
+       else if (minDistance || completePolygon) {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
