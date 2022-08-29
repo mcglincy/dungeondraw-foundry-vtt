@@ -539,6 +539,10 @@ export class DungeonLayer extends PlaceablesLayer {
           const rect = this._maybeSnappedRect(createData);
           // TODO: need to spam out methods to various different flavor deletions
           await this.dungeon.removeInteriorWalls(rect);
+        } else if (opcode === "removeinvisiblewall") {
+          const rect = this._maybeSnappedRect(createData);
+          // TODO: need to spam out methods to various different flavor deletions
+          await this.dungeon.removeInvisibleWalls(rect);
         } else if (opcode === "removepolygon") {
           this._maybeSnapLastPoint(createData);
           this._autoClosePolygon(createData);
