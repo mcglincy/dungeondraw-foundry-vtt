@@ -112,7 +112,7 @@ const renderPass = async (container, state) => {
   
    for (const wall of state.invisibleWalls) {
 
-      drawInvisibleWall(wallMask, maskConfig, wall);
+      drawInvisibleWall(wallGfx, state.config, wall);
    
   }
 
