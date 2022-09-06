@@ -18,9 +18,10 @@ export const makeWalls = async (state) => {
   }
 
   const interiorWalls = makeInteriorWalls(state.config, state.interiorWalls);
+  const invisibleWalls = makeInvisibleWalls(state.config, state.invisibleWalls);
   const doors = makeDoors(state.config, state.doors);
   const secretDoors = makeSecretDoors(state.config, state.secretDoors);
-  const allWalls = walls.concat(interiorWalls, doors, secretDoors);
+  const allWalls = walls.concat(interiorWalls, invisibleWalls, doors, secretDoors);
 
   // figure out what walls need to be created, deleted, or left in place
   const wallDocs = dungeonDrawWallDocuments();
@@ -138,6 +139,15 @@ const makeInteriorWalls = (config, walls) => {
   return allWalls;
 };
 
+const makeInvisibleWalls = (config, walls) => {
+  const allWalls = [];
+  for (const wall of walls) {
+    const data = invisibleWallData(config, wall[0], wall[1], wall[2], wall[3]);
+    allWalls.push(data);
+  }
+  return allWalls;
+};
+
 /** [[x1,y1,x2,y2],...] */
 const makeDoors = (config, doors) => {
   const allDoors = [];
@@ -198,5 +208,13 @@ const doorData = (config, x1, y1, x2, y2) => {
 const secretDoorData = (config, x1, y1, x2, y2) => {
   const data = wallData(config, x1, y1, x2, y2);
   data.door = 2; // secret
+  return data;
+};
+
+const invisibleWallData = (config, x1, y1, x2, y2) => {
+  const data = wallData(config, x1, y1, x2, y2);
+  data.door = 0; // secret
+  data.light = 0;
+  data.sight = 0;
   return data;
 };

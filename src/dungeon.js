@@ -197,6 +197,10 @@ export class Dungeon extends PlaceableObject {
   async addSecretDoor(x1, y1, x2, y2) {
     await this._addDoor(x1, y1, x2, y2, "secretDoors");
   }
+  
+  async addInvisibleWall(x1, y1, x2, y2) {
+    await this._addDoor(x1, y1, x2, y2, "invisibleWalls");
+  }
 
   async _addDoor(x1, y1, x2, y2, doorProperty) {
     const newState = this.history[this.historyIndex].clone();
@@ -253,6 +257,24 @@ export class Dungeon extends PlaceableObject {
     ) {
       const newState = this.history[this.historyIndex].clone();
       newState.interiorWalls = wallsToKeep;
+      await this.pushState(newState);
+    }
+  }
+  
+   // {x:, y:, height:, width:}
+  async removeInvisibleWalls(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const wallsToKeep = this.history[this.historyIndex].invisibleWalls.filter(
+      (w) => {
+        const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
+        return !geo.intersects(rectPoly, wallPoly);
+      }
+    );
+    if (
+      wallsToKeep.length != this.history[this.historyIndex].invisibleWalls.length
+    ) {
+      const newState = this.history[this.historyIndex].clone();
+      newState.invisibleWalls = wallsToKeep;
       await this.pushState(newState);
     }
   }

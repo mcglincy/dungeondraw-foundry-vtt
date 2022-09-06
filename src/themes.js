@@ -37,6 +37,10 @@ export const defaultConfig = () => {
     wallTexture: "",
     wallTextureTint: "",
     wallThickness: 8,
+    invisibleWallColor: "#000000",
+    invisibleWallTexture: "",
+    invisibleWallTextureTint: "",
+    invisibleWallThickness: 8,
   };
 };
 

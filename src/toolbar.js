@@ -97,6 +97,13 @@ export class Toolbar extends Application {
           icon: "fas fa-mask",
           isActive: game.activeDungeonDrawTool === "secretdoor",
         },
+        {
+          name: "invisiblewall",
+          title: "DD.ButtonTitleInvisibleWall",
+          icon: "fas fa-eye-slash",
+          isActive: game.activeDungeonDrawTool === "invisiblewall",
+        },
+        
       ],
       row3: [
         {

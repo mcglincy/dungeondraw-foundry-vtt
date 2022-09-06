@@ -6,6 +6,7 @@
   "DD.ButtonTitleClearAll": "Clear All",
   "DD.ButtonTitleConfig": "Configure",
   "DD.ButtonTitleDoor": "Door",
+  "DD.ButtonTitleInvisibleWall":"Invisible Wall",
   "DD.ButtonTitleDrawMap": "Draw Map",
   "DD.ButtonTitleEllipse": "Ellipse",
   "DD.ButtonTitleFreehand": "Freehand",
@@ -103,5 +104,11 @@
   "DD.WallTextureRotation": "Wall Texture Rotation",
   "DD.WallTextureTint": "Wall Texture Tint",
   "DD.WallThickness": "Wall Thickness",
+  "DD.InvisibleWallColor": "Invisible Wall Color",
+  "DD.InvisibleWallOpacity": "Invisible Wall Opacity",
+  "DD.InvisibleWallTexture": "Invisible Wall Texture",
+  "DD.InvisibleWallTextureRotation": "Invisible Wall Texture Rotation",
+  "DD.InvisibleWallTextureTint": "Invisible Wall Texture Tint",
+  "DD.InvisibleWallThickness": "Invisible Wall Thickness",
   "DD.Width": "Width"
 }
