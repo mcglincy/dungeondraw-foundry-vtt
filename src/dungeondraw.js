@@ -31,18 +31,10 @@ export class DungeonDraw {
   }
 
   static getSceneControlButtons(controls) {
-    if (CONFIG.Canvas.layers.background?.group) {
-      // v9+ layer setup
-      CONFIG.Canvas.layers.dungeon = {
-        layerClass: DungeonLayer,
-        group: "primary",
-      };
-    } else {
-      // v8 layer setup
-      // TODO: remove this if/else once v8 is gone from existence
-      CONFIG.Canvas.layers.dungeon = DungeonLayer;
-    }
-
+    CONFIG.Canvas.layers.dungeon = {
+      layerClass: DungeonLayer,
+      group: "primary",
+    };
     CONFIG.Dungeon = {
       layerClass: DungeonLayer,
     };
@@ -59,61 +51,6 @@ export class DungeonDraw {
           title: "DD.ButtonTitleDrawMap",
           icon: "fas fa-dungeon",
         },
-        // {
-        //   name: "addrect",
-        //   title: "DD.ButtonTitleAddRect",
-        //   icon: "fas fa-plus-square",
-        // },
-        // {
-        //   name: "subtractrect",
-        //   title: "DD.ButtonTitleSubtractRect",
-        //   icon: "fas fa-minus-square",
-        // },
-        // {
-        //   name: "addellipse",
-        //   title: "DD.ButtonTitleAddEllipse",
-        //   icon: "fas fa-circle",
-        // },
-        // {
-        //   name: "addpoly",
-        //   title: "DD.ButtonTitleAddPoly",
-        //   icon: "fas fa-draw-polygon",
-        // },
-        // {
-        //   name: "freehand",
-        //   title: "DD.ButtonTitleFreehand",
-        //   icon: "fas fa-signature",
-        // },
-        // {
-        //   name: "addwall",
-        //   title: "DD.ButtonTitleAddWall",
-        //   icon: "fas fa-bars",
-        // },
-        // {
-        //   name: "adddoor",
-        //   title: "DD.ButtonTitleAddDoor",
-        //   icon: "fas fa-door-open",
-        // },
-        // {
-        //   name: "addsecretdoor",
-        //   title: "DD.ButtonTitleAddSecretDoor",
-        //   icon: "fas fa-mask",
-        // },
-        // {
-        //   name: "subtractdoor",
-        //   title: "DD.ButtonTitleSubtractDoorsAndWalls",
-        //   icon: "fas fa-window-close",
-        // },
-        // {
-        //   name: "themepainter",
-        //   title: "DD.ButtonTitleThemePainter",
-        //   icon: "fas fa-brush",
-        // },
-        // {
-        //   name: "themeeraser",
-        //   title: "DD.ButtonTitleThemeEraser",
-        //   icon: "fas fa-eraser",
-        // },
         {
           name: "undo",
           title: "DD.ButtonTitleUndo",

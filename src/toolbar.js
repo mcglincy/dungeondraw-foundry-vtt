@@ -103,7 +103,6 @@ export class Toolbar extends Application {
           icon: "fas fa-eye-slash",
           isActive: game.activeDungeonDrawTool === "invisiblewall",
         },
-        
       ],
       row3: [
         {

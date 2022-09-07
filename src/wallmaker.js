@@ -21,7 +21,12 @@ export const makeWalls = async (state) => {
   const invisibleWalls = makeInvisibleWalls(state.config, state.invisibleWalls);
   const doors = makeDoors(state.config, state.doors);
   const secretDoors = makeSecretDoors(state.config, state.secretDoors);
-  const allWalls = walls.concat(interiorWalls, invisibleWalls, doors, secretDoors);
+  const allWalls = walls.concat(
+    interiorWalls,
+    invisibleWalls,
+    doors,
+    secretDoors
+  );
 
   // figure out what walls need to be created, deleted, or left in place
   const wallDocs = dungeonDrawWallDocuments();

@@ -197,7 +197,7 @@ export class Dungeon extends PlaceableObject {
   async addSecretDoor(x1, y1, x2, y2) {
     await this._addDoor(x1, y1, x2, y2, "secretDoors");
   }
-  
+
   async addInvisibleWall(x1, y1, x2, y2) {
     await this._addDoor(x1, y1, x2, y2, "invisibleWalls");
   }
@@ -260,8 +260,8 @@ export class Dungeon extends PlaceableObject {
       await this.pushState(newState);
     }
   }
-  
-   // {x:, y:, height:, width:}
+
+  // {x:, y:, height:, width:}
   async removeInvisibleWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
     const wallsToKeep = this.history[this.historyIndex].invisibleWalls.filter(
@@ -271,7 +271,8 @@ export class Dungeon extends PlaceableObject {
       }
     );
     if (
-      wallsToKeep.length != this.history[this.historyIndex].invisibleWalls.length
+      wallsToKeep.length !=
+      this.history[this.historyIndex].invisibleWalls.length
     ) {
       const newState = this.history[this.historyIndex].clone();
       newState.invisibleWalls = wallsToKeep;

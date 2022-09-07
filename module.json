@@ -1,4 +1,5 @@
 {
+  "id": "dungeon-draw",
   "name": "dungeon-draw",
   "author": "mcglintlock",
   "title": "Dungeon Draw",
@@ -6,8 +7,13 @@
   "version": "0.1.0",
   "library": "false",
   "manifestPlusVersion": "1.0.0",
-  "minimumCoreVersion": "0.8.9",
-  "compatibleCoreVersion": "9",
+  "minimumCoreVersion": 9,
+  "compatibleCoreVersion": 10,
+  "compatibility": {
+    "minimum": 9,
+    "verified": 10,
+    "maximum": 10
+  },
   "dependencies": [],
   "esmodules": ["./modules/dungeondraw-bundle.min.js"],
   "packs": [],

@@ -5,6 +5,7 @@ export const MODULE_NAME = "dungeon-draw";
 export const DUNGEON_VERSION = "1.0";
 
 export const FLAG_DUNGEON_VERSION = "dungeonVersion";
+export const FLAG_DUNGEON_STATE = "dungeonState";
 
 export const SETTING_ALLOW_TRUSTED_PLAYER = "allowTrustedPlayer";
 export const SETTING_3DCANVAS_ENABLED = "3DCanvasEnabled";

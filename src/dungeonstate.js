@@ -1,11 +1,20 @@
+import { FLAG_DUNGEON_STATE, MODULE_NAME } from "./constants.js";
 import { makeWalls } from "./wallmaker.js";
 import * as geo from "./geo-utils.js";
-import { defaultConfig, getTheme } from "./themes.js";
+import { defaultConfig } from "./themes.js";
 
 export class DungeonState {
   static FLAG_KEY = "dungeonState";
 
-  constructor(geometry, themeAreas, doors, secretDoors, interiorWalls, invisibleWalls, config) {
+  constructor(
+    geometry,
+    themeAreas,
+    doors,
+    secretDoors,
+    interiorWalls,
+    invisibleWalls,
+    config
+  ) {
     this.geometry = geometry;
     this.themeAreas = themeAreas;
     this.doors = doors;
@@ -77,43 +86,34 @@ export class DungeonState {
     const serialized = this.toString();
     // update walls before we update the journal
     await makeWalls(this);
-    await journalEntry.update({
-      content: serialized,
-    });
+    await journalEntry.setFlag(MODULE_NAME, FLAG_DUNGEON_STATE, serialized);
   }
 
   static async loadFromJournalEntry(journalEntry) {
-    if (journalEntry.data.content) {
-      console.log(`Loading dungeon from JournalEntry ${journalEntry.name}`);
-      const dungeonState = DungeonState.fromString(journalEntry.data.content);
-      await dungeonState.maybeMigrateAndSave(journalEntry);
-      return dungeonState;
-    } else {
-      console.log("Loading dungeon from start state");
-      return DungeonState.startState();
-    }
+    await this.maybeMigrateJournalEntry(journalEntry);
+    const content = journalEntry.getFlag(MODULE_NAME, FLAG_DUNGEON_STATE);
+    return DungeonState.fromString(content);
   }
 
-  async maybeMigrateAndSave(journalEntry) {
+  static async maybeMigrateJournalEntry(journalEntry) {
     if (!game.user.isGM) {
       return;
     }
-
-    let needsSave = false;
-
-    // fix any old themeArea.themeKey fields
-    for (const themeArea of this.themeAreas) {
-      if (themeArea.themeKey) {
-        const theme = getTheme(themeArea.themeKey);
-        if (theme) {
-          themeArea.config = theme.config;
-          delete themeArea.themeKey;
-          needsSave = true;
-        }
+    if (journalEntry.pages) {
+      // v10
+      const page = journalEntry.pages.find((p) => p.type === "text");
+      if (page?.text?.content) {
+        console.log("Migrating v10 page.text.content");
+        const dungeonState = DungeonState.fromString(page.text.content);
+        await dungeonState.saveToJournalEntry(journalEntry);
+        await page.delete();
       }
-    }
-    if (needsSave) {
-      await this.saveToJournalEntry(journalEntry);
+    } else if (journalEntry.data.content) {
+      // v9
+      console.log("Migrating v9 journalEntry.data.content");
+      const dungeonState = DungeonState.fromString(journalEntry.data.content);
+      await dungeonState.saveToJournalEntry(journalEntry);
+      await journalEntry.update({ content: null });
     }
   }
 }

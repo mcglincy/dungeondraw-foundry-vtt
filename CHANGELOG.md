@@ -1,3 +1,10 @@
+# 1.0.0
+
+- Foundry v10 compatibility.
+- Persist dungeon data in JournalEntry flag instead of either v9 content or v10 page.
+- Migrate any existing data to flag storage.
+- Add invisible wall tool and config fields, by @pbtura
+
 # 0.25.0
 
 - Add wallSidesTexture and wallSidesTextureTint settings for 3dcanvas.

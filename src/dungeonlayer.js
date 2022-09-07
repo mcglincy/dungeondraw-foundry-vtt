@@ -454,8 +454,7 @@ export class DungeonLayer extends PlaceablesLayer {
           data.x + data.points[1][0],
           data.y + data.points[1][1]
         );
-      }
-       else if (opcode === "addinvisiblewall") {
+      } else if (opcode === "addinvisiblewall") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
@@ -469,8 +468,7 @@ export class DungeonLayer extends PlaceablesLayer {
           data.x + data.points[1][0],
           data.y + data.points[1][1]
         );
-      }
-       else if (minDistance || completePolygon) {
+      } else if (minDistance || completePolygon) {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;

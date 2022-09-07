@@ -109,11 +109,9 @@ const renderPass = async (container, state) => {
       drawInteriorWall(wallGfx, state.config, wall);
     }
   }
-  
-   for (const wall of state.invisibleWalls) {
 
-      drawInvisibleWall(wallGfx, state.config, wall);
-   
+  for (const wall of state.invisibleWalls) {
+    drawInvisibleWall(wallGfx, state.config, wall);
   }
 
   // draw doors
@@ -468,7 +466,6 @@ const drawInvisibleWall = (wallGfx, config, wall) => {
     color: PIXI.utils.string2hex(config.invisibleWallColor),
     alpha: 1.0,
     alignment: 0.5, // middle
-
   });
   wallGfx.moveTo(wall[0], wall[1]);
   wallGfx.lineTo(wall[2], wall[3]);
