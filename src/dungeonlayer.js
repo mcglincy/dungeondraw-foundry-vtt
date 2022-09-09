@@ -77,6 +77,17 @@ const createDungeonNote = async (journalEntry) => {
   ]);
 };
 
+const onFreeHandMouseDraw = (preview, event) => {
+  const { destination } = event.data;
+  const position = destination;
+  const now = Date.now();
+  const temporary =
+    now - preview._drawTime < preview.constructor.FREEHAND_SAMPLE_RATE;
+  const snap = false;
+  preview._addPoint(position, { snap, temporary });
+  preview.refresh();
+};
+
 /**
  *
  * @extends {PlaceablesLayer}
@@ -317,7 +328,12 @@ export class DungeonLayer extends PlaceablesLayer {
       this.preview.addChild(preview);
     }
     if (createState >= 1) {
-      preview._onMouseDraw(event);
+      // TODO: deal with v10 having freehand-tool specific handling in DrawingShape :P
+      if (game.activeDungeonDrawTool === "freehand") {
+        onFreeHandMouseDraw(preview, event);
+      } else {
+        preview._onMouseDraw(event);
+      }
       // easy single opcode
       const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
       if (
@@ -392,8 +408,8 @@ export class DungeonLayer extends PlaceablesLayer {
 
     // Successful drawing completion
     // TODO: why is freehand not properly advancing createState?
-    // if (createState === 2 || game.activeDungeonDrawTool === "freehand") {
-    if (createState === 2) {
+    if (createState === 2 || game.activeDungeonDrawTool === "freehand") {
+      //    if (createState === 2) {
       // create a new dungeon if we don't already have one
       if (!this.dungeon) {
         await this.createNewDungeon();
