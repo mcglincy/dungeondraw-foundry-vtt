@@ -1,10 +1,14 @@
-# 1.0.0
+# 1.0.1
 
 - **PLEASE BACK UP YOUR WORLD DATA BEFORE UPGRADING TO THIS VERSION OF DUNGEON DRAW!!!**
-- Foundry v10 compatibility.
-- Persist dungeon data in JournalEntry flag instead of either v9 content or v10 page.
+- Foundry v10 compatibility. Note that Dungeon Draw 1.0.1+ will only be v10+ compatible.
+- Persist dungeon data in JournalEntry flag instead of either content/page.
 - Migrate any existing dungeon draw data to flag storage.
 - Add invisible wall tool and config fields, by @pbtura.
+
+# 1.0.0
+
+- Whoops, this should not have been released.
 
 # 0.25.0
 

@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "library": "false",
   "manifestPlusVersion": "1.0.0",
-  "minimumCoreVersion": 9,
+  "minimumCoreVersion": 10,
   "compatibleCoreVersion": 10,
   "compatibility": {
     "minimum": 10,

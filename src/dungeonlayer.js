@@ -351,18 +351,18 @@ export class DungeonLayer extends PlaceablesLayer {
   _maybeSnappedRect(createData) {
     if (Settings.snapToGrid() && !shiftPressed()) {
       const snapPos = canvas.grid.getSnappedPosition(
-        createData.x + createData.width,
-        createData.y + createData.height,
+        createData.x + createData.shape.width,
+        createData.y + createData.shape.height,
         this.gridPrecision
       );
-      createData.height = snapPos.y - createData.y;
-      createData.width = snapPos.x - createData.x;
+      createData.shape.height = snapPos.y - createData.y;
+      createData.shape.width = snapPos.x - createData.x;
     }
     const rect = {
       x: createData.x,
       y: createData.y,
-      height: createData.height,
-      width: createData.width,
+      height: createData.shape.height,
+      width: createData.shape.width,
     };
     return rect;
   }

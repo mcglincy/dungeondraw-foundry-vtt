@@ -35,7 +35,7 @@ export const makeWalls = async (state) => {
   for (const wall of allWalls) {
     let foundDoc = false;
     for (const wallDoc of wallDocs) {
-      if (wallDataEqual(wall, wallDoc.data)) {
+      if (wallDataEqual(wall, wallDoc)) {
         wallDocsStillNeeded.push(wallDoc);
         foundDoc = true;
         break;
