@@ -93,7 +93,6 @@ export class DungeonLayer extends PlaceablesLayer {
   static get layerOptions() {
     return foundry.utils.mergeObject(super.layerOptions, {
       name: DungeonLayer.LAYER_NAME,
-      // canDragCreate: game.user.isGM,
       canDragCreate: true,
       // we use our own snapToGrid setting to control snap
       snapToGrid: Settings.snapToGrid(),
@@ -131,12 +130,14 @@ export class DungeonLayer extends PlaceablesLayer {
     data.x = origin.x;
     data.y = origin.y;
     data.author = game.user.id;
+    data.shape = {};
 
     if (game.activeDungeonDrawMode === "add") {
       switch (game.activeDungeonDrawTool) {
         case "rectangle":
-          data.type = CONST.DRAWING_TYPES.RECTANGLE;
-          data.points = [];
+          data.shape.type = CONST.DRAWING_TYPES.RECTANGLE;
+          data.shape.width = 1;
+          data.shape.height = 1;
           break;
         case "polygon":
         case "interiorwall":
@@ -145,16 +146,18 @@ export class DungeonLayer extends PlaceablesLayer {
         case "invisiblewall":
         case "themepainter":
           data.type = CONST.DRAWING_TYPES.POLYGON;
-          data.points = [[0, 0]];
+          data.points = [0, 0];
+          data.bezierFactor = 0;
           break;
         case "freehand":
-          data.type = CONST.DRAWING_TYPES.FREEHAND;
-          data.points = [[0, 0]];
+          data.type = CONST.DRAWING_TYPES.POLYGON;
+          data.points = [0, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "ellipse":
           data.type = CONST.DRAWING_TYPES.ELLIPSE;
-          data.points = [];
+          data.shape.width = 1;
+          data.shape.height = 1;
           break;
       }
     } else if (game.activeDungeonDrawMode === "remove") {
@@ -166,20 +169,23 @@ export class DungeonLayer extends PlaceablesLayer {
         case "invisiblewall":
         case "themepainter":
           data.type = CONST.DRAWING_TYPES.RECTANGLE;
-          data.points = [];
+          data.shape.width = 1;
+          data.shape.height = 1;
           break;
         case "polygon":
           data.type = CONST.DRAWING_TYPES.POLYGON;
-          data.points = [[0, 0]];
+          data.points = [0, 0];
+          data.bezierFactor = 0;
           break;
         case "freehand":
-          data.type = CONST.DRAWING_TYPES.FREEHAND;
-          data.points = [[0, 0]];
+          data.type = CONST.DRAWING_TYPES.POLYGON;
+          data.points = [0, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "ellipse":
           data.type = CONST.DRAWING_TYPES.ELLIPSE;
-          data.points = [];
+          data.shape.width = 1;
+          data.shape.height = 1;
           break;
       }
     }
@@ -302,11 +308,8 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   _onDragLeftMove(event) {
-    // easy single opcode
-    const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
-
     const { preview, createState } = event.data;
-    if (!preview) {
+    if (!preview || preview._destroyed) {
       return;
     }
     if (preview.parent === null) {
@@ -315,8 +318,10 @@ export class DungeonLayer extends PlaceablesLayer {
     }
     if (createState >= 1) {
       preview._onMouseDraw(event);
+      // easy single opcode
+      const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
       if (
-        preview.data.type !== CONST.DRAWING_TYPES.POLYGON ||
+        preview.document.shape.type !== CONST.DRAWING_TYPES.POLYGON ||
         opcode === "adddoor" ||
         opcode === "addinteriorwall" ||
         opcode === "addsecretdoor" ||
@@ -325,20 +330,6 @@ export class DungeonLayer extends PlaceablesLayer {
         event.data.createState = 2;
       }
     }
-  }
-
-  _maybeSnappedEndPoint(data) {
-    const endPoint = data.points[1];
-    if (Settings.snapToGrid() && !shiftPressed()) {
-      const snapPos = canvas.grid.getSnappedPosition(
-        endPoint[0],
-        endPoint[1],
-        this.gridPrecision
-      );
-      endPoint[0] = snapPos.x;
-      endPoint[1] = snapPos.y;
-    }
-    return endPoint;
   }
 
   _maybeSnappedRect(createData) {
@@ -361,116 +352,125 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   _maybeSnapLastPoint(createData) {
-    const length = createData.points.length;
+    const length = createData.shape.points.length;
     if (length === 0) {
       return;
     }
     if (Settings.snapToGrid() && !shiftPressed()) {
       const snapPos = canvas.grid.getSnappedPosition(
-        createData.points[length - 1][0],
-        createData.points[length - 1][1],
+        createData.shape.points[length - 2],
+        createData.shape.points[length - 1],
         this.gridPrecision
       );
-      createData.points[length - 1][0] = snapPos.x;
-      createData.points[length - 1][1] = snapPos.y;
+      createData.points[length - 2] = snapPos.x;
+      createData.points[length - 1] = snapPos.y;
     }
   }
 
   _autoClosePolygon(createData) {
-    const length = createData.points.length;
+    const length = createData.shape.points.length;
     if (
-      length > 2 &&
-      (createData.points[0][0] !== createData.points[length - 1][0] ||
-        createData.points[0][1] !== createData.points[length - 1][1])
+      length > 4 &&
+      (createData.shape.points[0] !== createData.shape.points[length - 2] ||
+        createData.shape.points[1] !== createData.shape.points[length - 1])
     ) {
       // auto-close the polygon
-      createData.points.push(createData.points[0]);
+      createData.shape.points.push(
+        createData.shape.points[0],
+        createData.shape.points[1]
+      );
     }
   }
 
   /** @override */
   async _onDragLeftDrop(event) {
-    const { createState, destination, origin, preview } = event.data;
-
+    // preview is of type Drawing.
+    // Drawing.DrawingDocument.shape is shape data
+    const { createState, destination, preview } = event.data;
     // easy single opcode
     const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
 
     // Successful drawing completion
     // TODO: why is freehand not properly advancing createState?
-    if (createState === 2 || game.activeDungeonDrawTool === "freehand") {
+    // if (createState === 2 || game.activeDungeonDrawTool === "freehand") {
+    if (createState === 2) {
       // create a new dungeon if we don't already have one
       if (!this.dungeon) {
         await this.createNewDungeon();
       }
 
+      // XXXX
+      // const distance = Math.hypot(
+      //   destination.x - origin.x,
+      //   destination.y - origin.y
+      // );
       const distance = Math.hypot(
-        destination.x - origin.x,
-        destination.y - origin.y
+        destination.x - preview.x,
+        destination.y - preview.y
       );
       const minDistance = distance >= canvas.dimensions.size / 8;
+
+      // preview.isPolygon && preview.data.points.length > 2;
+      // XXXX
+      // in foundry v10, drawing.document.shape.points is a flat array
       const completePolygon =
-        preview.isPolygon && preview.data.points.length > 2;
+        preview.isPolygon && preview.document.shape.points.length > 4;
 
       // Clean up and DRY up these if/else blocks
       if (opcode === "adddoor") {
         event.data.createState = 0;
-        const data = preview.data.toObject(false);
+        // XXXX
+        //const data = preview.data.toObject(false);
+        // clone the shape data
+        const data = preview.document.toObject(false);
         preview._chain = false;
-        //const endPoint = this._maybeSnappedEndPoint(data);
         this._maybeSnapLastPoint(data);
         await this.dungeon.addDoor(
           data.x,
           data.y,
-          // data.x + endPoint[0],
-          // data.y + endPoint[1]
-          data.x + data.points[1][0],
-          data.y + data.points[1][1]
+          data.x + data.shape.points[2],
+          data.y + data.shape.points[3]
         );
       } else if (opcode === "addsecretdoor") {
         event.data.createState = 0;
         const data = preview.data.toObject(false);
         preview._chain = false;
-        // const endPoint = this._maybeSnappedEndPoint(data);
         this._maybeSnapLastPoint(data);
         await this.dungeon.addSecretDoor(
           data.x,
           data.y,
-          // data.x + endPoint[0],
-          // data.y + endPoint[1]
-          data.x + data.points[1][0],
-          data.y + data.points[1][1]
+          data.x + data.shape.points[2],
+          data.y + data.shape.points[3]
         );
       } else if (opcode === "addinteriorwall") {
         event.data.createState = 0;
-        const data = preview.data.toObject(false);
+        // const data = preview.data.toObject(false);
+        const data = preview.document.toObject(false);
         preview._chain = false;
-        // const endPoint = this._maybeSnappedEndPoint(data);
         this._maybeSnapLastPoint(data);
         await this.dungeon.addInteriorWall(
           data.x,
           data.y,
-          // data.x + endPoint[0],
-          // data.y + endPoint[1]
-          data.x + data.points[1][0],
-          data.y + data.points[1][1]
+          data.x + data.shape.points[2],
+          data.y + data.points[3]
         );
       } else if (opcode === "addinvisiblewall") {
         event.data.createState = 0;
-        const data = preview.data.toObject(false);
+        // XXX
+        //        const data = preview.data.toObject(false);
+        const data = preview.document.toObject(false);
         preview._chain = false;
-        // const endPoint = this._maybeSnappedEndPoint(data);
         this._maybeSnapLastPoint(data);
         await this.dungeon.addInvisibleWall(
           data.x,
           data.y,
-          // data.x + endPoint[0],
-          // data.y + endPoint[1]
-          data.x + data.points[1][0],
-          data.y + data.points[1][1]
+          data.x + data.points[2],
+          data.y + data.points[3]
         );
       } else if (minDistance || completePolygon) {
         event.data.createState = 0;
-        const data = preview.data.toObject(false);
+        // const data = preview.data.toObject(false);
+        const data = preview.document.toObject(false);
         preview._chain = false;
         // TODO: do we care about normalizing the shape? maybe for freehand curves/lines?
         const createData = this.constructor.placeableClass.normalizeShape(data);
@@ -485,18 +485,24 @@ export class DungeonLayer extends PlaceablesLayer {
           );
         } else if (opcode === "addfreehand") {
           this._autoClosePolygon(createData);
-          const offsetPoints = createData.points.map((p) => [
-            p[0] + createData.x,
-            p[1] + createData.y,
-          ]);
+          const offsetPoints = [];
+          for (let i = 0; i <= createData.shape.points.length - 2; i += 2) {
+            offsetPoints.push([
+              createData.shape.points[i] + createData.x,
+              createData.shape.points[i + 1] + createData.y,
+            ]);
+          }
           await this.dungeon.addPolygon(offsetPoints);
         } else if (opcode === "addpolygon") {
           this._maybeSnapLastPoint(createData);
           this._autoClosePolygon(createData);
-          const offsetPoints = createData.points.map((p) => [
-            p[0] + createData.x,
-            p[1] + createData.y,
-          ]);
+          const offsetPoints = [];
+          for (let i = 0; i <= createData.shape.points.length - 2; i += 2) {
+            offsetPoints.push([
+              createData.shape.points[i] + createData.x,
+              createData.shape.points[i + 1] + createData.y,
+            ]);
+          }
           await this.dungeon.addPolygon(offsetPoints);
         } else if (opcode === "addrectangle") {
           const rect = this._maybeSnappedRect(createData);
@@ -504,10 +510,13 @@ export class DungeonLayer extends PlaceablesLayer {
         } else if (opcode === "addthemepainter") {
           this._maybeSnapLastPoint(createData);
           this._autoClosePolygon(createData);
-          const offsetPoints = createData.points.map((p) => [
-            p[0] + createData.x,
-            p[1] + createData.y,
-          ]);
+          const offsetPoints = [];
+          for (let i = 0; i <= createData.shape.points.length - 2; i += 2) {
+            offsetPoints.push([
+              createData.shape.points[i] + createData.x,
+              createData.shape.points[i + 1] + createData.y,
+            ]);
+          }
           await this.dungeon.addThemeArea(offsetPoints);
         } else if (opcode === "removedoor") {
           const rect = this._maybeSnappedRect(createData);
