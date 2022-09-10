@@ -52,23 +52,21 @@ export class Dungeon extends PlaceableObject {
     // padding is rounded up to the nearest grid size increment
     const xOffset =
       Math.ceil(
-        (canvas.scene.data.width * canvas.scene.data.padding) /
-          canvas.scene.data.grid
-      ) * canvas.scene.data.grid;
+        (canvas.scene.width * canvas.scene.padding) / canvas.scene.grid.size
+      ) * canvas.scene.grid.size;
     const yOffset =
       Math.ceil(
-        (canvas.scene.data.height * canvas.scene.data.padding) /
-          canvas.scene.data.grid
-      ) * canvas.scene.data.grid;
+        (canvas.scene.height * canvas.scene.padding) / canvas.scene.grid.size
+      ) * canvas.scene.grid.size;
     const maskCoords = [
       xOffset,
       yOffset,
-      xOffset + canvas.scene.data.width,
+      xOffset + canvas.scene.width,
       yOffset,
-      xOffset + canvas.scene.data.width,
-      yOffset + canvas.scene.data.height,
+      xOffset + canvas.scene.width,
+      yOffset + canvas.scene.height,
       xOffset,
-      yOffset + canvas.scene.data.height,
+      yOffset + canvas.scene.height,
       xOffset,
       yOffset,
     ];
@@ -80,8 +78,8 @@ export class Dungeon extends PlaceableObject {
 
     // force container to scene dimensions
     const sizeForcer = new PIXI.Sprite();
-    sizeForcer.height = canvas.scene.data.height;
-    sizeForcer.width = canvas.scene.data.width;
+    sizeForcer.height = canvas.scene.height;
+    sizeForcer.width = canvas.scene.width;
     sizeForcer.position.x = xOffset;
     sizeForcer.position.y = yOffset;
     tempContainer.addChild(sizeForcer);
@@ -102,9 +100,11 @@ export class Dungeon extends PlaceableObject {
     const file = new File([blob], filename, { type: "image/png" });
     await FilePicker.upload("data", folder, file, {});
     const path = folder ? folder + "/" + filename : filename;
+    console.log(path);
     // make sure we don't keep using a cached copy
-    TextureLoader.loader.cache.delete(path);
-    if (canvas.scene.data.img === path) {
+    // TODO: TextureLoader #cache is now a private instance var
+    // TextureLoader.loader.cache.delete(path);
+    if (canvas.scene.img === path) {
       // cheat to force a scene update when we're re-saving to the same filename
       await canvas.scene.update({ img: null }, { render: false });
     }
