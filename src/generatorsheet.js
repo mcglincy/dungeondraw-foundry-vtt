@@ -75,7 +75,6 @@ export class GeneratorSheet extends FormApplication {
   async generate(event) {
     event.preventDefault();
     const formData = this._getSubmitData();
-    console.log(formData);
     await canvas.dungeon.generate(formData);
   }
 }

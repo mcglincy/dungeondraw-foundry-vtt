@@ -25,18 +25,16 @@ export const regenerate = async (dungeon, config = {}) => {
 const xOffset = () => {
   return (
     Math.ceil(
-      (canvas.scene.data.width * canvas.scene.data.padding) /
-        canvas.scene.data.grid
-    ) * canvas.scene.data.grid
+      (canvas.scene.width * canvas.scene.padding) / canvas.scene.grid.size
+    ) * canvas.scene.grid.size
   );
 };
 
 const yOffset = () => {
   return (
     Math.ceil(
-      (canvas.scene.data.height * canvas.scene.data.padding) /
-        canvas.scene.data.grid
-    ) * canvas.scene.data.grid
+      (canvas.scene.height * canvas.scene.padding) / canvas.scene.grid.size
+    ) * canvas.scene.grid.size
   );
 };
 
@@ -56,7 +54,7 @@ export const generateRotJsCellular = async (dungeon, config) => {
     map.connect(null, 1);
   }
 
-  const gridSize = canvas.scene.data.grid / scalingFactor;
+  const gridSize = canvas.scene.grid.size / scalingFactor;
   const xOff = xOffset();
   const yOff = yOffset();
   let geometry;
@@ -115,7 +113,7 @@ export const generate2DDungeon = async (dungeon, config) => {
   });
   map.generate();
 
-  const gridSize = canvas.scene.data.grid;
+  const gridSize = canvas.scene.grid.size;
   const xOff = xOffset();
   const yOff = yOffset();
   let geometry;
@@ -201,7 +199,7 @@ export const generateDungeoneer = async (dungeon, config) => {
     width: config.width,
     height: config.height,
   });
-  const gridSize = canvas.scene.data.grid;
+  const gridSize = canvas.scene.grid.size;
   const xOff = xOffset();
   const yOff = yOffset();
   let geometry;
