@@ -377,6 +377,7 @@ export class Dungeon extends PlaceableObject {
 
   // [[x,y]...]
   async addPolygon(points) {
+    console.log(points);
     const poly = geo.pointsToPolygon(points);
     if (!geo.isValid(poly)) {
       ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));

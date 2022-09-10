@@ -15,7 +15,7 @@ const shiftPressed = () => {
 
 const findDungeonEntryAndNote = () => {
   for (const note of canvas.scene.notes) {
-    const journalEntry = game.journal.get(note.data.entryId);
+    const journalEntry = game.journal.get(note.entryId);
     if (journalEntry) {
       const flag = journalEntry.getFlag(
         constants.MODULE_NAME,
@@ -37,7 +37,7 @@ const createDungeonEntryAndNote = async () => {
 
 const createDungeonEntry = async () => {
   let folder = game.folders
-    .filter((f) => f.data.type === "JournalEntry" && f.name === FOLDER_NAME)
+    .filter((f) => f.type === "JournalEntry" && f.name === FOLDER_NAME)
     .pop();
   if (!folder) {
     folder = await Folder.create({
@@ -86,6 +86,17 @@ const onFreeHandMouseDraw = (preview, event) => {
   const snap = false;
   preview._addPoint(position, { snap, temporary });
   preview.refresh();
+};
+
+const createDataOffsetPoints = (createData) => {
+  const offsetPoints = [];
+  for (let i = 0; i <= createData.shape.points.length - 2; i += 2) {
+    offsetPoints.push([
+      createData.shape.points[i] + createData.x,
+      createData.shape.points[i + 1] + createData.y,
+    ]);
+  }
+  return offsetPoints;
 };
 
 /**
@@ -378,8 +389,8 @@ export class DungeonLayer extends PlaceablesLayer {
         createData.shape.points[length - 1],
         this.gridPrecision
       );
-      createData.points[length - 2] = snapPos.x;
-      createData.points[length - 1] = snapPos.y;
+      createData.shape.points[length - 2] = snapPos.x;
+      createData.shape.points[length - 1] = snapPos.y;
     }
   }
 
@@ -402,7 +413,7 @@ export class DungeonLayer extends PlaceablesLayer {
   async _onDragLeftDrop(event) {
     // preview is of type Drawing.
     // Drawing.DrawingDocument.shape is shape data
-    const { createState, destination, preview } = event.data;
+    const { createState, destination, origin, preview } = event.data;
     // easy single opcode
     const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
 
@@ -415,14 +426,17 @@ export class DungeonLayer extends PlaceablesLayer {
         await this.createNewDungeon();
       }
 
-      // XXXX
+      // TODO: v9 calculate distance vs origin, v10 vs preview?
+      // Worse, preview.x / y don't exist when starting a new scene/first drawing,
+      // which causes an error.
+      // preview.document.shape.x / y do, tho
       // const distance = Math.hypot(
-      //   destination.x - origin.x,
-      //   destination.y - origin.y
+      //   destination.x - preview.x,
+      //   destination.y - preview.y
       // );
       const distance = Math.hypot(
-        destination.x - preview.x,
-        destination.y - preview.y
+        destination.x - origin.x,
+        destination.y - origin.y
       );
       const minDistance = distance >= canvas.dimensions.size / 8;
 
@@ -435,8 +449,6 @@ export class DungeonLayer extends PlaceablesLayer {
       // Clean up and DRY up these if/else blocks
       if (opcode === "adddoor") {
         event.data.createState = 0;
-        // XXXX
-        //const data = preview.data.toObject(false);
         // clone the shape data
         const data = preview.document.toObject(false);
         preview._chain = false;
@@ -449,7 +461,7 @@ export class DungeonLayer extends PlaceablesLayer {
         );
       } else if (opcode === "addsecretdoor") {
         event.data.createState = 0;
-        const data = preview.data.toObject(false);
+        const data = preview.document.toObject(false);
         preview._chain = false;
         this._maybeSnapLastPoint(data);
         await this.dungeon.addSecretDoor(
@@ -460,7 +472,6 @@ export class DungeonLayer extends PlaceablesLayer {
         );
       } else if (opcode === "addinteriorwall") {
         event.data.createState = 0;
-        // const data = preview.data.toObject(false);
         const data = preview.document.toObject(false);
         preview._chain = false;
         this._maybeSnapLastPoint(data);
@@ -468,57 +479,42 @@ export class DungeonLayer extends PlaceablesLayer {
           data.x,
           data.y,
           data.x + data.shape.points[2],
-          data.y + data.points[3]
+          data.y + data.shape.points[3]
         );
       } else if (opcode === "addinvisiblewall") {
         event.data.createState = 0;
-        // XXX
-        //        const data = preview.data.toObject(false);
         const data = preview.document.toObject(false);
         preview._chain = false;
         this._maybeSnapLastPoint(data);
         await this.dungeon.addInvisibleWall(
           data.x,
           data.y,
-          data.x + data.points[2],
-          data.y + data.points[3]
+          data.x + data.shape.points[2],
+          data.y + data.shape.points[3]
         );
       } else if (minDistance || completePolygon) {
         event.data.createState = 0;
-        // const data = preview.data.toObject(false);
         const data = preview.document.toObject(false);
         preview._chain = false;
         // TODO: do we care about normalizing the shape? maybe for freehand curves/lines?
         const createData = this.constructor.placeableClass.normalizeShape(data);
         if (opcode === "addellipse") {
-          const x = createData.x + createData.width / 2;
-          const y = createData.y + createData.height / 2;
+          const x = createData.x + createData.shape.width / 2;
+          const y = createData.y + createData.shape.height / 2;
           await this.dungeon.addEllipse(
             x,
             y,
-            createData.width,
-            createData.height
+            createData.shape.width,
+            createData.shape.height
           );
         } else if (opcode === "addfreehand") {
           this._autoClosePolygon(createData);
-          const offsetPoints = [];
-          for (let i = 0; i <= createData.shape.points.length - 2; i += 2) {
-            offsetPoints.push([
-              createData.shape.points[i] + createData.x,
-              createData.shape.points[i + 1] + createData.y,
-            ]);
-          }
+          const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.addPolygon(offsetPoints);
         } else if (opcode === "addpolygon") {
           this._maybeSnapLastPoint(createData);
           this._autoClosePolygon(createData);
-          const offsetPoints = [];
-          for (let i = 0; i <= createData.shape.points.length - 2; i += 2) {
-            offsetPoints.push([
-              createData.shape.points[i] + createData.x,
-              createData.shape.points[i + 1] + createData.y,
-            ]);
-          }
+          const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.addPolygon(offsetPoints);
         } else if (opcode === "addrectangle") {
           const rect = this._maybeSnappedRect(createData);
@@ -526,53 +522,38 @@ export class DungeonLayer extends PlaceablesLayer {
         } else if (opcode === "addthemepainter") {
           this._maybeSnapLastPoint(createData);
           this._autoClosePolygon(createData);
-          const offsetPoints = [];
-          for (let i = 0; i <= createData.shape.points.length - 2; i += 2) {
-            offsetPoints.push([
-              createData.shape.points[i] + createData.x,
-              createData.shape.points[i + 1] + createData.y,
-            ]);
-          }
+          const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.addThemeArea(offsetPoints);
         } else if (opcode === "removedoor") {
           const rect = this._maybeSnappedRect(createData);
           // TODO: need to spam out methods to various different flavor deletions
           await this.dungeon.removeDoors(rect);
         } else if (opcode === "removeellipse") {
-          const x = createData.x + createData.width / 2;
-          const y = createData.y + createData.height / 2;
+          const x = createData.x + createData.shape.width / 2;
+          const y = createData.y + createData.shape.height / 2;
           await this.dungeon.removeEllipse(
             x,
             y,
-            createData.width,
-            createData.height
+            createData.shape.width,
+            createData.shape.height
           );
         } else if (opcode === "removefreehand") {
           this._autoClosePolygon(createData);
-          const offsetPoints = createData.points.map((p) => [
-            p[0] + createData.x,
-            p[1] + createData.y,
-          ]);
+          const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.removePolygon(offsetPoints);
         } else if (opcode === "removesecretdoor") {
           const rect = this._maybeSnappedRect(createData);
-          // TODO: need to spam out methods to various different flavor deletions
           await this.dungeon.removeSecretDoors(rect);
         } else if (opcode === "removeinteriorwall") {
           const rect = this._maybeSnappedRect(createData);
-          // TODO: need to spam out methods to various different flavor deletions
           await this.dungeon.removeInteriorWalls(rect);
         } else if (opcode === "removeinvisiblewall") {
           const rect = this._maybeSnappedRect(createData);
-          // TODO: need to spam out methods to various different flavor deletions
           await this.dungeon.removeInvisibleWalls(rect);
         } else if (opcode === "removepolygon") {
           this._maybeSnapLastPoint(createData);
           this._autoClosePolygon(createData);
-          const offsetPoints = createData.points.map((p) => [
-            p[0] + createData.x,
-            p[1] + createData.y,
-          ]);
+          const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.removePolygon(offsetPoints);
         } else if (opcode === "removerectangle") {
           const rect = this._maybeSnappedRect(createData);
