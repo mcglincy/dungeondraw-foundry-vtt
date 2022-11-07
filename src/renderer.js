@@ -8,33 +8,10 @@ import "./lib/pixi-filters.min.js";
 export const render = async (container, state) => {
   // clear everything
   container.clear();
-  // add a background image if specified
-  await addBackgroundImage(container, state.config);
   // main geometry/config render pass
   await renderPass(container, state);
   // draw theme-painted areas as additional render passes
   await drawThemeAreas(container, state);
-};
-
-/**
- * Possibly add a background image to the container.
- */
-const addBackgroundImage = async (container, config) => {
-  if (config.backgroundImage) {
-    // mimicking MapLayer._drawBackground() behavior
-    const texture = await getTexture(config.backgroundImage);
-    if (texture?.valid) {
-      const d = canvas.dimensions;
-      const bg = new PIXI.Sprite(texture);
-      bg.position.set(d.paddingX - d.shiftX, d.paddingY - d.shiftY);
-      // resize the background image to match the scene dimensions
-      bg.width = d.sceneWidth;
-      bg.height = d.sceneHeight;
-      //maybeStartSpriteVideo(bg);
-      maybeStartTextureVideo(bg.texture);
-      container.addChild(bg);
-    }
-  }
 };
 
 /** If texture is a video, start playing it. */

@@ -1,5 +1,7 @@
 # 1.1.0
 
+- Remove "Background Image" config setting, since Foundry v10 scene background now appears under Dungeon Draw layer.
+- Split exterior walls around overlapping hidden walls (thus allowing "windows" for outdoor building maps).
 - Add Xenomorph theme.
 
 # 1.0.1

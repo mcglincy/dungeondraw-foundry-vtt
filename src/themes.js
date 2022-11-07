@@ -2,7 +2,6 @@ import * as constants from "./constants.js";
 
 export const defaultConfig = () => {
   return {
-    backgroundImage: "",
     doorColor: "#000000",
     doorFillColor: "#ffffff",
     doorFillOpacity: 1.0,

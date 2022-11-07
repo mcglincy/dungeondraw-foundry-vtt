@@ -13,8 +13,11 @@ export const makeWalls = async (state) => {
   if (state.geometry) {
     // simplify our geometry to downsample the amount of walls created
     const simplified = geo.simplify(state.geometry, 10.0);
-    const allDoors = state.doors.concat(state.secretDoors);
-    walls = makeWallsFromMulti(state.config, simplified, allDoors);
+    const wallBreaks = state.doors.concat(
+      state.secretDoors,
+      state.invisibleWalls
+    );
+    walls = makeWallsFromMulti(state.config, simplified, wallBreaks);
   }
 
   const interiorWalls = makeInteriorWalls(state.config, state.interiorWalls);
