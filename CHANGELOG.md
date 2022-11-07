@@ -1,3 +1,7 @@
+# 1.1.1
+
+- Rebuild with latest code.
+
 # 1.1.0
 
 - Remove "Background Image" config setting, since Foundry v10 scene background now appears under Dungeon Draw layer.
