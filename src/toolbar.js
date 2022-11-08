@@ -94,7 +94,7 @@ export class Toolbar extends Application {
         {
           name: "secretdoor",
           title: "DD.ButtonTitleSecretDoor",
-          icon: "fas fa-mask",
+          icon: "fas fa-user-secret",
           isActive: game.activeDungeonDrawTool === "secretdoor",
         },
         {
