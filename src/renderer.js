@@ -87,8 +87,11 @@ const renderPass = async (container, state) => {
     }
   }
 
+  // draw invisible walls
   for (const wall of state.invisibleWalls) {
-    drawInvisibleWall(wallGfx, state.config, wall);
+    // draw on the door gfx, so invis walls get layered on top of regular
+    // walls. E.g., when used as visible windows.
+    drawInvisibleWall(doorGfx, state.config, wall);
   }
 
   // draw doors
