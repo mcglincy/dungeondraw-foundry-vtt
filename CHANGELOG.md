@@ -1,3 +1,7 @@
+# 1.2.1
+
+- Tweak per-theme invisibleWall thicknesses.
+
 # 1.2.0
 
 - Implement new visual style for invisible walls (as windows).
