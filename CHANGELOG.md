@@ -1,4 +1,4 @@
-# 1.1.2
+# 1.2.0
 
 - Implement new visual style for invisible walls (as windows).
 - Draw invisible walls into the door graphics/layer, so they appear on top of regular walls.
