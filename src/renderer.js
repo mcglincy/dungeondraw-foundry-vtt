@@ -91,7 +91,8 @@ const renderPass = async (container, state) => {
   for (const wall of state.invisibleWalls) {
     // draw on the door gfx, so invis walls get layered on top of regular
     // walls. E.g., when used as visible windows.
-    drawInvisibleWall(doorGfx, state.config, wall);
+    drawInvisibleWallShadow(interiorShadowGfx, state.config, wall);
+    drawInvisibleWall(doorGfx, wallGfx, wallMask, state.config, wall);
   }
 
   // draw doors
@@ -440,15 +441,27 @@ const drawInteriorWall = (wallGfx, config, wall) => {
   wallGfx.lineTo(wall[2], wall[3]);
 };
 
-const drawInvisibleWall = (wallGfx, config, wall) => {
-  wallGfx.lineStyle({
-    width: config.invisibleWallThickness,
+const drawInvisibleWall = (doorGfx, wallGfx, wallMask, config, wall) => {
+  const doorConfig = {
+    doorColor: config.invisibleWallColor,
+    doorLineThickness: config.invisibleWallLineThickness,
+    doorFillColor: config.invisibleWallFillColor,
+    doorFillOpacity: config.invisibleWallFillOpacity,
+    doorThickness: config.invisibleWallThickness,
+    wallColor: config.wallColor,
+    wallTexture: config.wallTexture,
+    wallThickness: config.wallThickness,
+  };
+  drawDoor(doorGfx, wallGfx, wallMask, doorConfig, wall);
+  // and another line across the rectangle
+  doorGfx.lineStyle({
+    width: config.invisibleWallLineThickness,
     color: PIXI.utils.string2hex(config.invisibleWallColor),
     alpha: 1.0,
     alignment: 0.5, // middle
   });
-  wallGfx.moveTo(wall[0], wall[1]);
-  wallGfx.lineTo(wall[2], wall[3]);
+  doorGfx.moveTo(wall[0], wall[1]);
+  doorGfx.lineTo(wall[2], wall[3]);
 };
 
 const drawInteriorWallShadow = (gfx, config, wall) => {
@@ -665,6 +678,17 @@ const drawSecretDoor = (doorGfx, wallGfx, wallMask, config, door) => {
       doorRect[3]
     );
   }
+};
+
+const drawInvisibleWallShadow = (gfx, config, wall) => {
+  const doorConfig = {
+    doorLineThickness: config.invisibleWallLineThickness,
+    doorThickness: config.invisibleWallThickness,
+    interiorShadowColor: config.interiorShadowColor,
+    interiorShadowThickness: config.interiorShadowThickness,
+    wallThickness: config.wallThickness,
+  };
+  drawDoorShadow(gfx, doorConfig, wall);
 };
 
 const drawDoorShadow = (gfx, config, door) => {
