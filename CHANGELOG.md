@@ -1,3 +1,7 @@
+# 1.1.2
+
+- Draw invisible walls into the door graphics/layer, so they appear on top of regular walls.
+
 # 1.1.1
 
 - Rebuild with latest code.
