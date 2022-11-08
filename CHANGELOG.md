@@ -1,3 +1,10 @@
+# 1.1.3
+
+- Add new visual style for invisible walls (as windows).
+- Expose various settings for invisible walls.
+- Style invisible walls / windows for premade themes.
+- Use secret agent icon for secret doors tool, to match Foundry walls icon.
+
 # 1.1.2
 
 - Draw invisible walls into the door graphics/layer, so they appear on top of regular walls.

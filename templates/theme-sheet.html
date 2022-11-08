@@ -252,6 +252,79 @@
     </div>
     <hr />
     <div class="form-group">
+      <label>{{localize "DD.InvisibleWallColor"}}</label>
+      <div class="form-fields">
+        <input
+          type="text"
+          class="color"
+          name="invisibleWallColor"
+          value="{{config.invisibleWallColor}}"
+          data-dtype="String"
+        />
+        <input
+          type="color"
+          value="{{config.invisibleWallColor}}"
+          data-dtype="String"
+          data-edit="invisibleWallColor"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.InvisibleWallFillColor"}}</label>
+      <div class="form-fields">
+        <input
+          type="text"
+          class="color"
+          name="invisibleWallFillColor"
+          value="{{config.invisibleWallFillColor}}"
+          data-dtype="String"
+        />
+        <input
+          type="color"
+          value="{{config.invisibleWallFillColor}}"
+          data-dtype="String"
+          data-edit="invisibleWallFillColor"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.InvisibleWallFillOpacity"}}</label>
+      <div class="form-fields">
+        <input
+          type="number"
+          name="invisibleWallFillOpacity"
+          value="{{config.invisibleWallFillOpacity}}"
+          data-dtype="Number"
+          min="0"
+          max="1"
+          step="0.05"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.InvisibleWallLineThickness"}}</label>
+      <div class="form-fields">
+        <input
+          type="number"
+          name="invisibleWallLineThickness"
+          value="{{config.invisibleWallLineThickness}}"
+          data-dtype="Number"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.InvisibleWallThickness"}}</label>
+      <div class="form-fields">
+        <input
+          type="text"
+          name="invisibleWallThickness"
+          value="{{config.invisibleWallThickness}}"
+          data-dtype="Number"
+        />
+      </div>
+    </div>
+    <hr />
+    <div class="form-group">
       <label>{{localize "DD.SceneBackgroundColor"}}</label>
       <div class="form-fields">
         <input
@@ -418,91 +491,6 @@
           type="text"
           name="wallThickness"
           value="{{config.wallThickness}}"
-          data-dtype="Number"
-        />
-      </div>
-    </div>
-    <hr />
-    <div class="form-group">
-      <label>{{localize "DD.InvisibleWallColor"}}</label>
-      <div class="form-fields">
-        <input
-          type="text"
-          class="color"
-          name="invisibleWallColor"
-          value="{{config.invisibleWallColor}}"
-          data-dtype="String"
-        />
-        <input
-          type="color"
-          value="{{config.invisibleWallColor}}"
-          data-dtype="String"
-          data-edit="invisibleWallColor"
-        />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>{{localize "DD.InvisibleWallOpacity"}}</label>
-      <div class="form-fields">
-        <input
-          type="number"
-          name="invisibleWallOpacity"
-          value="{{config.invisibleWallOpacity}}"
-          data-dtype="Number"
-          min="0"
-          max="1"
-          step="0.05"
-        />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>{{localize "DD.InvisibleWallTexture"}}</label>
-      <div class="form-fields">
-        <button
-          type="button"
-          class="file-picker"
-          data-type="imagevideo"
-          data-target="invisibleWallTexture"
-          title="Browse Files"
-          tabindex="-1"
-        >
-          <i class="fas fa-file-import fa-fw"></i>
-        </button>
-        <input
-          class="image"
-          type="text"
-          name="invisibleWallTexture"
-          value="{{config.invisibleWallTexture}}"
-          data-dtype="String"
-          placeholder="File Path"
-        />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>{{localize "DD.InvisibleWallTextureTint"}}</label>
-      <div class="form-fields">
-        <input
-          type="text"
-          class="color"
-          name="invisibleWallTextureTint"
-          value="{{config.invisibleWallTextureTint}}"
-          data-dtype="String"
-        />
-        <input
-          type="color"
-          value="{{config.invisibleWallTextureTint}}"
-          data-edit="invisibleWallTextureTint"
-          data-dtype="String"
-        />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>{{localize "DD.InvisibleWallThickness"}}</label>
-      <div class="form-fields">
-        <input
-          type="text"
-          name="invisibleWallThickness"
-          value="{{config.invisibleWallThickness}}"
           data-dtype="Number"
         />
       </div>
