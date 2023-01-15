@@ -1,47 +1,43 @@
 {
-    "id": "dungeon-draw",
-    "name": "dungeon-draw",
-    "authors": [
-      {
-        "name": "mcglintlock"
-      }
-    ],
-    "title": "Dungeon Draw",
-    "description": "A dungeon-drawing module for Foundry VTT",
-    "version": "1.2.1",
-    "library": "false",
-    "manifestPlusVersion": "1.0.0",
-    "minimumCoreVersion": 10,
-    "compatibleCoreVersion": 10,
-    "compatibility": {
-        "minimum": 10,
-        "verified": 10,
-        "maximum": 10
+  "id": "dungeon-draw",
+  "name": "dungeon-draw",
+  "authors": [
+    {
+      "name": "mcglintlock"
+    }
+  ],
+  "title": "Dungeon Draw",
+  "description": "A dungeon-drawing module for Foundry VTT",
+  "version": "1.2.1",
+  "library": "false",
+  "manifestPlusVersion": "1.0.0",
+  "minimumCoreVersion": 10,
+  "compatibleCoreVersion": 10,
+  "compatibility": {
+    "minimum": 10,
+    "verified": 10,
+    "maximum": 10
+  },
+  "relationships": {
+    "requires": []
+  },
+  "esmodules": ["./modules/dungeondraw-bundle.min.js"],
+  "packs": [],
+  "scripts": [],
+  "styles": ["styles/dungeondraw.css"],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
     },
-    "relationships": {
-      "requires": []
-    },
-    "esmodules": [
-        "./modules/dungeondraw-bundle.min.js"
-    ],
-    "packs": [],
-    "scripts": [],
-    "styles": [
-        "styles/dungeondraw.css"
-    ],
-    "languages": [
-        {
-            "lang": "en",
-            "name": "English",
-            "path": "lang/en.json"
-        },
-        {
-            "lang": "ja",
-            "name": "日本語",
-            "path": "lang/ja.json"
-        }
-    ],
-    "url": "https://github.com/mcglincy/dungeondraw-foundry-vtt",
-    "manifest": "https://github.com/mcglincy/dungeondraw-foundry-vtt/releases/latest/download/module.json",
-    "download": "https://github.com/mcglincy/dungeondraw-foundry-vtt/releases/download/1.2.1/module.zip"
+    {
+      "lang": "ja",
+      "name": "日本語",
+      "path": "lang/ja.json"
+    }
+  ],
+  "url": "https://github.com/mcglincy/dungeondraw-foundry-vtt",
+  "manifest": "https://github.com/mcglincy/dungeondraw-foundry-vtt/releases/latest/download/module.json",
+  "download": "https://github.com/mcglincy/dungeondraw-foundry-vtt/releases/download/1.2.1/module.zip"
 }
