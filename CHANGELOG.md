@@ -1,6 +1,7 @@
 # 1.2.2
 
 - Fix module.json to remove v10 warnings (by @TooPick).
+- Fix dependabot security warnings.
 
 # 1.2.1
 
