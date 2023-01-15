@@ -1,3 +1,7 @@
+# 1.2.2
+
+- Fix module.json to remove v10 warnings (by @TooPick).
+
 # 1.2.1
 
 - Tweak per-theme invisibleWall thicknesses.
