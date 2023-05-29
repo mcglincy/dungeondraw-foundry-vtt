@@ -1,3 +1,7 @@
+# 2.0.0
+
+- Foundry v11 compatibility.
+
 # 1.2.2
 
 - Fix module.json to remove v10 warnings (by @TooPick).
