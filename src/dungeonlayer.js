@@ -78,7 +78,7 @@ const createDungeonNote = async (journalEntry) => {
 };
 
 const onFreeHandMouseDraw = (preview, event) => {
-  const { destination } = event.data;
+  const { destination } = event.interactionData;
   const position = destination;
   const now = Date.now();
   const temporary =
@@ -276,18 +276,21 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   _onClickLeft(event) {
-    const { preview, createState, originalEvent } = event.data;
+    const { preview, drawingsState, destination } = event.interactionData;
 
     // Continue polygon point placement
-    if (createState >= 1 && preview.isPolygon) {
-      let point = event.data.destination;
-      if (!originalEvent.shiftKey)
+    if (drawingsState >= 1 && preview.isPolygon) {
+      let point = destination;
+      const snap = !event.shiftKey;
+      if (snap)
         point = canvas.grid.getSnappedPosition(
           point.x,
           point.y,
           this.gridPrecision
         );
       preview._addPoint(point, false);
+      // TODO: this v11 addPoint snap doesn't seem to work for our polygon drawing
+      // preview._addPoint(point, {snap, round: true});
       preview._chain = true; // Note that we are now in chain mode
       return preview.refresh();
     }
@@ -296,11 +299,11 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   _onClickLeft2(event) {
-    const { createState, preview } = event.data;
+    const { drawingsState, preview } = event.interactionData;
 
     // Conclude polygon placement with double-click
-    if (createState >= 1 && preview.isPolygon) {
-      event.data.createState = 2;
+    if (drawingsState >= 1 && preview.isPolygon) {
+      event.interactionData.drawingsState = 2;
       return this._onDragLeftDrop(event);
     }
 
@@ -311,26 +314,25 @@ export class DungeonLayer extends PlaceablesLayer {
   async _onDragLeftStart(event) {
     // TODO: DrawingsLayer _onDragLeftStart isn't seeing the shift key press,
     // so set it for them ourselves :P
-    event.data.originalEvent.isShift = shiftPressed();
+    // TODO: double-check that this is still the case for v11
+    //event.data.originalEvent.isShift = shiftPressed();
 
     // superclass will handle layerOptions.snapToGrid
     await super._onDragLeftStart(event);
-
-    // TODO: why is super._onDragleftStart() not setting createState?
-    event.data.createState = 1;
-
+    const interaction = event.interactionData;
     // we use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
-    const data = this._getNewDrawingData(event.data.origin);
+    const data = this._getNewDrawingData(event.interactionData.origin);
     const document = new DrawingDocument(data, { parent: canvas.scene });
     const drawing = new Drawing(document);
-    event.data.preview = this.preview.addChild(drawing);
+    interaction.preview = this.preview.addChild(drawing);
+    interaction.drawingsState = 1;
     return drawing.draw();
   }
 
   /** @override */
   _onDragLeftMove(event) {
-    const { preview, createState } = event.data;
+    const { preview, drawingsState } = event.interactionData;
     if (!preview || preview._destroyed) {
       return;
     }
@@ -338,7 +340,7 @@ export class DungeonLayer extends PlaceablesLayer {
       // In theory this should never happen, but rarely does
       this.preview.addChild(preview);
     }
-    if (createState >= 1) {
+    if (drawingsState >= 1) {
       // TODO: deal with v10 having freehand-tool specific handling in DrawingShape :P
       if (game.activeDungeonDrawTool === "freehand") {
         onFreeHandMouseDraw(preview, event);
@@ -354,7 +356,7 @@ export class DungeonLayer extends PlaceablesLayer {
         opcode === "addsecretdoor" ||
         opcode === "addinvisiblewall"
       ) {
-        event.data.createState = 2;
+        event.interactionData.drawingsState = 2;
       }
     }
   }
@@ -413,42 +415,50 @@ export class DungeonLayer extends PlaceablesLayer {
   async _onDragLeftDrop(event) {
     // preview is of type Drawing.
     // Drawing.DrawingDocument.shape is shape data
-    const { createState, destination, origin, preview } = event.data;
+    const { destination, origin, preview } = event.interactionData;
+    let drawingsState = event.interactionData.drawingsState;
+
+    // recognize completed polygons
+    if (
+      game.activeDungeonDrawTool === "polygon" ||
+      game.activeDungeonDrawTool === "themepainter"
+    ) {
+      const length = preview.document.shape.points.length;
+      const closedPolygon =
+        preview.isPolygon &&
+        length > 4 &&
+        preview.document.shape.points[0] ==
+          preview.document.shape.points[length - 2] &&
+        preview.document.shape.points[1] ==
+          preview.document.shape.points[length - 1];
+      if (closedPolygon) {
+        // advance the drawing state to finish it
+        drawingsState = 2;
+      }
+    }
+
     // easy single opcode
     const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
 
     // Successful drawing completion
-    // TODO: why is freehand not properly advancing createState?
-    if (createState === 2 || game.activeDungeonDrawTool === "freehand") {
-      //    if (createState === 2) {
+    // TODO: why is freehand not properly advancing drawingsState?
+    // TODO: verify this is still the case in v11
+    if (drawingsState === 2 || game.activeDungeonDrawTool === "freehand") {
       // create a new dungeon if we don't already have one
       if (!this.dungeon) {
         await this.createNewDungeon();
       }
-
-      // TODO: v9 calculate distance vs origin, v10 vs preview?
-      // Worse, preview.x / y don't exist when starting a new scene/first drawing,
-      // which causes an error.
-      // preview.document.shape.x / y do, tho
-      // const distance = Math.hypot(
-      //   destination.x - preview.x,
-      //   destination.y - preview.y
-      // );
       const distance = Math.hypot(
         destination.x - origin.x,
         destination.y - origin.y
       );
       const minDistance = distance >= canvas.dimensions.size / 8;
-
-      // preview.isPolygon && preview.data.points.length > 2;
-      // XXXX
-      // in foundry v10, drawing.document.shape.points is a flat array
       const completePolygon =
         preview.isPolygon && preview.document.shape.points.length > 4;
 
       // Clean up and DRY up these if/else blocks
       if (opcode === "adddoor") {
-        event.data.createState = 0;
+        event.interactionData.drawingsState = 0;
         // clone the shape data
         const data = preview.document.toObject(false);
         preview._chain = false;
@@ -460,7 +470,7 @@ export class DungeonLayer extends PlaceablesLayer {
           data.y + data.shape.points[3]
         );
       } else if (opcode === "addsecretdoor") {
-        event.data.createState = 0;
+        event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
         preview._chain = false;
         this._maybeSnapLastPoint(data);
@@ -471,7 +481,7 @@ export class DungeonLayer extends PlaceablesLayer {
           data.y + data.shape.points[3]
         );
       } else if (opcode === "addinteriorwall") {
-        event.data.createState = 0;
+        event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
         preview._chain = false;
         this._maybeSnapLastPoint(data);
@@ -482,7 +492,7 @@ export class DungeonLayer extends PlaceablesLayer {
           data.y + data.shape.points[3]
         );
       } else if (opcode === "addinvisiblewall") {
-        event.data.createState = 0;
+        event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
         preview._chain = false;
         this._maybeSnapLastPoint(data);
@@ -493,7 +503,7 @@ export class DungeonLayer extends PlaceablesLayer {
           data.y + data.shape.points[3]
         );
       } else if (minDistance || completePolygon) {
-        event.data.createState = 0;
+        event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
         preview._chain = false;
         // TODO: do we care about normalizing the shape? maybe for freehand curves/lines?
@@ -569,8 +579,8 @@ export class DungeonLayer extends PlaceablesLayer {
     }
 
     // In-progress polygon
-    if (createState === 1 && preview.isPolygon) {
-      event.data.originalEvent.preventDefault();
+    if (drawingsState === 1 && preview.isPolygon) {
+      event.preventDefault();
       if (preview._chain) {
         return;
       }

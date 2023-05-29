@@ -11,12 +11,10 @@
   "version": "1.2.1",
   "library": "false",
   "manifestPlusVersion": "1.0.0",
-  "minimumCoreVersion": 10,
-  "compatibleCoreVersion": 10,
   "compatibility": {
     "minimum": 10,
-    "verified": 10,
-    "maximum": 10
+    "verified": 11,
+    "maximum": 11
   },
   "relationships": {
     "requires": []
