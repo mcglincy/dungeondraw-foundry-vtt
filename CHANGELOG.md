@@ -1,3 +1,7 @@
+# 2.0.1
+
+- Mark v11 only for latest release.
+
 # 2.0.0
 
 - Foundry v11 compatibility.
