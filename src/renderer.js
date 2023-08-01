@@ -1,6 +1,4 @@
 import * as geo from "./geo-utils.js";
-// importing a local copy of PIXI filters, to avoid a long chain of npm pixi dependencies
-import "./lib/pixi-filters.min.js";
 
 /**
  * Render the given dungeon state into the given container.
