@@ -1,3 +1,7 @@
+# 2.1.0
+
+- Resolve issue with Sequencer by using PIXI filters lib included with Foundry (by IHaveThePower).
+
 # 2.0.1
 
 - Mark v11 only for latest release.
