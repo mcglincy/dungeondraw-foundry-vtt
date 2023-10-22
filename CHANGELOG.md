@@ -1,3 +1,7 @@
+# 2.2.0
+
+- Add setting for toggling Foundry wall creation.
+
 # 2.1.0
 
 - Resolve issue with Sequencer by using PIXI filters lib included with Foundry (by IHaveThePower).
