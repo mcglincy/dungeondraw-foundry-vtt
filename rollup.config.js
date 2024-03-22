@@ -1,6 +1,6 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
-import { terser } from "rollup-plugin-terser";
-import commonjs from "rollup-plugin-commonjs";
+import terser from "@rollup/plugin-terser";
+import commonjs from "@rollup/plugin-commonjs";
 
 export default () => {
   return [
@@ -9,7 +9,11 @@ export default () => {
       output: {
         file: "modules/dungeondraw-bundle.min.js",
         format: "es",
-        plugins: [terser()],
+        plugins: [
+          terser({
+            keep_classnames: true,
+          }),
+        ],
         preferConst: true,
         sourcemap: true,
       },

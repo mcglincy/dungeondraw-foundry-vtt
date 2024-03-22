@@ -5,7 +5,7 @@ import {
   themes,
 } from "./themes.js";
 
-export class Toolbar extends Application {
+export class DungeonDrawToolbar extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "dd-toolbar",
@@ -38,7 +38,7 @@ export class Toolbar extends Application {
   }
 
   /** @override */
-  getData() {
+  getData(options) {
     const customThemes = getCustomThemes();
     const customThemeKeys = Object.keys(customThemes).sort();
     const themeKeys = Object.keys(themes).sort();
@@ -118,11 +118,7 @@ export class Toolbar extends Application {
       toggleAddClass,
       toggleRemoveClass,
     };
-    return data;
-  }
-
-  render(force = false, options = {}) {
-    super.render(force, options);
+    return foundry.utils.mergeObject(super.getData(options), data);
   }
 
   updateActiveCss() {
@@ -147,5 +143,10 @@ export class Toolbar extends Application {
   themeSelectChange(event) {
     const themeKey = $(event.currentTarget).val();
     setThemePainterThemeKey(themeKey);
+  }
+
+  async _render(...args) {
+    await super._render(...args);
+    $("#controls").append(this.element);
   }
 }

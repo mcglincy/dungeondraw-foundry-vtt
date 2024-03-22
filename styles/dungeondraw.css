@@ -31,10 +31,20 @@
   border: 1px solid black;
   border-radius: 5px;
   color: white;
-  left: 107px;
+  width: auto;
+  height: auto;
+  margin-right: 10px;
+}
+#dd-control-tools .dd-control-wrapper {
   padding: 10px;
-  position: absolute;
-  top: 84px;
+  width: auto !important;
+  height: auto !important;
+}
+#dd-control-tools li.dd-control-wrapper:hover {
+  padding: 10px;
+  box-shadow: 0 0 10px var(--color-shadow-dark) !important;
+  border: 1px solid var(--color-border-dark) !important;
+  border-radius: 5px !important;
 }
 #dd-control-tools .addremove-toggle-row {
   display: flex;

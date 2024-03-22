@@ -8,30 +8,39 @@
 </div>
 {{/inline}}
 
-<div id="dd-control-tools">
-  <div class="addremove-toggle-row">
-    <div class="addremove-toggle {{toggleAddClass}}" data-addremove="add">
-      {{localize "DD.Add"}}
+<ol id="dd-control-tools" class="sub-controls app control-tools flexcol">
+  <li class="dd-control-wrapper">
+    <div class="addremove-toggle-row">
+      <div class="addremove-toggle {{toggleAddClass}}" data-addremove="add">
+        {{localize "DD.Add"}}
+      </div>
+      <div
+        class="addremove-toggle {{toggleRemoveClass}}"
+        data-addremove="remove"
+      >
+        {{localize "DD.Remove"}}
+      </div>
     </div>
-    <div class="addremove-toggle {{toggleRemoveClass}}" data-addremove="remove">
-      {{localize "DD.Remove"}}
+    <div class="control-row-separator"></div>
+    <div class="control-tool-row">
+      {{#each row1}} {{> toolPartial}} {{/each}}
     </div>
-  </div>
-  <div class="control-row-separator"></div>
-  <div class="control-tool-row">{{#each row1}} {{> toolPartial}} {{/each}}</div>
-  <div class="control-row-separator"></div>
-  <div class="control-tool-row">{{#each row2}} {{> toolPartial}} {{/each}}</div>
-  <div class="control-row-separator"></div>
-  <div class="control-tool-row">
-    {{#each row3}} {{> toolPartial}} {{/each}}
-    <select name="themePainterThemeKey" data-dtype="string">
-      {{#select themePainterThemeKey}} {{#each customThemeKeys as |themeKey|}}
-      {{name}} {{#with (lookup ../customThemes themeKey)~}}
-      <option value="custom.{{themeKey}}">{{name}}</option>
-      {{/with}} {{/each}} {{#each themeKeys as |themeKey|}} {{name}} {{#with
-      (lookup ../themes themeKey)~}}
-      <option value="module.{{themeKey}}">{{name}}</option>
-      {{/with}} {{/each}} {{/select}}
-    </select>
-  </div>
-</div>
+    <div class="control-row-separator"></div>
+    <div class="control-tool-row">
+      {{#each row2}} {{> toolPartial}} {{/each}}
+    </div>
+    <div class="control-row-separator"></div>
+    <div class="control-tool-row">
+      {{#each row3}} {{> toolPartial}} {{/each}}
+      <select name="themePainterThemeKey" data-dtype="string">
+        {{#select themePainterThemeKey}} {{#each customThemeKeys as |themeKey|}}
+        {{name}} {{#with (lookup ../customThemes themeKey)~}}
+        <option value="custom.{{themeKey}}">{{name}}</option>
+        {{/with}} {{/each}} {{#each themeKeys as |themeKey|}} {{name}} {{#with
+        (lookup ../themes themeKey)~}}
+        <option value="module.{{themeKey}}">{{name}}</option>
+        {{/with}} {{/each}} {{/select}}
+      </select>
+    </div>
+  </li>
+</ol>
