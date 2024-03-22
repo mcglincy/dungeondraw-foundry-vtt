@@ -118,15 +118,16 @@ export class DungeonDraw {
   }
 
   static async renderSceneControls(controls) {
-    if (!canvas.dungeon.toolbar) {
-      canvas.dungeon.toolbar = toolbar;
-    }
     if (controls.activeControl !== "dungeondraw") {
       // TODO: not found?
       await toolbar.close();
       return;
     }
     toolbar.render(true);
+  }
+
+  static async activateSceneControls() {
+    toolbar.element.addClass("active");
   }
 }
 
@@ -136,6 +137,4 @@ Hooks.on("getSceneControlButtons", DungeonDraw.getSceneControlButtons);
 Hooks.on("canvasReady", DungeonDraw.canvasReady);
 Hooks.on("updateJournalEntry", DungeonDraw.updateJournalEntry);
 Hooks.on("renderSceneControls", DungeonDraw.renderSceneControls);
-Hooks.on("renderDungeonDrawToolbar", () => {
-  canvas.dungeon.toolbar.element.addClass("active");
-});
+Hooks.on("renderDungeonDrawToolbar", DungeonDraw.activateSceneControls);
