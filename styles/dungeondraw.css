@@ -31,10 +31,19 @@
   border: 1px solid black;
   border-radius: 5px;
   color: white;
-  left: 107px;
+}
+#dd-control-tools .dd-control-wrapper {
   padding: 10px;
-  position: absolute;
-  top: 84px;
+  width: auto !important;
+  height: auto !important;
+  position: fixed;
+  cursor: auto !important;
+}
+#dd-control-tools li.dd-control-wrapper:hover {
+  padding: 10px;
+  box-shadow: 0 0 10px var(--color-shadow-dark) !important;
+  border: 1px solid var(--color-border-dark) !important;
+  border-radius: 5px !important;
 }
 #dd-control-tools .addremove-toggle-row {
   display: flex;
@@ -49,6 +58,9 @@
   padding: 4px;
   text-align: center;
   width: 90px;
+}
+#dd-control-tools .addremove-toggle {
+  cursor: pointer;
 }
 #dd-control-tools .addremove-toggle-row .addremove-toggle:hover {
   box-shadow: 0 0 10px red;
@@ -110,4 +122,5 @@
   color: white;
   font-family: Signika, sans-serif;
   font-size: 16px;
+  cursor: pointer;
 }

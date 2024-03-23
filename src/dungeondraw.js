@@ -4,9 +4,9 @@ import * as constants from "./constants.js";
 import { GeneratorSheet } from "./generatorsheet.js";
 import { Keybindings } from "./keybindings";
 import { Settings } from "./settings";
-import { Toolbar } from "./toolbar";
+import { DungeonDrawToolbar } from "./toolbar";
 
-const toolbar = new Toolbar();
+const toolbar = new DungeonDrawToolbar();
 
 export class DungeonDraw {
   static init() {
@@ -125,6 +125,11 @@ export class DungeonDraw {
     }
     toolbar.render(true);
   }
+
+  static async activateSceneControls() {
+    $("#controls").append(toolbar.element);
+    toolbar.element.addClass("active");
+  }
 }
 
 Hooks.on("init", DungeonDraw.init);
@@ -133,3 +138,4 @@ Hooks.on("getSceneControlButtons", DungeonDraw.getSceneControlButtons);
 Hooks.on("canvasReady", DungeonDraw.canvasReady);
 Hooks.on("updateJournalEntry", DungeonDraw.updateJournalEntry);
 Hooks.on("renderSceneControls", DungeonDraw.renderSceneControls);
+Hooks.on("renderDungeonDrawToolbar", DungeonDraw.activateSceneControls);

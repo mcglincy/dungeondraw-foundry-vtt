@@ -5,7 +5,7 @@ import {
   themes,
 } from "./themes.js";
 
-export class Toolbar extends Application {
+export class DungeonDrawToolbar extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "dd-toolbar",
