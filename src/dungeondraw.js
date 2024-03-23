@@ -127,6 +127,7 @@ export class DungeonDraw {
   }
 
   static async activateSceneControls() {
+    $("#controls").append(toolbar.element);
     toolbar.element.addClass("active");
   }
 }

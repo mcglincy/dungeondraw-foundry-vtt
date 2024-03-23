@@ -38,7 +38,7 @@ export class DungeonDrawToolbar extends Application {
   }
 
   /** @override */
-  getData(options) {
+  getData() {
     const customThemes = getCustomThemes();
     const customThemeKeys = Object.keys(customThemes).sort();
     const themeKeys = Object.keys(themes).sort();
@@ -118,7 +118,11 @@ export class DungeonDrawToolbar extends Application {
       toggleAddClass,
       toggleRemoveClass,
     };
-    return foundry.utils.mergeObject(super.getData(options), data);
+    return data;
+  }
+
+  render(force = false, options = {}) {
+    super.render(force, options);
   }
 
   updateActiveCss() {
@@ -143,10 +147,5 @@ export class DungeonDrawToolbar extends Application {
   themeSelectChange(event) {
     const themeKey = $(event.currentTarget).val();
     setThemePainterThemeKey(themeKey);
-  }
-
-  async _render(...args) {
-    await super._render(...args);
-    $("#controls").append(this.element);
   }
 }
