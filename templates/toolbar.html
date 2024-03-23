@@ -3,6 +3,7 @@
   class="control-tool toggle {{#if isActive}}active{{/if}}"
   title="{{localize title}}"
   data-tool="{{name}}"
+  role="button"
 >
   <i class="{{icon}}"></i>
 </div>
@@ -11,12 +12,17 @@
 <ol id="dd-control-tools" class="sub-controls app control-tools flexcol">
   <li class="dd-control-wrapper">
     <div class="addremove-toggle-row">
-      <div class="addremove-toggle {{toggleAddClass}}" data-addremove="add">
+      <div
+        class="addremove-toggle {{toggleAddClass}}"
+        data-addremove="add"
+        role="button"
+      >
         {{localize "DD.Add"}}
       </div>
       <div
         class="addremove-toggle {{toggleRemoveClass}}"
         data-addremove="remove"
+        role="button"
       >
         {{localize "DD.Remove"}}
       </div>
