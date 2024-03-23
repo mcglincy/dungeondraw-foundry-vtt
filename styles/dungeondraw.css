@@ -31,14 +31,13 @@
   border: 1px solid black;
   border-radius: 5px;
   color: white;
-  width: auto;
-  height: auto;
   margin-right: 10px;
 }
 #dd-control-tools .dd-control-wrapper {
   padding: 10px;
   width: auto !important;
   height: auto !important;
+  position: fixed;
 }
 #dd-control-tools li.dd-control-wrapper:hover {
   padding: 10px;
