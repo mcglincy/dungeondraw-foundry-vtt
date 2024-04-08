@@ -1,4 +1,5 @@
 import { FLAG_DUNGEON_STATE, MODULE_NAME } from "./constants.js";
+import { Settings } from "./settings.js";
 import { makeWalls } from "./wallmaker.js";
 import * as geo from "./geo-utils.js";
 import { defaultConfig } from "./themes.js";
@@ -84,8 +85,10 @@ export class DungeonState {
 
   async saveToJournalEntry(journalEntry) {
     const serialized = this.toString();
-    // update walls before we update the journal
-    await makeWalls(this);
+    if (Settings.makeFoundryWalls()) {
+      // update walls before we update the journal
+      await makeWalls(this);
+    }
     await journalEntry.setFlag(MODULE_NAME, FLAG_DUNGEON_STATE, serialized);
   }
 
