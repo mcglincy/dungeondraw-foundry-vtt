@@ -1,3 +1,11 @@
+# 2.3.0
+
+- Add setting for toggling Foundry wall creation.
+
+# 2.2.0
+
+- Move sidebar to subcontrols so that DungeonDraw will not conflict with the camera views [ by @tvandort ]
+
 # 2.1.0
 
 - Resolve issue with Sequencer by using PIXI filters lib included with Foundry (by IHaveThePower).

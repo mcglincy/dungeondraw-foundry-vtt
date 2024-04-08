@@ -72,6 +72,17 @@ export class Settings {
         config: false,
       }
     );
+    game.settings.register(
+      constants.MODULE_NAME,
+      constants.SETTING_MAKE_FOUNDRY_WALLS,
+      {
+        name: game.i18n.localize("DD.SettingMakeFoundryWalls"),
+        scope: "world",
+        default: true,
+        type: Boolean,
+        config: true,
+      }
+    );
   }
 
   static threeDCanvasEnabled() {
@@ -85,6 +96,13 @@ export class Settings {
     return game.settings.get(
       constants.MODULE_NAME,
       constants.SETTING_SNAP_TO_GRID
+    );
+  }
+
+  static makeFoundryWalls() {
+    return game.settings.get(
+      constants.MODULE_NAME,
+      constants.SETTING_MAKE_FOUNDRY_WALLS
     );
   }
 }
