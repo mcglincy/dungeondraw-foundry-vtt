@@ -126,15 +126,6 @@ export class DungeonLayer extends PlaceablesLayer {
     });
   }
 
-  /**
-   * Use an adaptive precision depending on the size of the grid
-   * @type {number}
-   */
-  // get gridPrecision() {
-  //   if ( canvas.scene.data.gridType === CONST.GRID_TYPES.GRIDLESS ) return 0;
-  //   return canvas.dimensions.size >= 128 ? 16 : 8;
-  // }
-
   // TODO: figure out what documentName / embeddedName / type we should be using
   /** @inheritdoc */
   static documentName = "Drawing";
@@ -220,11 +211,6 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   /** @override */
-  async undoHistory() {
-    return super.undoHistory();
-  }
-
-  /** @override */
   async deleteAll() {
     if (!game.user.isGM) {
       throw new Error(`You do not have permission to clear all.`);
@@ -245,8 +231,6 @@ export class DungeonLayer extends PlaceablesLayer {
     await regenerate(this.dungeon, config);
   }
 
-  /* -------------------------------------------- */
-
   async loadDungeon() {
     const { journalEntry, note } = await findDungeonEntryAndNote();
     if (journalEntry) {
@@ -266,38 +250,15 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   /* -------------------------------------------- */
-  /*  Rendering                                   */
-  /* -------------------------------------------- */
-
-  /** @inheritdoc */
-  async draw() {
-    await super.draw();
-    return this;
-  }
-
-  /* -------------------------------------------- */
   /*  Event Listeners and Handlers                */
   /* -------------------------------------------- */
 
   /** @override */
   _onClickLeft(event) {
     const { preview, drawingsState, destination } = event.interactionData;
-
     // Continue polygon point placement
     if (drawingsState >= 1 && preview.isPolygon) {
-      // let point = destination;
-      // const snap = !event.shiftKey;
-      // if (snap)
-      //   // point = this.getSnappedPoint(point);
-      //   point = canvas.grid.getSnappedPosition(
-      //     point.x,
-      //     point.y,
-      //     this.gridPrecision
-      //   );
       preview._addPoint(destination, { snap: !event.shiftKey, round: true });
-      // preview._addPoint(point, false);
-      // TODO: this v11 addPoint snap doesn't seem to work for our polygon drawing
-      // preview._addPoint(point, {snap, round: true});
       preview._chain = true; // Note that we are now in chain mode
       return preview.refresh();
     }
@@ -327,17 +288,9 @@ export class DungeonLayer extends PlaceablesLayer {
     // superclass will handle layerOptions.snapToGrid
     await super._onDragLeftStart(event);
     const interaction = event.interactionData;
-    // we use a Drawing as our preview, but then on end-drag/completion,
-    // update our single Dungeon instance.
 
-    /*
-    const data = this._getNewDrawingData(event.interactionData.origin);
-    const document = new DrawingDocument(data, { parent: canvas.scene });
-    const drawing = new Drawing(document);
-    interaction.preview = this.preview.addChild(drawing);
-    interaction.drawingsState = 1;
-    return drawing.draw();
-    */
+    // We use a Drawing as our preview, but then on end-drag/completion,
+    // update our single Dungeon instance.
     // Create the preview object
     const cls = getDocumentClass("Drawing");
     let document;
@@ -368,7 +321,7 @@ export class DungeonLayer extends PlaceablesLayer {
       this.preview.addChild(preview);
     }
     if (drawingsState >= 1) {
-      // TODO: deal with freehand-tool specific handling in DrawingShape
+      // Deal with freehand-tool specific handling in DrawingShape
       if (isFreehand()) {
         onFreeHandMouseDraw(preview, event);
       } else {
