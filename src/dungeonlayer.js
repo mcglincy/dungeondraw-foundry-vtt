@@ -6,14 +6,18 @@ import { Settings } from "./settings.js";
 const FOLDER_NAME = "Dungeon Draw";
 
 /** Handle both v8 and v9 styles of detecting shift */
-const shiftPressed = () => {
+function shiftPressed() {
   if (KeyboardManager.MODIFIER_KEYS?.SHIFT) {
     return game.keyboard.isModifierActive(KeyboardManager.MODIFIER_KEYS.SHIFT);
   }
   return game.keyboard.isDown("SHIFT");
-};
+}
 
-const findDungeonEntryAndNote = () => {
+function isFreehand() {
+  return game.activeDungeonDrawTool === "freehand";
+}
+
+function findDungeonEntryAndNote() {
   for (const note of canvas.scene.notes) {
     const journalEntry = game.journal.get(note.entryId);
     if (journalEntry) {
@@ -27,15 +31,15 @@ const findDungeonEntryAndNote = () => {
     }
   }
   return { journalEntry: null, note: null };
-};
+}
 
-const createDungeonEntryAndNote = async () => {
+async function createDungeonEntryAndNote() {
   const journalEntry = await createDungeonEntry();
   const note = await createDungeonNote(journalEntry);
   return { journalEntry, note };
-};
+}
 
-const createDungeonEntry = async () => {
+async function createDungeonEntry() {
   let folder = game.folders
     .filter((f) => f.type === "JournalEntry" && f.name === FOLDER_NAME)
     .pop();
@@ -57,9 +61,9 @@ const createDungeonEntry = async () => {
     },
   });
   return journalEntry;
-};
+}
 
-const createDungeonNote = async (journalEntry) => {
+async function createDungeonNote(journalEntry) {
   await canvas.scene.createEmbeddedDocuments("Note", [
     {
       entryId: journalEntry.id,
@@ -75,9 +79,9 @@ const createDungeonNote = async (journalEntry) => {
       flags: {},
     },
   ]);
-};
+}
 
-const onFreeHandMouseDraw = (preview, event) => {
+function onFreeHandMouseDraw(preview, event) {
   const { destination } = event.interactionData;
   const position = destination;
   const now = Date.now();
@@ -86,9 +90,9 @@ const onFreeHandMouseDraw = (preview, event) => {
   const snap = false;
   preview._addPoint(position, { snap, temporary });
   preview.refresh();
-};
+}
 
-const createDataOffsetPoints = (createData) => {
+function createDataOffsetPoints(createData) {
   const offsetPoints = [];
   for (let i = 0; i <= createData.shape.points.length - 2; i += 2) {
     offsetPoints.push([
@@ -97,10 +101,9 @@ const createDataOffsetPoints = (createData) => {
     ]);
   }
   return offsetPoints;
-};
+}
 
 /**
- *
  * @extends {PlaceablesLayer}
  */
 export class DungeonLayer extends PlaceablesLayer {
@@ -143,21 +146,28 @@ export class DungeonLayer extends PlaceablesLayer {
    * @return {Object}           The new drawing data
    */
   _getNewDrawingData(origin) {
+    const userColor = game.user.color.css;
     const data = {
-      fillColor: game.user.color,
-      strokeColor: game.user.color,
+      fillColor: userColor,
+      strokeColor: userColor,
       strokeWidth: 8,
     };
     // Mandatory additions
     data.x = origin.x;
     data.y = origin.y;
+    data.sort = Math.max(this.getMaxSort() + 1, 0);
     data.author = game.user.id;
     data.shape = {};
 
     if (game.activeDungeonDrawMode === "add") {
       switch (game.activeDungeonDrawTool) {
         case "rectangle":
-          data.shape.type = CONST.DRAWING_TYPES.RECTANGLE;
+          data.shape.type = Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = 1;
+          data.shape.height = 1;
+          break;
+        case "ellipse":
+          data.shape.type = Drawing.SHAPE_TYPES.ELLIPSE;
           data.shape.width = 1;
           data.shape.height = 1;
           break;
@@ -167,19 +177,14 @@ export class DungeonLayer extends PlaceablesLayer {
         case "secretdoor":
         case "invisiblewall":
         case "themepainter":
-          data.type = CONST.DRAWING_TYPES.POLYGON;
-          data.points = [0, 0];
+          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0];
           data.bezierFactor = 0;
           break;
         case "freehand":
-          data.type = CONST.DRAWING_TYPES.POLYGON;
-          data.points = [0, 0];
+          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
-          break;
-        case "ellipse":
-          data.type = CONST.DRAWING_TYPES.ELLIPSE;
-          data.shape.width = 1;
-          data.shape.height = 1;
           break;
       }
     } else if (game.activeDungeonDrawMode === "remove") {
@@ -190,24 +195,24 @@ export class DungeonLayer extends PlaceablesLayer {
         case "secretdoor":
         case "invisiblewall":
         case "themepainter":
-          data.type = CONST.DRAWING_TYPES.RECTANGLE;
+          data.shape.type = Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = 1;
+          data.shape.height = 1;
+          break;
+        case "ellipse":
+          data.shape.type = Drawing.SHAPE_TYPES.ELLIPSE;
           data.shape.width = 1;
           data.shape.height = 1;
           break;
         case "polygon":
-          data.type = CONST.DRAWING_TYPES.POLYGON;
-          data.points = [0, 0];
+          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0];
           data.bezierFactor = 0;
           break;
         case "freehand":
-          data.type = CONST.DRAWING_TYPES.POLYGON;
-          data.points = [0, 0];
+          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
-          break;
-        case "ellipse":
-          data.type = CONST.DRAWING_TYPES.ELLIPSE;
-          data.shape.width = 1;
-          data.shape.height = 1;
           break;
       }
     }
@@ -280,15 +285,17 @@ export class DungeonLayer extends PlaceablesLayer {
 
     // Continue polygon point placement
     if (drawingsState >= 1 && preview.isPolygon) {
-      let point = destination;
-      const snap = !event.shiftKey;
-      if (snap)
-        point = canvas.grid.getSnappedPosition(
-          point.x,
-          point.y,
-          this.gridPrecision
-        );
-      preview._addPoint(point, false);
+      // let point = destination;
+      // const snap = !event.shiftKey;
+      // if (snap)
+      //   // point = this.getSnappedPoint(point);
+      //   point = canvas.grid.getSnappedPosition(
+      //     point.x,
+      //     point.y,
+      //     this.gridPrecision
+      //   );
+      preview._addPoint(destination, { snap: !event.shiftKey, round: true });
+      // preview._addPoint(point, false);
       // TODO: this v11 addPoint snap doesn't seem to work for our polygon drawing
       // preview._addPoint(point, {snap, round: true});
       preview._chain = true; // Note that we are now in chain mode
@@ -304,7 +311,7 @@ export class DungeonLayer extends PlaceablesLayer {
     // Conclude polygon placement with double-click
     if (drawingsState >= 1 && preview.isPolygon) {
       event.interactionData.drawingsState = 2;
-      return this._onDragLeftDrop(event);
+      return;
     }
 
     super._onClickLeft2(event);
@@ -322,27 +329,47 @@ export class DungeonLayer extends PlaceablesLayer {
     const interaction = event.interactionData;
     // we use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
+
+    /*
     const data = this._getNewDrawingData(event.interactionData.origin);
     const document = new DrawingDocument(data, { parent: canvas.scene });
     const drawing = new Drawing(document);
     interaction.preview = this.preview.addChild(drawing);
     interaction.drawingsState = 1;
     return drawing.draw();
+    */
+    // Create the preview object
+    const cls = getDocumentClass("Drawing");
+    let document;
+    try {
+      document = new cls(this._getNewDrawingData(interaction.origin), {
+        parent: canvas.scene,
+      });
+    } catch (e) {
+      if (e instanceof foundry.data.validation.DataModelValidationError) {
+        ui.notifications.error("DRAWING.JointValidationErrorUI", {
+          localize: true,
+        });
+      }
+      throw e;
+    }
+    const drawing = new this.constructor.placeableClass(document);
+    interaction.preview = this.preview.addChild(drawing);
+    interaction.drawingsState = 1;
+    drawing.draw();
   }
 
   /** @override */
   _onDragLeftMove(event) {
     const { preview, drawingsState } = event.interactionData;
-    if (!preview || preview._destroyed) {
-      return;
-    }
+    if (!preview || preview._destroyed) return;
     if (preview.parent === null) {
       // In theory this should never happen, but rarely does
       this.preview.addChild(preview);
     }
     if (drawingsState >= 1) {
-      // TODO: deal with v10 having freehand-tool specific handling in DrawingShape :P
-      if (game.activeDungeonDrawTool === "freehand") {
+      // TODO: deal with freehand-tool specific handling in DrawingShape
+      if (isFreehand()) {
         onFreeHandMouseDraw(preview, event);
       } else {
         preview._onMouseDraw(event);
@@ -350,7 +377,8 @@ export class DungeonLayer extends PlaceablesLayer {
       // easy single opcode
       const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
       if (
-        preview.document.shape.type !== CONST.DRAWING_TYPES.POLYGON ||
+        !preview.isPolygon ||
+        isFreehand() ||
         opcode === "adddoor" ||
         opcode === "addinteriorwall" ||
         opcode === "addsecretdoor" ||
@@ -363,13 +391,13 @@ export class DungeonLayer extends PlaceablesLayer {
 
   _maybeSnappedRect(createData) {
     if (Settings.snapToGrid() && !shiftPressed()) {
-      const snapPos = canvas.grid.getSnappedPosition(
-        createData.x + createData.shape.width,
-        createData.y + createData.shape.height,
-        this.gridPrecision
-      );
-      createData.shape.height = snapPos.y - createData.y;
-      createData.shape.width = snapPos.x - createData.x;
+      const position = {
+        x: createData.x + createData.shape.width,
+        y: createData.y + createData.shape.height,
+      };
+      const snappedPoint = this.getSnappedPoint(position);
+      createData.shape.height = snappedPoint.y - createData.y;
+      createData.shape.width = snappedPoint.x - createData.x;
     }
     const rect = {
       x: createData.x,
@@ -386,13 +414,13 @@ export class DungeonLayer extends PlaceablesLayer {
       return;
     }
     if (Settings.snapToGrid() && !shiftPressed()) {
-      const snapPos = canvas.grid.getSnappedPosition(
-        createData.shape.points[length - 2],
-        createData.shape.points[length - 1],
-        this.gridPrecision
-      );
-      createData.shape.points[length - 2] = snapPos.x;
-      createData.shape.points[length - 1] = snapPos.y;
+      const position = {
+        x: createData.shape.points[length - 2],
+        y: createData.shape.points[length - 1],
+      };
+      const snappedPoint = this.getSnappedPoint(position);
+      createData.shape.points[length - 2] = snappedPoint.x;
+      createData.shape.points[length - 1] = snappedPoint.y;
     }
   }
 
