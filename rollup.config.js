@@ -14,7 +14,6 @@ export default () => {
             keep_classnames: true,
           }),
         ],
-        preferConst: true,
         sourcemap: true,
       },
       plugins: [nodeResolve(), commonjs()],
