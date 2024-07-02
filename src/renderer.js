@@ -56,10 +56,8 @@ const renderPass = async (container, state) => {
 
   interiorShadowGfx.mask = clipMask;
   // apply alpha filter once for entire shadow graphics, so overlaps aren't additive
-  const alphaFilter = new PIXI.filters.AlphaFilter(
-    state.config.interiorShadowOpacity
-  );
-  const blurFilter = new PIXI.filters.BlurFilter();
+  const alphaFilter = new PIXI.AlphaFilter(state.config.interiorShadowOpacity);
+  const blurFilter = new PIXI.BlurFilter();
   interiorShadowGfx.filters = [alphaFilter, blurFilter];
 
   // draw the dungeon geometry room(s)
@@ -228,10 +226,8 @@ const addExteriorShadow = (container, config, geometry) => {
   }
 
   // filters
-  const alphaFilter = new PIXI.filters.AlphaFilter(
-    config.exteriorShadowOpacity
-  );
-  const blurFilter = new PIXI.filters.BlurFilter();
+  const alphaFilter = new PIXI.AlphaFilter(config.exteriorShadowOpacity);
+  const blurFilter = new PIXI.BlurFilter();
   exteriorShadowGfx.filters = [alphaFilter, blurFilter];
   container.addChild(exteriorShadowGfx);
 };

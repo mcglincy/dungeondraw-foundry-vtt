@@ -1,3 +1,7 @@
+# 3.0.0
+
+- Foundry v12 compatibility.
+
 # 2.3.0
 
 - Add setting for toggling Foundry wall creation.
