@@ -1,3 +1,7 @@
+# 3.0.1
+
+- Rebuild with v12 code merged this time. Whoops.
+
 # 3.0.0
 
 - Foundry v12 compatibility.
