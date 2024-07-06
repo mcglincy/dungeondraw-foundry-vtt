@@ -109,9 +109,20 @@ function createDataOffsetPoints(createData) {
 export class DungeonLayer extends PlaceablesLayer {
   static LAYER_NAME = "dungeon";
 
+  // TODO: figure out what documentName / embeddedName / type we should be using
+  /** @inheritdoc */
+  static documentName = "Drawing";
+
   constructor() {
     super();
     this.dungeon = null;
+  }
+
+  get documentCollection() {
+    // avoid returning all Drawings in the scene, as we
+    // don't want DungeonLayer to draw them during draw().
+    // TODO: we need to stop re-using Drawing for the documentName.
+    return null;
   }
 
   /** @inheritdoc */
@@ -125,10 +136,6 @@ export class DungeonLayer extends PlaceablesLayer {
       quadtree: true,
     });
   }
-
-  // TODO: figure out what documentName / embeddedName / type we should be using
-  /** @inheritdoc */
-  static documentName = "Drawing";
 
   /**
    * Get initial data for a new drawing.
