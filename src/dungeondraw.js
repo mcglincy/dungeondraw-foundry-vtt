@@ -31,7 +31,7 @@ export class DungeonDraw {
   }
 
   static getSceneControlButtons(controls) {
-    CONFIG.Canvas.layers.dungeon = {
+    CONFIG.Canvas.layers[DungeonLayer.LAYER_NAME] = {
       layerClass: DungeonLayer,
       group: "primary",
     };
