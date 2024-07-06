@@ -1,3 +1,7 @@
+# 3.0.2
+
+- Prevent DungeonLayer from drawing all Drawings in scene.
+
 # 3.0.1
 
 - Rebuild with v12 code merged this time. Whoops.
