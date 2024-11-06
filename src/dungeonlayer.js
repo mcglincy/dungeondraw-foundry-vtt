@@ -5,14 +5,6 @@ import { Settings } from "./settings.js";
 
 const FOLDER_NAME = "Dungeon Draw";
 
-/** Handle both v8 and v9 styles of detecting shift */
-function shiftPressed() {
-  if (KeyboardManager.MODIFIER_KEYS?.SHIFT) {
-    return game.keyboard.isModifierActive(KeyboardManager.MODIFIER_KEYS.SHIFT);
-  }
-  return game.keyboard.isDown("SHIFT");
-}
-
 function isFreehand() {
   return game.activeDungeonDrawTool === "freehand";
 }
@@ -287,14 +279,12 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   async _onDragLeftStart(event) {
-    // TODO: DrawingsLayer _onDragLeftStart isn't seeing the shift key press,
-    // so set it for them ourselves :P
-    // TODO: double-check that this is still the case for v11
-    //event.data.originalEvent.isShift = shiftPressed();
-
-    // superclass will handle layerOptions.snapToGrid
     await super._onDragLeftStart(event);
     const interaction = event.interactionData;
+
+    if (Settings.snapToGrid() && !event.shiftKey) {
+      interaction.origin = this.getSnappedPoint(interaction.origin);
+    }
 
     // We use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
@@ -349,8 +339,8 @@ export class DungeonLayer extends PlaceablesLayer {
     }
   }
 
-  _maybeSnappedRect(createData) {
-    if (Settings.snapToGrid() && !shiftPressed()) {
+  _maybeSnappedRect(createData, shiftPressed) {
+    if (Settings.snapToGrid() && !shiftPressed) {
       const position = {
         x: createData.x + createData.shape.width,
         y: createData.y + createData.shape.height,
@@ -368,12 +358,12 @@ export class DungeonLayer extends PlaceablesLayer {
     return rect;
   }
 
-  _maybeSnapLastPoint(createData) {
+  _maybeSnapLastPoint(createData, shiftPressed) {
     const length = createData.shape.points.length;
     if (length === 0) {
       return;
     }
-    if (Settings.snapToGrid() && !shiftPressed()) {
+    if (Settings.snapToGrid() && !shiftPressed) {
       const position = {
         x: createData.shape.points[length - 2],
         y: createData.shape.points[length - 1],
@@ -401,6 +391,13 @@ export class DungeonLayer extends PlaceablesLayer {
 
   /** @override */
   async _onDragLeftDrop(event) {
+    const interaction = event.interactionData;
+
+    // Snap the destination to the grid
+    if (Settings.snapToGrid() && !event.shiftKey) {
+      interaction.destination = this.getSnappedPoint(interaction.destination);
+    }
+
     // preview is of type Drawing.
     // Drawing.DrawingDocument.shape is shape data
     const { destination, origin, preview } = event.interactionData;
@@ -450,7 +447,7 @@ export class DungeonLayer extends PlaceablesLayer {
         // clone the shape data
         const data = preview.document.toObject(false);
         preview._chain = false;
-        this._maybeSnapLastPoint(data);
+        this._maybeSnapLastPoint(data, event.shiftKey);
         await this.dungeon.addDoor(
           data.x,
           data.y,
@@ -461,7 +458,7 @@ export class DungeonLayer extends PlaceablesLayer {
         event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
         preview._chain = false;
-        this._maybeSnapLastPoint(data);
+        this._maybeSnapLastPoint(data, event.shiftKey);
         await this.dungeon.addSecretDoor(
           data.x,
           data.y,
@@ -472,7 +469,7 @@ export class DungeonLayer extends PlaceablesLayer {
         event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
         preview._chain = false;
-        this._maybeSnapLastPoint(data);
+        this._maybeSnapLastPoint(data, event.shiftKey);
         await this.dungeon.addInteriorWall(
           data.x,
           data.y,
@@ -483,7 +480,7 @@ export class DungeonLayer extends PlaceablesLayer {
         event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
         preview._chain = false;
-        this._maybeSnapLastPoint(data);
+        this._maybeSnapLastPoint(data, event.shiftKey);
         await this.dungeon.addInvisibleWall(
           data.x,
           data.y,
@@ -506,24 +503,25 @@ export class DungeonLayer extends PlaceablesLayer {
             createData.shape.height
           );
         } else if (opcode === "addfreehand") {
+          this._maybeSnapLastPoint(createData, event.shiftKey);
           this._autoClosePolygon(createData);
           const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.addPolygon(offsetPoints);
         } else if (opcode === "addpolygon") {
-          this._maybeSnapLastPoint(createData);
+          this._maybeSnapLastPoint(createData, event.shiftKey);
           this._autoClosePolygon(createData);
           const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.addPolygon(offsetPoints);
         } else if (opcode === "addrectangle") {
-          const rect = this._maybeSnappedRect(createData);
+          const rect = this._maybeSnappedRect(createData, event.shiftKey);
           await this.dungeon.addRectangle(rect);
         } else if (opcode === "addthemepainter") {
-          this._maybeSnapLastPoint(createData);
+          this._maybeSnapLastPoint(createData, event.shiftKey);
           this._autoClosePolygon(createData);
           const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.addThemeArea(offsetPoints);
         } else if (opcode === "removedoor") {
-          const rect = this._maybeSnappedRect(createData);
+          const rect = this._maybeSnappedRect(createData, event.shiftKey);
           // TODO: need to spam out methods to various different flavor deletions
           await this.dungeon.removeDoors(rect);
         } else if (opcode === "removeellipse") {
@@ -536,28 +534,29 @@ export class DungeonLayer extends PlaceablesLayer {
             createData.shape.height
           );
         } else if (opcode === "removefreehand") {
+          this._maybeSnapLastPoint(createData, event.shiftKey);
           this._autoClosePolygon(createData);
           const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.removePolygon(offsetPoints);
         } else if (opcode === "removesecretdoor") {
-          const rect = this._maybeSnappedRect(createData);
+          const rect = this._maybeSnappedRect(createData, event.shiftKey);
           await this.dungeon.removeSecretDoors(rect);
         } else if (opcode === "removeinteriorwall") {
-          const rect = this._maybeSnappedRect(createData);
+          const rect = this._maybeSnappedRect(createData, event.shiftKey);
           await this.dungeon.removeInteriorWalls(rect);
         } else if (opcode === "removeinvisiblewall") {
-          const rect = this._maybeSnappedRect(createData);
+          const rect = this._maybeSnappedRect(createData, event.shiftKey);
           await this.dungeon.removeInvisibleWalls(rect);
         } else if (opcode === "removepolygon") {
-          this._maybeSnapLastPoint(createData);
+          this._maybeSnapLastPoint(createData, event.shiftKey);
           this._autoClosePolygon(createData);
           const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.removePolygon(offsetPoints);
         } else if (opcode === "removerectangle") {
-          const rect = this._maybeSnappedRect(createData);
+          const rect = this._maybeSnappedRect(createData, event.shiftKey);
           await this.dungeon.removeRectangle(rect);
         } else if (opcode === "removethemepainter") {
-          const rect = this._maybeSnappedRect(createData);
+          const rect = this._maybeSnappedRect(createData, event.shiftKey);
           await this.dungeon.removeThemeAreas(rect);
         }
       }

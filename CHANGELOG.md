@@ -1,3 +1,8 @@
+# 3.0.3
+
+- Fix snap, broken in v12. This also fixes doors not properly splitting walls.
+- Update npm package dependencies to fix vulnerabilities.
+
 # 3.0.2
 
 - Prevent DungeonLayer from drawing all Drawings in scene.
