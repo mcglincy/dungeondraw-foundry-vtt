@@ -1,7 +1,11 @@
-# 3.0.3
+# 3.0.4
 
 - Fix snap, broken in v12. This also fixes doors not properly splitting walls.
 - Update npm package dependencies to fix vulnerabilities.
+
+# 3.0.3
+
+- Mis-build, please ignore :P
 
 # 3.0.2
 
