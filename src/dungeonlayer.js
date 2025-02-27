@@ -143,6 +143,7 @@ export class DungeonLayer extends PlaceablesLayer {
       strokeWidth: 8,
     };
     // Mandatory additions
+    origin = Settings.snapToGrid ? this.getSnappedPoint(origin) : origin;
     data.x = origin.x;
     data.y = origin.y;
     data.sort = Math.max(this.getMaxSort() + 1, 0);
