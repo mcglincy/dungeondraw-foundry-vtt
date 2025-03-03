@@ -1,3 +1,7 @@
+# 3.0.5
+
+- npm audit fix and rebuild.
+
 # 3.0.4
 
 - Fix snap, broken in v12. This also fixes doors not properly splitting walls.
