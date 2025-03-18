@@ -1,12 +1,17 @@
 import * as constants from "./constants.js";
 import { Dungeon } from "./dungeon.js";
 import { regenerate } from "./generator.js";
+import { GridPainterHelper } from "./GridPainterHelper.js";
 import { Settings } from "./settings.js";
 
 const FOLDER_NAME = "Dungeon Draw";
 
 function isFreehand() {
   return game.activeDungeonDrawTool === "freehand";
+}
+
+function isGridPainter() {
+  return game.activeDungeonDrawTool === "gridpainter";
 }
 
 function findDungeonEntryAndNote() {
@@ -73,9 +78,18 @@ async function createDungeonNote(journalEntry) {
   ]);
 }
 
+function onGridPainterMouseDraw(preview, event) {
+  //add the grid space to the array in flags, check for dupes
+  const { destination } = event.interactionData;
+  const { i, j } = canvas.grid.getOffset(destination);
+
+  preview.document.flags.gridPainterHelper.onGridPainterMouseDraw(i, j);
+}
+
 function onFreeHandMouseDraw(preview, event) {
   const { destination } = event.interactionData;
   const position = destination;
+  //TODO look into this. There's something strange here, preview._drawTime is never not undefined so snape is always false. IDK what temporary is really supposed to do tbh, but odd
   const now = Date.now();
   const temporary =
     now - preview._drawTime < preview.constructor.FREEHAND_SAMPLE_RATE;
@@ -176,6 +190,10 @@ export class DungeonLayer extends PlaceablesLayer {
           data.shape.points = [0, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
+        case "gridpainter":
+          data.flags = { gridPainterHelper: new GridPainterHelper() };
+          data.shape.width = 0;
+          data.shape.height = 0;
       }
     } else if (game.activeDungeonDrawMode === "remove") {
       switch (game.activeDungeonDrawTool) {
@@ -204,6 +222,10 @@ export class DungeonLayer extends PlaceablesLayer {
           data.shape.points = [0, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
+        case "gridpainter":
+          data.flags = { gridPainterHelper: new GridPainterHelper() };
+          data.shape.width = 0;
+          data.shape.height = 0;
       }
     }
     return data;
@@ -318,9 +340,11 @@ export class DungeonLayer extends PlaceablesLayer {
       this.preview.addChild(preview);
     }
     if (drawingsState >= 1) {
-      // Deal with freehand-tool specific handling in DrawingShape
+      // Deal with freehand-tool and gridpainter-tool specific handling in DrawingShape
       if (isFreehand()) {
         onFreeHandMouseDraw(preview, event);
+      } else if (isGridPainter()) {
+        onGridPainterMouseDraw(preview, event);
       } else {
         preview._onMouseDraw(event);
       }
@@ -332,7 +356,8 @@ export class DungeonLayer extends PlaceablesLayer {
         opcode === "adddoor" ||
         opcode === "addinteriorwall" ||
         opcode === "addsecretdoor" ||
-        opcode === "addinvisiblewall"
+        opcode === "addinvisiblewall" ||
+        opcode === "addgridpainter"
       ) {
         event.interactionData.drawingsState = 2;
       }
@@ -520,6 +545,10 @@ export class DungeonLayer extends PlaceablesLayer {
           this._autoClosePolygon(createData);
           const offsetPoints = createDataOffsetPoints(createData);
           await this.dungeon.addThemeArea(offsetPoints);
+        } else if (opcode === "addgridpainter") {
+          await this.dungeon.addGridPaintedArea(
+            createData.flags.gridPainterHelper.paintedGeometry
+          );
         } else if (opcode === "removedoor") {
           const rect = this._maybeSnappedRect(createData, event.shiftKey);
           // TODO: need to spam out methods to various different flavor deletions
@@ -558,9 +587,23 @@ export class DungeonLayer extends PlaceablesLayer {
         } else if (opcode === "removethemepainter") {
           const rect = this._maybeSnappedRect(createData, event.shiftKey);
           await this.dungeon.removeThemeAreas(rect);
+        } else if (opcode === "removegridpainter") {
+          await this.dungeon.removeGridPaintedArea(
+            createData.flags.gridPainterHelper.paintedGeometry
+          );
         }
       }
 
+      // Cancel the GridPainter Preview
+      if (isGridPainter()) {
+        const drawings = await Promise.all(
+          preview.document.flags.gridPainterHelper.gridDrawings
+        );
+
+        const ids = drawings.map((drawing) => drawing.id);
+
+        game.scenes.current.deleteEmbeddedDocuments("Drawing", ids);
+      }
       // Cancel the preview
       return this._onDragLeftCancel(event);
     }
