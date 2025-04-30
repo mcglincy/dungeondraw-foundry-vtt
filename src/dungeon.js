@@ -361,6 +361,34 @@ export class Dungeon extends PlaceableObject {
     await this._removePoly(poly);
   }
 
+  async addGridPaintedArea(multiPoly) {
+    if (!geo.isValid(multiPoly)) {
+      ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));
+      return;
+    }
+    try {
+      this._addPoly(multiPoly);
+    } catch (error) {
+      console.log(error);
+      //TODO add a "error adding multigon" localization?
+      ui.notifications.error(game.i18n.localize("DD.ErrorAddingPolygon"));
+    }
+  }
+
+  async removeGridPaintedArea(multiPoly) {
+    if (!geo.isValid(multiPoly)) {
+      ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));
+      return;
+    }
+    try {
+      this._removePoly(multiPoly);
+    } catch (error) {
+      console.log(error);
+      //TODO add a "error removing multigon" localization?
+      ui.notifications.error(game.i18n.localize("DD.ErrorAddingPolygon"));
+    }
+  }
+
   async _removePoly(poly) {
     // only makes sense to remove if we have geometry
     if (!this.history[this.historyIndex].geometry) {
