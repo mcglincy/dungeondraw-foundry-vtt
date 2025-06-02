@@ -1,3 +1,7 @@
+# 3.1.0
+
+- Grid painter tool by @Huge-Euge.
+
 # 3.0.5
 
 - npm audit fix and rebuild.
