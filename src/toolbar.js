@@ -77,6 +77,13 @@ export class DungeonDrawToolbar extends Application {
           icon: "fas fa-signature",
           isActive: game.activeDungeonDrawTool === "freehand",
         },
+        {
+          name: "gridpainter",
+          title: "DD.ButtonTitleGridPainter",
+          //TODO change the icon
+          icon: "fas fa-grid-3",
+          isActive: game.activeDungeonDrawTool === "gridpainter",
+        },
       ],
       row2: [
         {
