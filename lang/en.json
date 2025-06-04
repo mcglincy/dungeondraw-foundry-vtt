@@ -47,6 +47,7 @@
   "DD.FloorOpacity": "Floor Opacity",
   "DD.FloorTexture": "Floor Texture",
   "DD.FloorTextureRotation": "Floor Texture Rotation",
+  "DD.FloorTextureScaling": "Floor Texture Scaling",
   "DD.FloorTextureTint": "Floor Texture Tint",
   "DD.Generate": "Generate",
   "DD.GenerateDoors": "Generate Doors",
@@ -66,6 +67,7 @@
   "DD.InvisibleWallLineThickness": "Invisible Wall Line Thickness",
   "DD.InvisibleWallTexture": "Invisible Wall Texture",
   "DD.InvisibleWallTextureRotation": "Invisible Wall Texture Rotation",
+  "DD.InvisibleWallTextureScaling": "Invisible Wall Texture Scaling",
   "DD.InvisibleWallTextureTint": "Invisible Wall Texture Tint",
   "DD.InvisibleWallThickness": "Invisible Wall Thickness",
   "DD.OK": "OK",
@@ -111,6 +113,7 @@
   "DD.WallOpacity": "Wall Opacity",
   "DD.WallTexture": "Wall Texture",
   "DD.WallTextureRotation": "Wall Texture Rotation",
+  "DD.WallTextureScaling": "Wall Texture Scaling",
   "DD.WallTextureTint": "Wall Texture Tint",
   "DD.WallThickness": "Wall Thickness",
   "DD.Width": "Width"

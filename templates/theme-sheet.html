@@ -189,6 +189,20 @@
       </div>
     </div>
     <div class="form-group">
+      <label>{{localize "DD.FloorTextureScaling"}}</label>
+      <div class="form-fields">
+        <input
+          type="number"
+          name="floorTextureScaling"
+          value="{{config.floorTextureScaling}}"
+          data-dtype="Number"
+          min="0"
+          max="100"
+          step="0.05"
+        />
+      </div>
+    </div>
+    <div class="form-group">
       <label>{{localize "DD.FloorTextureTint"}}</label>
       <div class="form-fields">
         <input
@@ -463,6 +477,20 @@
           value="{{config.wallTexture}}"
           data-dtype="String"
           placeholder="File Path"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DD.WallTextureScaling"}}</label>
+      <div class="form-fields">
+        <input
+          type="number"
+          name="WallTextureScaling"
+          value="{{config.WallTextureScaling}}"
+          data-dtype="Number"
+          min="0"
+          max="100"
+          step="0.05"
         />
       </div>
     </div>

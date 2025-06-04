@@ -46,6 +46,7 @@
   "DD.FloorOpacity": "床の不透明度",
   "DD.FloorTexture": "床のテクスチャー",
   "DD.FloorTextureRotation": "床のテクスチャーの回転度",
+  "DD.FloorTextureScaling": "TODO",
   "DD.FloorTextureTint": "床のテクスチャーの色合い",
   "DD.Generate": "生成",
   "DD.GenerateDoors": "扉配置",
@@ -97,6 +98,7 @@
   "DD.WallOpacity": "ウォールの不透明度",
   "DD.WallTexture": "ウォールのテクスチャー",
   "DD.WallTextureRotation": "ウォールのテクスチャー回転度",
+  "DD.WallTextureScaling": "TODO",
   "DD.WallTextureTint": "ウォール・テクスチャーの色合い",
   "DD.WallThickness": "ウォールの厚さ",
   "DD.Width": "幅"
