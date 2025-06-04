@@ -126,7 +126,10 @@ const renderPass = async (container, state) => {
         matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
       }
       if (state.config.WallTextureScaling) {
-        matrix.scale(state.config.WallTextureScaling, state.config.WallTextureScaling);
+        matrix.scale(
+          state.config.WallTextureScaling,
+          state.config.WallTextureScaling
+        );
       }
       maybeStartTextureVideo(texture);
       wallGfx.beginTextureFill({

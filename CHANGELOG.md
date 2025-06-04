@@ -1,3 +1,7 @@
+# 3.2.0
+
+- Wall and floor texture scaling by @oskarnp314.
+
 # 3.1.0
 
 - Grid painter tool by @Huge-Euge.
