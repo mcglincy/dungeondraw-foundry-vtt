@@ -121,9 +121,12 @@ const renderPass = async (container, state) => {
     const texture = await getTexture(state.config.wallTexture);
     if (texture?.valid) {
       let matrix = null;
+      matrix = PIXI.Matrix.IDENTITY.clone();
       if (state.config.wallTextureRotation) {
-        matrix = PIXI.Matrix.IDENTITY.clone();
         matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
+      }
+      if (state.config.WallTextureScaling) {
+        matrix.scale(state.config.WallTextureScaling, state.config.WallTextureScaling);
       }
       maybeStartTextureVideo(texture);
       wallGfx.beginTextureFill({
@@ -338,9 +341,12 @@ const drawPolygonRoom = async (
     const texture = await getTexture(config.floorTexture);
     if (texture?.valid) {
       let matrix = null;
+      matrix = PIXI.Matrix.IDENTITY.clone();
       if (config.floorTextureRotation) {
-        matrix = PIXI.Matrix.IDENTITY.clone();
         matrix.rotate(config.floorTextureRotation * PIXI.DEG_TO_RAD);
+      }
+      if (config.floorTextureScaling) {
+        matrix.scale(config.floorTextureScaling, config.floorTextureScaling);
       }
       maybeStartTextureVideo(texture);
       floorGfx.beginTextureFill({
