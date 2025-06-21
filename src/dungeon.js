@@ -7,7 +7,7 @@ import { getTheme, getThemePainterThemeKey } from "./themes.js";
  * @extends {PlaceableObject}
  */
 // TODO: does Dungeon even need to be a PlaceableObject? Or could it just extend PIXI.Container?
-export class Dungeon extends PlaceableObject {
+export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
   // expects JournalEntry for constructor
   constructor(journalEntry, note) {
     // note will be saved as this.document

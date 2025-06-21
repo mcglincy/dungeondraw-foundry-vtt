@@ -112,7 +112,7 @@ function createDataOffsetPoints(createData) {
 /**
  * @extends {PlaceablesLayer}
  */
-export class DungeonLayer extends PlaceablesLayer {
+export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   static LAYER_NAME = "dungeon";
 
   // TODO: figure out what documentName / embeddedName / type we should be using
