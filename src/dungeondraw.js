@@ -31,9 +31,10 @@ export class DungeonDraw {
   }
 
   static getSceneControlButtons(controls) {
+    console.log("******* getSceneControlButtons");
     CONFIG.Canvas.layers[DungeonLayer.LAYER_NAME] = {
       layerClass: DungeonLayer,
-      group: "primary",
+      group: "interface",
     };
     CONFIG.Dungeon = {
       layerClass: DungeonLayer,
@@ -104,10 +105,11 @@ export class DungeonDraw {
       },
       activeTool: "drawmap",
       // eslint-disable-next-line no-unused-vars
-      onChange: (event, active) => {},
+      onChange: (event, active) => {
+        if (active) canvas.dungeon.activate();
+      },
       onToolChange: () => {},
     };
-    console.log("controls", controls);
   }
 
   static async canvasReady(canvas) {

@@ -131,16 +131,31 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     return null;
   }
 
+  // static get layerOptions() {
+  //   return foundry.utils.mergeObject(super.layerOptions, {
+  //     name: DungeonLayer.LAYER_NAME,
+  //     canDragCreate: true,
+  //     // we use our own snapToGrid setting to control snap
+  //     snapToGrid: Settings.snapToGrid(),
+  //     zIndex: -1, // under tiles and background image
+  //     quadtree: true,
+  //   });
+  // }
+
   /** @inheritdoc */
   static get layerOptions() {
     return foundry.utils.mergeObject(super.layerOptions, {
       name: DungeonLayer.LAYER_NAME,
-      canDragCreate: true,
-      // we use our own snapToGrid setting to control snap
-      snapToGrid: Settings.snapToGrid(),
+      controllableObjects: true,
+      rotatableObjects: true,
+      // zIndex: 501,
       zIndex: -1, // under tiles and background image
-      quadtree: true,
     });
+  }
+
+  /** @inheritdoc */
+  get hookName() {
+    return DungeonLayer.name;
   }
 
   /**
@@ -150,30 +165,42 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
    * @return {Object}           The new drawing data
    */
   _getNewDrawingData(origin) {
-    const userColor = game.user.color.css;
-    const data = {
-      fillColor: userColor,
-      strokeColor: userColor,
-      strokeWidth: 8,
-    };
+    // TODO: use our own defaults
+    const defaults = game.settings.get(
+      "core",
+      foundry.canvas.layers.DrawingsLayer.DEFAULT_CONFIG_SETTING
+    );
+    const data = foundry.utils.deepClone(defaults);
+
+    // const userColor = game.user.color.css;
+    // const data = {
+    //   fillColor: userColor,
+    //   strokeColor: userColor,
+    //   strokeWidth: 8,
+    // };
     // Mandatory additions
+    delete data._id;
     data.x = origin.x;
     data.y = origin.y;
     data.sort = Math.max(this.getMaxSort() + 1, 0);
     data.author = game.user.id;
     data.shape = {};
+    data.interface = false;
+    const strokeWidth = data.strokeWidth ?? 8;
 
     if (game.activeDungeonDrawMode === "add") {
       switch (game.activeDungeonDrawTool) {
         case "rectangle":
-          data.shape.type = Drawing.SHAPE_TYPES.RECTANGLE;
-          data.shape.width = 1;
-          data.shape.height = 1;
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
           break;
         case "ellipse":
-          data.shape.type = Drawing.SHAPE_TYPES.ELLIPSE;
-          data.shape.width = 1;
-          data.shape.height = 1;
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
           break;
         case "polygon":
         case "interiorwall":
@@ -181,19 +208,26 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         case "secretdoor":
         case "invisiblewall":
         case "themepainter":
-          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
-          data.shape.points = [0, 0];
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = 0;
           break;
         case "freehand":
-          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
-          data.shape.points = [0, 0];
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "gridpainter":
           data.flags = { gridPainterHelper: new GridPainterHelper() };
-          data.shape.width = 0;
-          data.shape.height = 0;
+          // data.shape.width = 0;
+          // data.shape.height = 0;
+          // TODO: testing a fix
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
       }
     } else if (game.activeDungeonDrawMode === "remove") {
       switch (game.activeDungeonDrawTool) {
@@ -203,32 +237,42 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         case "secretdoor":
         case "invisiblewall":
         case "themepainter":
-          data.shape.type = Drawing.SHAPE_TYPES.RECTANGLE;
-          data.shape.width = 1;
-          data.shape.height = 1;
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
           break;
         case "ellipse":
-          data.shape.type = Drawing.SHAPE_TYPES.ELLIPSE;
-          data.shape.width = 1;
-          data.shape.height = 1;
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
           break;
         case "polygon":
-          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
-          data.shape.points = [0, 0];
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = 0;
           break;
         case "freehand":
-          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
-          data.shape.points = [0, 0];
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "gridpainter":
           data.flags = { gridPainterHelper: new GridPainterHelper() };
-          data.shape.width = 0;
-          data.shape.height = 0;
+          // data.shape.width = 0;
+          // data.shape.height = 0;
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
       }
     }
-    return data;
+
+    // Return the cleaned data
+    return DrawingDocument.cleanData(data);
   }
 
   /** @override */
@@ -253,7 +297,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   }
 
   async loadDungeon() {
-    const { journalEntry, note } = await findDungeonEntryAndNote();
+    const { journalEntry, note } = findDungeonEntryAndNote();
     if (journalEntry) {
       this.dungeon = new Dungeon(journalEntry, note);
       await this.dungeon.loadFromJournalEntry();
@@ -310,8 +354,10 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
 
     // We use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
+
     // Create the preview object
-    const cls = getDocumentClass("Drawing");
+    // const cls = getDocumenddtClass$1("Drawing");
+    const cls = CONFIG["Drawing"]?.documentClass;
     let document;
     try {
       document = new cls(this._getNewDrawingData(interaction.origin), {
@@ -326,6 +372,8 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       throw e;
     }
     const drawing = new this.constructor.placeableClass(document);
+    drawing._fixedPoints = [0, 0];
+    document._object = drawing;
     interaction.preview = this.preview.addChild(drawing);
     interaction.drawingsState = 1;
     drawing.draw();

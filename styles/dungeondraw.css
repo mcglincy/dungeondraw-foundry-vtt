@@ -76,7 +76,7 @@
 }
 #dd-control-tools .control-tool-row {
   display: flex;
-  height: 40px;
+  height: 36px;
 }
 #dd-control-tools .control-row-separator {
   background-color: rgba(255, 255, 255, 0.2);
@@ -93,13 +93,13 @@
   box-sizing: content-box;
   color: #bbb;
   cursor: pointer;
-  height: 36px;
-  font-size: 24px;
-  line-height: 36px;
+  height: 32px;
+  font-size: 16px;
+  line-height: 32px;
   margin-right: 10px;
   padding: 0;
   text-align: center;
-  width: 36px;
+  width: 32px;
 }
 #dd-control-tools .control-tool:hover {
   color: #fff;
