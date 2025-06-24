@@ -83,6 +83,9 @@ function onGridPainterMouseDraw(preview, event) {
   const { destination } = event.interactionData;
   const { i, j } = canvas.grid.getOffset(destination);
 
+  if (!preview.document.flags.gridPainterHelper) {
+    preview.document.flags.gridPainterHelper = new GridPainterHelper();
+  }
   preview.document.flags.gridPainterHelper.onGridPainterMouseDraw(i, j);
 }
 
@@ -172,12 +175,6 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     );
     const data = foundry.utils.deepClone(defaults);
 
-    // const userColor = game.user.color.css;
-    // const data = {
-    //   fillColor: userColor,
-    //   strokeColor: userColor,
-    //   strokeWidth: 8,
-    // };
     // Mandatory additions
     delete data._id;
     data.x = origin.x;
@@ -220,14 +217,14 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "gridpainter":
-          data.flags = { gridPainterHelper: new GridPainterHelper() };
-          // data.shape.width = 0;
-          // data.shape.height = 0;
-          // TODO: testing a fix
+          // TODO: debug why flags aren't properly propagating to doc
+          // data.flags = { gridPainterHelper: new GridPainterHelper() };
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
           data.shape.width = strokeWidth + 1;
           data.shape.height = strokeWidth + 1;
+          data.strokeAlpha = 0.0;
+          data.fillAlpha = 0.0;
       }
     } else if (game.activeDungeonDrawMode === "remove") {
       switch (game.activeDungeonDrawTool) {
@@ -261,13 +258,14 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "gridpainter":
-          data.flags = { gridPainterHelper: new GridPainterHelper() };
-          // data.shape.width = 0;
-          // data.shape.height = 0;
+          // TODO: debug why flags aren't properly propagating to doc
+          // data.flags = { gridPainterHelper: new GridPainterHelper() };
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
           data.shape.width = strokeWidth + 1;
           data.shape.height = strokeWidth + 1;
+          data.strokeAlpha = 0.0;
+          data.fillAlpha = 0.0;
       }
     }
 
@@ -374,6 +372,8 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     const drawing = new this.constructor.placeableClass(document);
     drawing._fixedPoints = [0, 0];
     document._object = drawing;
+    // XXXX
+    //drawing.flags.gridPainterHelper = new GridPainterHelper();
     interaction.preview = this.preview.addChild(drawing);
     interaction.drawingsState = 1;
     drawing.draw();
