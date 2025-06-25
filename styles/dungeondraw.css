@@ -32,21 +32,21 @@
   border-radius: 5px;
   color: white;
   position: absolute;
-  left: 100px;
-  top: 100px;
-  /* width: 200px; */
+  left: 96px;
+  top: 96px;
+  /* width: 220px; */
+  box-shadow: none;
+}
+#dd-control-tools:hover {
 }
 #dd-control-tools .dd-control-wrapper {
   padding: 10px;
   width: auto !important;
   height: auto !important;
-  /* position: fixed; */
   cursor: auto !important;
 }
 #dd-control-tools .dd-control-wrapper:hover {
   padding: 10px;
-  box-shadow: 0 0 10px var(--color-shadow-dark) !important;
-  border: 1px solid var(--color-border-dark) !important;
   border-radius: 5px !important;
 }
 #dd-control-tools .addremove-toggle-row {
@@ -67,12 +67,14 @@
   cursor: pointer;
 }
 #dd-control-tools .addremove-toggle-row .addremove-toggle:hover {
-  box-shadow: 0 0 10px red;
+  background: var(--control-active-bg-color);
+  border-color: var(--control-active-border-color);
+  color: var(--control-active-icon-color);
 }
 #dd-control-tools .addremove-toggle-row .addremove-toggle.toggle-on {
-  background-color: black;
-  box-shadow: 0 0 10px red;
-  color: white;
+  background: var(--control-active-bg-color);
+  border-color: var(--control-active-border-color);
+  color: var(--control-active-icon-color);
 }
 #dd-control-tools .control-tool-row {
   display: flex;
@@ -89,7 +91,6 @@
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #000;
   border-radius: 5px;
-  box-shadow: 0 0 10px #000;
   box-sizing: content-box;
   color: #bbb;
   cursor: pointer;
@@ -102,29 +103,23 @@
   width: 32px;
 }
 #dd-control-tools .control-tool:hover {
-  color: #fff;
-  border: 1px solid red;
-  border-bottom: 1px solid #ff6400;
-  box-shadow: 0 0 10px red;
+  background: var(--control-active-bg-color);
+  border-color: var(--control-active-border-color);
+  color: var(--control-active-icon-color);
 }
 #dd-control-tools .control-tool.toggle {
 }
 #dd-control-tools .control-tool.toggle:hover {
-  background-color: black;
-  box-shadow: 0 0 10px red;
-  border: 1px solid red;
-  border-bottom: 1px solid #ff6400;
+  background: var(--control-active-bg-color);
+  border-color: var(--control-active-border-color);
+  color: var(--control-active-icon-color);
 }
 #dd-control-tools .control-tool.toggle.active {
-  background-color: black;
-  border: 1px solid red;
-  border-bottom: 1px solid #ff6400;
-  box-shadow: 0 0 10px red;
+  background: var(--control-active-bg-color);
+  border-color: var(--control-active-border-color);
+  color: var(--control-active-icon-color);
 }
 #dd-control-tools select {
-  border: 1px solid black;
-  color: white;
   font-family: Signika, sans-serif;
   font-size: 16px;
-  cursor: pointer;
 }
