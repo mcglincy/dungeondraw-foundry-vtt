@@ -118,7 +118,6 @@ function createDataOffsetPoints(createData) {
 export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   static LAYER_NAME = "dungeon";
 
-  // TODO: figure out what documentName / embeddedName / type we should be using
   /** @inheritdoc */
   static documentName = "Drawing";
 
@@ -134,31 +133,14 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     return null;
   }
 
-  // static get layerOptions() {
-  //   return foundry.utils.mergeObject(super.layerOptions, {
-  //     name: DungeonLayer.LAYER_NAME,
-  //     canDragCreate: true,
-  //     // we use our own snapToGrid setting to control snap
-  //     snapToGrid: Settings.snapToGrid(),
-  //     zIndex: -1, // under tiles and background image
-  //     quadtree: true,
-  //   });
-  // }
-
   /** @inheritdoc */
   static get layerOptions() {
     return foundry.utils.mergeObject(super.layerOptions, {
       name: DungeonLayer.LAYER_NAME,
       controllableObjects: true,
       rotatableObjects: true,
-      // zIndex: 501,
       zIndex: -1, // under tiles and background image
     });
-  }
-
-  /** @inheritdoc */
-  get hookName() {
-    return DungeonLayer.name;
   }
 
   /**
@@ -217,7 +199,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "gridpainter":
-          // TODO: debug why flags aren't properly propagating to doc
+          // TODO: debug why flags aren't properly propagating to doc in v13
           // data.flags = { gridPainterHelper: new GridPainterHelper() };
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
@@ -258,7 +240,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "gridpainter":
-          // TODO: debug why flags aren't properly propagating to doc
+          // TODO: debug why flags aren't properly propagating to doc in v13
           // data.flags = { gridPainterHelper: new GridPainterHelper() };
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
@@ -300,6 +282,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       this.dungeon = new Dungeon(journalEntry, note);
       await this.dungeon.loadFromJournalEntry();
       // add dungeon underneath any placeables or drawing preview
+      // TODO: debug why this.preview container is getting rendered UNDER dungeon
       this.addChildAt(this.dungeon, 0);
     } else {
       // no journal entry and note found, so make sure dungeon is nulled on this layer
@@ -372,8 +355,6 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     const drawing = new this.constructor.placeableClass(document);
     drawing._fixedPoints = [0, 0];
     document._object = drawing;
-    // XXXX
-    //drawing.flags.gridPainterHelper = new GridPainterHelper();
     interaction.preview = this.preview.addChild(drawing);
     interaction.drawingsState = 1;
     drawing.draw();

@@ -22,7 +22,7 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
 
   // TODO: figure out what documentName / embeddedName / type we should be using
   /** @inheritdoc */
-  static embeddedName = "Drawing";
+  static embeddedName = "Dungeon";
 
   /** Convenience method to get most recent state. */
   state() {
@@ -98,17 +98,21 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
     const blob = await res.blob();
     //const file = new File([blob], filename, { type: "image/jpeg" });
     const file = new File([blob], filename, { type: "image/png" });
-    await FilePicker.upload("data", folder, file, {});
+    await foundry.applications.apps.FilePicker.implementation.upload(
+      "data",
+      folder,
+      file,
+      {}
+    );
     const path = folder ? folder + "/" + filename : filename;
-    console.log(path);
     // make sure we don't keep using a cached copy
     // TODO: TextureLoader #cache is now a private instance var
     // TextureLoader.loader.cache.delete(path);
-    if (canvas.scene.img === path) {
+    if (canvas.scene.background.src === path) {
       // cheat to force a scene update when we're re-saving to the same filename
-      await canvas.scene.update({ img: null }, { render: false });
+      await canvas.scene.update({ "background.src": path }, { render: false });
     }
-    await canvas.scene.update({ img: path });
+    await canvas.scene.update({ "background.src": path });
 
     // remove our mask
     this.mask = null;

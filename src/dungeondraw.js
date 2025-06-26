@@ -31,7 +31,6 @@ export class DungeonDraw {
   }
 
   static getSceneControlButtons(controls) {
-    console.log("******* getSceneControlButtons");
     CONFIG.Canvas.layers[DungeonLayer.LAYER_NAME] = {
       layerClass: DungeonLayer,
       group: "interface",
