@@ -1,6 +1,6 @@
 {{#*inline "toolPartial"}}
 <div
-  class="control-tool toggle {{#if isActive}}active{{/if}}"
+  class="control ui-control control-tool toggle {{#if isActive}}active{{/if}}"
   title="{{localize title}}"
   data-tool="{{name}}"
   role="button"
@@ -9,18 +9,21 @@
 </div>
 {{/inline}}
 
-<ol id="dd-control-tools" class="sub-controls app control-tools flexcol">
-  <li class="dd-control-wrapper">
+<div
+  id="dd-control-tools"
+  class="faded-ui sub-controls app control-tools flexcol"
+>
+  <div class="dd-control-wrapper">
     <div class="addremove-toggle-row">
       <div
-        class="addremove-toggle {{toggleAddClass}}"
+        class="control ui-control addremove-toggle {{toggleAddClass}}"
         data-addremove="add"
         role="button"
       >
         {{localize "DD.Add"}}
       </div>
       <div
-        class="addremove-toggle {{toggleRemoveClass}}"
+        class="control ui-control addremove-toggle {{toggleRemoveClass}}"
         data-addremove="remove"
         role="button"
       >
@@ -48,5 +51,5 @@
         {{/with}} {{/each}} {{/select}}
       </select>
     </div>
-  </li>
-</ol>
+  </div>
+</div>

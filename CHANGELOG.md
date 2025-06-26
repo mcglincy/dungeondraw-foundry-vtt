@@ -1,3 +1,7 @@
+# 4.0.0
+
+- Foundry v13 compatibility.
+
 # 3.2.0
 
 - Wall and floor texture scaling by @oskarnp314.
