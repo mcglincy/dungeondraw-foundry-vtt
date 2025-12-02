@@ -6,7 +6,12 @@ export class Keybindings {
     game.keybindings.register(constants.MODULE_NAME, "redo", {
       name: "DD.ButtonTitleRedo",
       uneditable: [
-        { key: "KeyY", modifiers: [KeyboardManager.MODIFIER_KEYS.CONTROL] },
+        {
+          key: "KeyY",
+          modifiers: [
+            foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.CONTROL,
+          ],
+        },
       ],
       onDown: Keybindings.onRedo,
     });
@@ -14,7 +19,12 @@ export class Keybindings {
     game.keybindings.register(constants.MODULE_NAME, "undo", {
       name: "DD.ButtonTitleUndo",
       uneditable: [
-        { key: "KeyZ", modifiers: [KeyboardManager.MODIFIER_KEYS.CONTROL] },
+        {
+          key: "KeyZ",
+          modifiers: [
+            foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.CONTROL,
+          ],
+        },
       ],
       onDown: Keybindings.onUndo,
     });

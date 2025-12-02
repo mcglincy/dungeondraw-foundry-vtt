@@ -39,19 +39,19 @@ export class DungeonDraw {
       layerClass: DungeonLayer,
     };
 
-    controls.push({
+    controls.dungeondraw = {
       name: "dungeondraw",
       title: "DD.SceneControlTitle",
       layer: DungeonLayer.LAYER_NAME,
       icon: "fas fa-dungeon",
       visible: DungeonDraw.controlsVisible(),
-      tools: [
-        {
+      tools: {
+        drawmap: {
           name: "drawmap",
           title: "DD.ButtonTitleDrawMap",
           icon: "fas fa-dungeon",
         },
-        {
+        undo: {
           name: "undo",
           title: "DD.ButtonTitleUndo",
           icon: "fas fa-undo",
@@ -60,7 +60,7 @@ export class DungeonDraw {
           },
           button: true,
         },
-        {
+        redo: {
           name: "redo",
           title: "DD.ButtonTitleRedo",
           icon: "fas fa-redo",
@@ -69,21 +69,21 @@ export class DungeonDraw {
           },
           button: true,
         },
-        {
+        generate: {
           name: "generate",
           title: "DD.ButtonTitleGenerate",
           icon: "fas fa-magic",
           onClick: async () => new GeneratorSheet().render(true),
           button: true,
         },
-        {
+        config: {
           name: "config",
           title: "DD.ButtonTitleConfig",
           icon: "fas fa-cog",
           onClick: () => new ConfigSheet().render(true),
           button: true,
         },
-        {
+        savetoscene: {
           name: "savetoscene",
           title: "DD.ButtonTitleSaveToSceneBackground",
           icon: "fas fa-sign-out-alt",
@@ -93,7 +93,7 @@ export class DungeonDraw {
           },
           button: true,
         },
-        {
+        clear: {
           name: "clear",
           title: "DD.ButtonTitleClearAll",
           icon: "fas fa-trash",
@@ -101,9 +101,14 @@ export class DungeonDraw {
           onClick: () => canvas.dungeon.deleteAll(),
           button: true,
         },
-      ],
+      },
       activeTool: "drawmap",
-    });
+      // eslint-disable-next-line no-unused-vars
+      onChange: (event, active) => {
+        if (active) canvas.dungeon.activate();
+      },
+      onToolChange: () => {},
+    };
   }
 
   static async canvasReady(canvas) {
@@ -118,7 +123,7 @@ export class DungeonDraw {
   }
 
   static async renderSceneControls(controls) {
-    if (controls.activeControl !== "dungeondraw") {
+    if (controls.control.name !== "dungeondraw") {
       // TODO: not found?
       await toolbar.close();
       return;

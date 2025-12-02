@@ -83,6 +83,9 @@ function onGridPainterMouseDraw(preview, event) {
   const { destination } = event.interactionData;
   const { i, j } = canvas.grid.getOffset(destination);
 
+  if (!preview.document.flags.gridPainterHelper) {
+    preview.document.flags.gridPainterHelper = new GridPainterHelper();
+  }
   preview.document.flags.gridPainterHelper.onGridPainterMouseDraw(i, j);
 }
 
@@ -112,10 +115,9 @@ function createDataOffsetPoints(createData) {
 /**
  * @extends {PlaceablesLayer}
  */
-export class DungeonLayer extends PlaceablesLayer {
+export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   static LAYER_NAME = "dungeon";
 
-  // TODO: figure out what documentName / embeddedName / type we should be using
   /** @inheritdoc */
   static documentName = "Drawing";
 
@@ -135,11 +137,9 @@ export class DungeonLayer extends PlaceablesLayer {
   static get layerOptions() {
     return foundry.utils.mergeObject(super.layerOptions, {
       name: DungeonLayer.LAYER_NAME,
-      canDragCreate: true,
-      // we use our own snapToGrid setting to control snap
-      snapToGrid: Settings.snapToGrid(),
+      controllableObjects: true,
+      rotatableObjects: true,
       zIndex: -1, // under tiles and background image
-      quadtree: true,
     });
   }
 
@@ -150,30 +150,36 @@ export class DungeonLayer extends PlaceablesLayer {
    * @return {Object}           The new drawing data
    */
   _getNewDrawingData(origin) {
-    const userColor = game.user.color.css;
-    const data = {
-      fillColor: userColor,
-      strokeColor: userColor,
-      strokeWidth: 8,
-    };
+    // TODO: use our own defaults
+    const defaults = game.settings.get(
+      "core",
+      foundry.canvas.layers.DrawingsLayer.DEFAULT_CONFIG_SETTING
+    );
+    const data = foundry.utils.deepClone(defaults);
+
     // Mandatory additions
+    delete data._id;
     data.x = origin.x;
     data.y = origin.y;
     data.sort = Math.max(this.getMaxSort() + 1, 0);
     data.author = game.user.id;
     data.shape = {};
+    data.interface = false;
+    const strokeWidth = data.strokeWidth ?? 8;
 
     if (game.activeDungeonDrawMode === "add") {
       switch (game.activeDungeonDrawTool) {
         case "rectangle":
-          data.shape.type = Drawing.SHAPE_TYPES.RECTANGLE;
-          data.shape.width = 1;
-          data.shape.height = 1;
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
           break;
         case "ellipse":
-          data.shape.type = Drawing.SHAPE_TYPES.ELLIPSE;
-          data.shape.width = 1;
-          data.shape.height = 1;
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
           break;
         case "polygon":
         case "interiorwall":
@@ -181,19 +187,26 @@ export class DungeonLayer extends PlaceablesLayer {
         case "secretdoor":
         case "invisiblewall":
         case "themepainter":
-          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
-          data.shape.points = [0, 0];
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = 0;
           break;
         case "freehand":
-          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
-          data.shape.points = [0, 0];
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "gridpainter":
-          data.flags = { gridPainterHelper: new GridPainterHelper() };
-          data.shape.width = 0;
-          data.shape.height = 0;
+          // TODO: debug why flags aren't properly propagating to doc in v13
+          // data.flags = { gridPainterHelper: new GridPainterHelper() };
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
+          data.strokeAlpha = 0.0;
+          data.fillAlpha = 0.0;
       }
     } else if (game.activeDungeonDrawMode === "remove") {
       switch (game.activeDungeonDrawTool) {
@@ -203,32 +216,43 @@ export class DungeonLayer extends PlaceablesLayer {
         case "secretdoor":
         case "invisiblewall":
         case "themepainter":
-          data.shape.type = Drawing.SHAPE_TYPES.RECTANGLE;
-          data.shape.width = 1;
-          data.shape.height = 1;
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
           break;
         case "ellipse":
-          data.shape.type = Drawing.SHAPE_TYPES.ELLIPSE;
-          data.shape.width = 1;
-          data.shape.height = 1;
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
           break;
         case "polygon":
-          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
-          data.shape.points = [0, 0];
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = 0;
           break;
         case "freehand":
-          data.shape.type = Drawing.SHAPE_TYPES.POLYGON;
-          data.shape.points = [0, 0];
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = data.bezierFactor ?? 0.5;
           break;
         case "gridpainter":
-          data.flags = { gridPainterHelper: new GridPainterHelper() };
-          data.shape.width = 0;
-          data.shape.height = 0;
+          // TODO: debug why flags aren't properly propagating to doc in v13
+          // data.flags = { gridPainterHelper: new GridPainterHelper() };
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+          data.shape.width = strokeWidth + 1;
+          data.shape.height = strokeWidth + 1;
+          data.strokeAlpha = 0.0;
+          data.fillAlpha = 0.0;
       }
     }
-    return data;
+
+    // Return the cleaned data
+    return DrawingDocument.cleanData(data);
   }
 
   /** @override */
@@ -253,11 +277,12 @@ export class DungeonLayer extends PlaceablesLayer {
   }
 
   async loadDungeon() {
-    const { journalEntry, note } = await findDungeonEntryAndNote();
+    const { journalEntry, note } = findDungeonEntryAndNote();
     if (journalEntry) {
       this.dungeon = new Dungeon(journalEntry, note);
       await this.dungeon.loadFromJournalEntry();
       // add dungeon underneath any placeables or drawing preview
+      // TODO: debug why this.preview container is getting rendered UNDER dungeon
       this.addChildAt(this.dungeon, 0);
     } else {
       // no journal entry and note found, so make sure dungeon is nulled on this layer
@@ -310,8 +335,10 @@ export class DungeonLayer extends PlaceablesLayer {
 
     // We use a Drawing as our preview, but then on end-drag/completion,
     // update our single Dungeon instance.
+
     // Create the preview object
-    const cls = getDocumentClass("Drawing");
+    // const cls = getDocumenddtClass$1("Drawing");
+    const cls = CONFIG["Drawing"]?.documentClass;
     let document;
     try {
       document = new cls(this._getNewDrawingData(interaction.origin), {
@@ -326,6 +353,8 @@ export class DungeonLayer extends PlaceablesLayer {
       throw e;
     }
     const drawing = new this.constructor.placeableClass(document);
+    drawing._fixedPoints = [0, 0];
+    document._object = drawing;
     interaction.preview = this.preview.addChild(drawing);
     interaction.drawingsState = 1;
     drawing.draw();
