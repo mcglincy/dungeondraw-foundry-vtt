@@ -1,6 +1,5 @@
 {
   "id": "dungeon-draw",
-  "name": "dungeon-draw",
   "authors": [
     {
       "name": "mcglintlock"
@@ -10,7 +9,6 @@
   "description": "A dungeon-drawing module for Foundry VTT",
   "version": "1.2.1",
   "library": "false",
-  "manifestPlusVersion": "1.0.0",
   "compatibility": {
     "minimum": 12,
     "verified": 12
