@@ -6,7 +6,7 @@ import { Keybindings } from "./keybindings";
 import { Settings } from "./settings";
 import { DungeonDrawToolbar } from "./toolbar";
 
-const toolbar = new DungeonDrawToolbar();
+export const toolbar = new DungeonDrawToolbar();
 
 export class DungeonDraw {
   static init() {

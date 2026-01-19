@@ -116,5 +116,17 @@
   "DD.WallTextureScaling": "Wall Texture Scaling",
   "DD.WallTextureTint": "Wall Texture Tint",
   "DD.WallThickness": "Wall Thickness",
-  "DD.Width": "Width"
+  "DD.Width": "Width",
+  "DD.KeybindingRectangle": "Tool: Rectangle",
+  "DD.KeybindingPolygon": "Tool: Polygon",
+  "DD.KeybindingEllipse": "Tool: Ellipse",
+  "DD.KeybindingFreehand": "Tool: Freehand",
+  "DD.KeybindingGridPainter": "Tool: Grid Painter",
+  "DD.KeybindingInteriorWall": "Tool: Interior Wall",
+  "DD.KeybindingDoor": "Tool: Door",
+  "DD.KeybindingSecretDoor": "Tool: Secret Door",
+  "DD.KeybindingInvisibleWall": "Tool: Invisible Wall",
+  "DD.KeybindingThemePainter": "Tool: Theme Painter",
+  "DD.KeybindingAddMode": "Mode: Add",
+  "DD.KeybindingRemoveMode": "Mode: Remove"
 }
