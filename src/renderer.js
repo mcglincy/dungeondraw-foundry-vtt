@@ -200,7 +200,7 @@ const drawThemeAreas = async (container, state) => {
 /** Try-catch wrapper around loadTexture. */
 const getTexture = async (path) => {
   try {
-    const texture = await loadTexture(path);
+    const texture = await foundry.canvas.loadTexture(path);
     if (!texture) {
       ui.notifications.error(
         `${game.i18n.localize("DD.TextureLoadFailure")}: ${path}`
