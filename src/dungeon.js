@@ -506,4 +506,39 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
       await this.pushState(newState);
     }
   }
+
+  // { x1, y1, x2, y2, x3, y3, x4, y4 }
+  async addStairs(stairData) {
+    const newState = this.history[this.historyIndex].clone();
+    newState.stairs.push(stairData);
+    await this.pushState(newState);
+  }
+
+  // {x:, y:, height:, width:}
+  async removeStairs(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const oldState = this.history[this.historyIndex];
+    const stairsToKeep = oldState.stairs.filter((s) => {
+      try {
+        // Create polygon from the 4 corners of the stair trapezoid
+        const stairPoints = [
+          [s.x1, s.y1],
+          [s.x2, s.y2],
+          [s.x4, s.y4],
+          [s.x3, s.y3],
+          [s.x1, s.y1],
+        ];
+        const stairPoly = geo.pointsToPolygon(stairPoints);
+        return !geo.intersects(rectPoly, stairPoly);
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
+    });
+    if (stairsToKeep.length != oldState.stairs.length) {
+      const newState = oldState.clone();
+      newState.stairs = stairsToKeep;
+      await this.pushState(newState);
+    }
+  }
 }

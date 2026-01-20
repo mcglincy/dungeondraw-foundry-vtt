@@ -87,6 +87,12 @@ export class Keybindings {
       onDown: () => Keybindings.setActiveTool("invisiblewall"),
     });
 
+    game.keybindings.register(constants.MODULE_NAME, "toolStairs", {
+      name: "DD.KeybindingStairs",
+      editable: [{ key: "KeyG" }],
+      onDown: () => Keybindings.setActiveTool("stairs"),
+    });
+
     // Row 3 - Other Tools (Z)
     game.keybindings.register(constants.MODULE_NAME, "toolThemePainter", {
       name: "DD.KeybindingThemePainter",

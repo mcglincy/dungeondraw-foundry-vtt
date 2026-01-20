@@ -18,6 +18,7 @@
   "DD.ButtonTitleSaveToSceneBackground": "Save to Scene Background",
   "DD.ButtonTitleSecretDoor": "Secret Door",
   "DD.ButtonTitleSelect": "Select",
+  "DD.ButtonTitleStairs": "Stairs",
   "DD.ButtonTitleThemePainter": "Theme Painter",
   "DD.ButtonTitleUndo": "Undo",
   "DD.Cancel": "Cancel",
@@ -126,6 +127,7 @@
   "DD.KeybindingDoor": "Tool: Door",
   "DD.KeybindingSecretDoor": "Tool: Secret Door",
   "DD.KeybindingInvisibleWall": "Tool: Invisible Wall",
+  "DD.KeybindingStairs": "Tool: Stairs",
   "DD.KeybindingThemePainter": "Tool: Theme Painter",
   "DD.KeybindingAddMode": "Mode: Add",
   "DD.KeybindingRemoveMode": "Mode: Remove"
