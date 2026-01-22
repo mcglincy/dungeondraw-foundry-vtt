@@ -17,15 +17,16 @@ const FOLDER_NAME = "Dungeon Draw";
  */
 function rectangleToWallSegments(x, y, width, height) {
   return [
-    [x, y, x + width, y],                           // top
-    [x + width, y, x + width, y + height],          // right
-    [x + width, y + height, x, y + height],         // bottom
-    [x, y + height, x, y],                          // left
+    [x, y, x + width, y], // top
+    [x + width, y, x + width, y + height], // right
+    [x + width, y + height, x, y + height], // bottom
+    [x, y + height, x, y], // left
   ];
 }
 
 /**
  * Convert an ellipse to an array of wall segments using geo.ellipse.
+ * Uses simplification to reduce segment count for game walls (same as room walls).
  * @param {number} x - X position (top-left corner of bounding box)
  * @param {number} y - Y position (top-left corner of bounding box)
  * @param {number} width - Width
@@ -37,7 +38,9 @@ function ellipseToWallSegments(x, y, width, height) {
   const centerX = x + width / 2;
   const centerY = y + height / 2;
   const ellipsePoly = geo.ellipse(centerX, centerY, width, height);
-  const coords = ellipsePoly.getExteriorRing().getCoordinates();
+  // Simplify the ellipse to reduce segment count (same tolerance as room walls in wallmaker.js)
+  const simplified = geo.simplify(ellipsePoly, 10.0);
+  const coords = simplified.getExteriorRing().getCoordinates();
 
   const segments = [];
   for (let i = 0; i < coords.length - 1; i++) {
@@ -54,7 +57,12 @@ function ellipseToWallSegments(x, y, width, height) {
 function polygonToWallSegments(points) {
   const segments = [];
   for (let i = 0; i < points.length - 1; i++) {
-    segments.push([points[i][0], points[i][1], points[i + 1][0], points[i + 1][1]]);
+    segments.push([
+      points[i][0],
+      points[i][1],
+      points[i + 1][0],
+      points[i + 1][1],
+    ]);
   }
   return segments;
 }
@@ -354,22 +362,27 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           break;
         case "interiorwall":
         case "invisiblewall": {
-          const shapeMode = game.dungeonDrawShapes?.[game.activeDungeonDrawTool] || "line";
+          const shapeMode =
+            game.dungeonDrawShapes?.[game.activeDungeonDrawTool] || "line";
           if (shapeMode === "square") {
-            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+            data.shape.type =
+              foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
             data.shape.width = strokeWidth + 1;
             data.shape.height = strokeWidth + 1;
           } else if (shapeMode === "ellipse") {
-            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
+            data.shape.type =
+              foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
             data.shape.width = strokeWidth + 1;
             data.shape.height = strokeWidth + 1;
           } else if (shapeMode === "polygon") {
-            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+            data.shape.type =
+              foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
             data.shape.points = [0, 0, 1, 0];
             data.bezierFactor = 0;
           } else {
             // Default: line mode
-            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+            data.shape.type =
+              foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
             data.shape.points = [0, 0, 1, 0];
             data.bezierFactor = 0;
           }
@@ -378,16 +391,19 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         case "themepainter": {
           const shapeMode = game.dungeonDrawShapes?.themepainter || "polygon";
           if (shapeMode === "square") {
-            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+            data.shape.type =
+              foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
             data.shape.width = strokeWidth + 1;
             data.shape.height = strokeWidth + 1;
           } else if (shapeMode === "ellipse") {
-            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
+            data.shape.type =
+              foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
             data.shape.width = strokeWidth + 1;
             data.shape.height = strokeWidth + 1;
           } else {
             // Default: polygon mode
-            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+            data.shape.type =
+              foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
             data.shape.points = [0, 0, 1, 0];
             data.bezierFactor = 0;
           }
@@ -676,14 +692,19 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       // easy single opcode
       const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
       // Check if we should auto-complete (non-polygon tools or line-mode walls)
-      const wallShapeMode = game.dungeonDrawShapes?.[game.activeDungeonDrawTool];
-      const isLineMode = (opcode === "addinteriorwall" || opcode === "addinvisiblewall") &&
-                         (wallShapeMode === "line" || !wallShapeMode);
-      const isNonPolygonWallMode = (opcode === "addinteriorwall" || opcode === "addinvisiblewall") &&
-                                   (wallShapeMode === "square" || wallShapeMode === "ellipse");
+      const wallShapeMode =
+        game.dungeonDrawShapes?.[game.activeDungeonDrawTool];
+      const isLineMode =
+        (opcode === "addinteriorwall" || opcode === "addinvisiblewall") &&
+        (wallShapeMode === "line" || !wallShapeMode);
+      const isNonPolygonWallMode =
+        (opcode === "addinteriorwall" || opcode === "addinvisiblewall") &&
+        (wallShapeMode === "square" || wallShapeMode === "ellipse");
       const themePainterShapeMode = game.dungeonDrawShapes?.themepainter;
-      const isNonPolygonThemePainter = opcode === "addthemepainter" &&
-                                       (themePainterShapeMode === "square" || themePainterShapeMode === "ellipse");
+      const isNonPolygonThemePainter =
+        opcode === "addthemepainter" &&
+        (themePainterShapeMode === "square" ||
+          themePainterShapeMode === "ellipse");
       if (
         !preview.isPolygon ||
         isFreehand() ||
@@ -882,9 +903,11 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     // recognize completed polygons (including polygon mode for walls/themepainter)
     const tool = game.activeDungeonDrawTool;
     const shapeMode = game.dungeonDrawShapes?.[tool];
-    const isPolygonModeTool = tool === "polygon" ||
+    const isPolygonModeTool =
+      tool === "polygon" ||
       (tool === "themepainter" && shapeMode === "polygon") ||
-      ((tool === "interiorwall" || tool === "invisiblewall") && shapeMode === "polygon");
+      ((tool === "interiorwall" || tool === "invisiblewall") &&
+        shapeMode === "polygon");
     if (isPolygonModeTool && preview.isPolygon) {
       const length = preview.document.shape.points.length;
       const closedPolygon =
@@ -958,18 +981,29 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           );
         } else if (wallShapeMode === "square") {
           const rect = this._maybeSnappedRect(data, event.shiftKey);
-          const segments = rectangleToWallSegments(rect.x, rect.y, rect.width, rect.height);
+          const segments = rectangleToWallSegments(
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height
+          );
           for (const seg of segments) {
             await this.dungeon.addInteriorWall(seg[0], seg[1], seg[2], seg[3]);
           }
         } else if (wallShapeMode === "ellipse") {
           const rect = this._maybeSnappedRect(data, event.shiftKey);
-          const segments = ellipseToWallSegments(rect.x, rect.y, rect.width, rect.height);
+          const segments = ellipseToWallSegments(
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height
+          );
           for (const seg of segments) {
             await this.dungeon.addInteriorWall(seg[0], seg[1], seg[2], seg[3]);
           }
         } else if (wallShapeMode === "polygon") {
-          const createData = this.constructor.placeableClass.normalizeShape(data);
+          const createData =
+            this.constructor.placeableClass.normalizeShape(data);
           this._maybeSnapLastPoint(createData, event.shiftKey);
           this._autoClosePolygon(createData);
           const offsetPoints = createDataOffsetPoints(createData);
@@ -994,18 +1028,29 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           );
         } else if (wallShapeMode === "square") {
           const rect = this._maybeSnappedRect(data, event.shiftKey);
-          const segments = rectangleToWallSegments(rect.x, rect.y, rect.width, rect.height);
+          const segments = rectangleToWallSegments(
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height
+          );
           for (const seg of segments) {
             await this.dungeon.addInvisibleWall(seg[0], seg[1], seg[2], seg[3]);
           }
         } else if (wallShapeMode === "ellipse") {
           const rect = this._maybeSnappedRect(data, event.shiftKey);
-          const segments = ellipseToWallSegments(rect.x, rect.y, rect.width, rect.height);
+          const segments = ellipseToWallSegments(
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height
+          );
           for (const seg of segments) {
             await this.dungeon.addInvisibleWall(seg[0], seg[1], seg[2], seg[3]);
           }
         } else if (wallShapeMode === "polygon") {
-          const createData = this.constructor.placeableClass.normalizeShape(data);
+          const createData =
+            this.constructor.placeableClass.normalizeShape(data);
           this._maybeSnapLastPoint(createData, event.shiftKey);
           this._autoClosePolygon(createData);
           const offsetPoints = createDataOffsetPoints(createData);
@@ -1039,17 +1084,31 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         // Phase 1 is handled in _onClickLeft
       } else if (opcode === "addthemepainter") {
         // Handle themepainter square/ellipse modes separately (polygon mode falls through to below)
-        const themePainterShapeMode = game.dungeonDrawShapes?.themepainter || "polygon";
-        if (themePainterShapeMode === "square" || themePainterShapeMode === "ellipse") {
+        const themePainterShapeMode =
+          game.dungeonDrawShapes?.themepainter || "polygon";
+        if (
+          themePainterShapeMode === "square" ||
+          themePainterShapeMode === "ellipse"
+        ) {
           event.interactionData.drawingsState = 0;
           const data = preview.document.toObject(false);
           preview._chain = false;
           const rect = this._maybeSnappedRect(data, event.shiftKey);
           if (themePainterShapeMode === "square") {
-            const offsetPoints = rectangleToPolygonPoints(rect.x, rect.y, rect.width, rect.height);
+            const offsetPoints = rectangleToPolygonPoints(
+              rect.x,
+              rect.y,
+              rect.width,
+              rect.height
+            );
             await this.dungeon.addThemeArea(offsetPoints);
           } else {
-            const offsetPoints = ellipseToPolygonPoints(rect.x, rect.y, rect.width, rect.height);
+            const offsetPoints = ellipseToPolygonPoints(
+              rect.x,
+              rect.y,
+              rect.width,
+              rect.height
+            );
             await this.dungeon.addThemeArea(offsetPoints);
           }
         } else if (minDistance || completePolygon) {
@@ -1057,7 +1116,8 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           event.interactionData.drawingsState = 0;
           const data = preview.document.toObject(false);
           preview._chain = false;
-          const createData = this.constructor.placeableClass.normalizeShape(data);
+          const createData =
+            this.constructor.placeableClass.normalizeShape(data);
           this._maybeSnapLastPoint(createData, event.shiftKey);
           this._autoClosePolygon(createData);
           const offsetPoints = createDataOffsetPoints(createData);

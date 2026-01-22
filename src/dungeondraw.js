@@ -17,8 +17,8 @@ export class DungeonDraw {
     game.activeDungeonDrawMode = "add";
     // Shape modes for tools that support multiple drawing shapes
     game.dungeonDrawShapes = {
-      interiorwall: "line",    // "line" | "square" | "ellipse" | "polygon"
-      invisiblewall: "line",   // "line" | "square" | "ellipse" | "polygon"
+      interiorwall: "line", // "line" | "square" | "ellipse" | "polygon"
+      invisiblewall: "line", // "line" | "square" | "ellipse" | "polygon"
       themepainter: "polygon", // "square" | "ellipse" | "polygon"
     };
   }

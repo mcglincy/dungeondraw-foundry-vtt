@@ -212,7 +212,9 @@ export class DungeonDrawToolbar extends Application {
         min-width: 120px;
       ">
         <ol style="list-style: none; margin: 0; padding: 0;">
-          ${modes.map((mode) => `
+          ${modes
+            .map(
+              (mode) => `
             <li class="dd-shape-menu-item" data-mode="${mode}" style="
               padding: 6px 12px;
               cursor: pointer;
@@ -222,9 +224,13 @@ export class DungeonDrawToolbar extends Application {
               gap: 8px;
             ">
               ${this._getShapeIcon(mode)}
-              ${game.i18n.localize(`DD.DrawMode.${mode.charAt(0).toUpperCase() + mode.slice(1)}`)}
+              ${game.i18n.localize(
+                `DD.DrawMode.${mode.charAt(0).toUpperCase() + mode.slice(1)}`
+              )}
             </li>
-          `).join("")}
+          `
+            )
+            .join("")}
         </ol>
       </nav>
     `;
@@ -239,11 +245,14 @@ export class DungeonDrawToolbar extends Application {
     });
 
     // Add hover effect
-    menu.find(".dd-shape-menu-item").on("mouseenter", function () {
-      $(this).css("background", "#333");
-    }).on("mouseleave", function () {
-      $(this).css("background", "transparent");
-    });
+    menu
+      .find(".dd-shape-menu-item")
+      .on("mouseenter", function () {
+        $(this).css("background", "#333");
+      })
+      .on("mouseleave", function () {
+        $(this).css("background", "transparent");
+      });
 
     // Handle menu item clicks
     menu.find(".dd-shape-menu-item").on("mousedown", (e) => {
