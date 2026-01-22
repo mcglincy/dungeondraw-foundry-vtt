@@ -155,8 +155,8 @@ const renderPass = async (container, state) => {
       }
     }
   }
-  container.addChild(wallGfx);
   container.addChild(stairsGfx);
+  container.addChild(wallGfx);
   container.addChild(doorGfx);
 };
 
