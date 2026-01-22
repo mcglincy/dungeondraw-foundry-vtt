@@ -1,7 +1,7 @@
 {{#*inline "toolPartial"}}
 <div
   class="control ui-control control-tool toggle {{#if isActive}}active{{/if}}"
-  title="{{localize title}}"
+  title="{{localize title}}{{#if titleSuffix}} {{localize titleSuffix}}{{/if}}"
   data-tool="{{name}}"
   role="button"
 >

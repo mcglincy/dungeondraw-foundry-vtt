@@ -1,10 +1,97 @@
 import * as constants from "./constants.js";
 import { Dungeon } from "./dungeon.js";
+import * as geo from "./geo-utils.js";
 import { regenerate } from "./generator.js";
 import { GridPainterHelper } from "./GridPainterHelper.js";
 import { Settings } from "./settings.js";
 
 const FOLDER_NAME = "Dungeon Draw";
+
+/**
+ * Convert a rectangle to an array of wall segments.
+ * @param {number} x - X position
+ * @param {number} y - Y position
+ * @param {number} width - Width
+ * @param {number} height - Height
+ * @returns {Array} Array of [x1, y1, x2, y2] wall segments
+ */
+function rectangleToWallSegments(x, y, width, height) {
+  return [
+    [x, y, x + width, y],                           // top
+    [x + width, y, x + width, y + height],          // right
+    [x + width, y + height, x, y + height],         // bottom
+    [x, y + height, x, y],                          // left
+  ];
+}
+
+/**
+ * Convert an ellipse to an array of wall segments using geo.ellipse.
+ * @param {number} x - X position (top-left corner of bounding box)
+ * @param {number} y - Y position (top-left corner of bounding box)
+ * @param {number} width - Width
+ * @param {number} height - Height
+ * @returns {Array} Array of [x1, y1, x2, y2] wall segments
+ */
+function ellipseToWallSegments(x, y, width, height) {
+  // geo.ellipse expects center coordinates
+  const centerX = x + width / 2;
+  const centerY = y + height / 2;
+  const ellipsePoly = geo.ellipse(centerX, centerY, width, height);
+  const coords = ellipsePoly.getExteriorRing().getCoordinates();
+
+  const segments = [];
+  for (let i = 0; i < coords.length - 1; i++) {
+    segments.push([coords[i].x, coords[i].y, coords[i + 1].x, coords[i + 1].y]);
+  }
+  return segments;
+}
+
+/**
+ * Convert polygon points to wall segments.
+ * @param {Array} points - Array of [x, y] points
+ * @returns {Array} Array of [x1, y1, x2, y2] wall segments
+ */
+function polygonToWallSegments(points) {
+  const segments = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    segments.push([points[i][0], points[i][1], points[i + 1][0], points[i + 1][1]]);
+  }
+  return segments;
+}
+
+/**
+ * Convert a rectangle to polygon points for theme areas.
+ * @param {number} x - X position
+ * @param {number} y - Y position
+ * @param {number} width - Width
+ * @param {number} height - Height
+ * @returns {Array} Array of [x, y] points forming a closed polygon
+ */
+function rectangleToPolygonPoints(x, y, width, height) {
+  return [
+    [x, y],
+    [x + width, y],
+    [x + width, y + height],
+    [x, y + height],
+    [x, y], // close the polygon
+  ];
+}
+
+/**
+ * Convert an ellipse to polygon points for theme areas.
+ * @param {number} x - X position (top-left corner of bounding box)
+ * @param {number} y - Y position (top-left corner of bounding box)
+ * @param {number} width - Width
+ * @param {number} height - Height
+ * @returns {Array} Array of [x, y] points
+ */
+function ellipseToPolygonPoints(x, y, width, height) {
+  const centerX = x + width / 2;
+  const centerY = y + height / 2;
+  const ellipsePoly = geo.ellipse(centerX, centerY, width, height);
+  const coords = ellipsePoly.getExteriorRing().getCoordinates();
+  return coords.map((c) => [c.x, c.y]);
+}
 
 function isFreehand() {
   return game.activeDungeonDrawTool === "freehand";
@@ -258,16 +345,54 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           data.shape.height = strokeWidth + 1;
           break;
         case "polygon":
-        case "interiorwall":
         case "door":
         case "secretdoor":
-        case "invisiblewall":
-        case "themepainter":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
           data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = 0;
           break;
+        case "interiorwall":
+        case "invisiblewall": {
+          const shapeMode = game.dungeonDrawShapes?.[game.activeDungeonDrawTool] || "line";
+          if (shapeMode === "square") {
+            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+            data.shape.width = strokeWidth + 1;
+            data.shape.height = strokeWidth + 1;
+          } else if (shapeMode === "ellipse") {
+            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
+            data.shape.width = strokeWidth + 1;
+            data.shape.height = strokeWidth + 1;
+          } else if (shapeMode === "polygon") {
+            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+            data.shape.points = [0, 0, 1, 0];
+            data.bezierFactor = 0;
+          } else {
+            // Default: line mode
+            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+            data.shape.points = [0, 0, 1, 0];
+            data.bezierFactor = 0;
+          }
+          break;
+        }
+        case "themepainter": {
+          const shapeMode = game.dungeonDrawShapes?.themepainter || "polygon";
+          if (shapeMode === "square") {
+            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+            data.shape.width = strokeWidth + 1;
+            data.shape.height = strokeWidth + 1;
+          } else if (shapeMode === "ellipse") {
+            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
+            data.shape.width = strokeWidth + 1;
+            data.shape.height = strokeWidth + 1;
+          } else {
+            // Default: polygon mode
+            data.shape.type = foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+            data.shape.points = [0, 0, 1, 0];
+            data.bezierFactor = 0;
+          }
+          break;
+        }
         case "stairs":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
@@ -550,13 +675,23 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       }
       // easy single opcode
       const opcode = game.activeDungeonDrawMode + game.activeDungeonDrawTool;
+      // Check if we should auto-complete (non-polygon tools or line-mode walls)
+      const wallShapeMode = game.dungeonDrawShapes?.[game.activeDungeonDrawTool];
+      const isLineMode = (opcode === "addinteriorwall" || opcode === "addinvisiblewall") &&
+                         (wallShapeMode === "line" || !wallShapeMode);
+      const isNonPolygonWallMode = (opcode === "addinteriorwall" || opcode === "addinvisiblewall") &&
+                                   (wallShapeMode === "square" || wallShapeMode === "ellipse");
+      const themePainterShapeMode = game.dungeonDrawShapes?.themepainter;
+      const isNonPolygonThemePainter = opcode === "addthemepainter" &&
+                                       (themePainterShapeMode === "square" || themePainterShapeMode === "ellipse");
       if (
         !preview.isPolygon ||
         isFreehand() ||
         opcode === "adddoor" ||
-        opcode === "addinteriorwall" ||
+        isLineMode ||
         opcode === "addsecretdoor" ||
-        opcode === "addinvisiblewall" ||
+        isNonPolygonWallMode ||
+        isNonPolygonThemePainter ||
         opcode === "addgridpainter" ||
         opcode === "addstairs"
       ) {
@@ -744,14 +879,15 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     const { destination, origin, preview } = event.interactionData;
     let drawingsState = event.interactionData.drawingsState;
 
-    // recognize completed polygons
-    if (
-      game.activeDungeonDrawTool === "polygon" ||
-      game.activeDungeonDrawTool === "themepainter"
-    ) {
+    // recognize completed polygons (including polygon mode for walls/themepainter)
+    const tool = game.activeDungeonDrawTool;
+    const shapeMode = game.dungeonDrawShapes?.[tool];
+    const isPolygonModeTool = tool === "polygon" ||
+      (tool === "themepainter" && shapeMode === "polygon") ||
+      ((tool === "interiorwall" || tool === "invisiblewall") && shapeMode === "polygon");
+    if (isPolygonModeTool && preview.isPolygon) {
       const length = preview.document.shape.points.length;
       const closedPolygon =
-        preview.isPolygon &&
         length > 4 &&
         preview.document.shape.points[0] ==
           preview.document.shape.points[length - 2] &&
@@ -810,24 +946,74 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
         preview._chain = false;
-        this._maybeSnapLastPoint(data, event.shiftKey);
-        await this.dungeon.addInteriorWall(
-          data.x,
-          data.y,
-          data.x + data.shape.points[2],
-          data.y + data.shape.points[3]
-        );
+        const wallShapeMode = game.dungeonDrawShapes?.interiorwall || "line";
+
+        if (wallShapeMode === "line") {
+          this._maybeSnapLastPoint(data, event.shiftKey);
+          await this.dungeon.addInteriorWall(
+            data.x,
+            data.y,
+            data.x + data.shape.points[2],
+            data.y + data.shape.points[3]
+          );
+        } else if (wallShapeMode === "square") {
+          const rect = this._maybeSnappedRect(data, event.shiftKey);
+          const segments = rectangleToWallSegments(rect.x, rect.y, rect.width, rect.height);
+          for (const seg of segments) {
+            await this.dungeon.addInteriorWall(seg[0], seg[1], seg[2], seg[3]);
+          }
+        } else if (wallShapeMode === "ellipse") {
+          const rect = this._maybeSnappedRect(data, event.shiftKey);
+          const segments = ellipseToWallSegments(rect.x, rect.y, rect.width, rect.height);
+          for (const seg of segments) {
+            await this.dungeon.addInteriorWall(seg[0], seg[1], seg[2], seg[3]);
+          }
+        } else if (wallShapeMode === "polygon") {
+          const createData = this.constructor.placeableClass.normalizeShape(data);
+          this._maybeSnapLastPoint(createData, event.shiftKey);
+          this._autoClosePolygon(createData);
+          const offsetPoints = createDataOffsetPoints(createData);
+          const segments = polygonToWallSegments(offsetPoints);
+          for (const seg of segments) {
+            await this.dungeon.addInteriorWall(seg[0], seg[1], seg[2], seg[3]);
+          }
+        }
       } else if (opcode === "addinvisiblewall") {
         event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
         preview._chain = false;
-        this._maybeSnapLastPoint(data, event.shiftKey);
-        await this.dungeon.addInvisibleWall(
-          data.x,
-          data.y,
-          data.x + data.shape.points[2],
-          data.y + data.shape.points[3]
-        );
+        const wallShapeMode = game.dungeonDrawShapes?.invisiblewall || "line";
+
+        if (wallShapeMode === "line") {
+          this._maybeSnapLastPoint(data, event.shiftKey);
+          await this.dungeon.addInvisibleWall(
+            data.x,
+            data.y,
+            data.x + data.shape.points[2],
+            data.y + data.shape.points[3]
+          );
+        } else if (wallShapeMode === "square") {
+          const rect = this._maybeSnappedRect(data, event.shiftKey);
+          const segments = rectangleToWallSegments(rect.x, rect.y, rect.width, rect.height);
+          for (const seg of segments) {
+            await this.dungeon.addInvisibleWall(seg[0], seg[1], seg[2], seg[3]);
+          }
+        } else if (wallShapeMode === "ellipse") {
+          const rect = this._maybeSnappedRect(data, event.shiftKey);
+          const segments = ellipseToWallSegments(rect.x, rect.y, rect.width, rect.height);
+          for (const seg of segments) {
+            await this.dungeon.addInvisibleWall(seg[0], seg[1], seg[2], seg[3]);
+          }
+        } else if (wallShapeMode === "polygon") {
+          const createData = this.constructor.placeableClass.normalizeShape(data);
+          this._maybeSnapLastPoint(createData, event.shiftKey);
+          this._autoClosePolygon(createData);
+          const offsetPoints = createDataOffsetPoints(createData);
+          const segments = polygonToWallSegments(offsetPoints);
+          for (const seg of segments) {
+            await this.dungeon.addInvisibleWall(seg[0], seg[1], seg[2], seg[3]);
+          }
+        }
       } else if (opcode === "addstairs") {
         // Stairs has a two-phase drawing process
         if (this.stairsPhase === 0) {
@@ -851,6 +1037,32 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           return;
         }
         // Phase 1 is handled in _onClickLeft
+      } else if (opcode === "addthemepainter") {
+        // Handle themepainter square/ellipse modes separately (polygon mode falls through to below)
+        const themePainterShapeMode = game.dungeonDrawShapes?.themepainter || "polygon";
+        if (themePainterShapeMode === "square" || themePainterShapeMode === "ellipse") {
+          event.interactionData.drawingsState = 0;
+          const data = preview.document.toObject(false);
+          preview._chain = false;
+          const rect = this._maybeSnappedRect(data, event.shiftKey);
+          if (themePainterShapeMode === "square") {
+            const offsetPoints = rectangleToPolygonPoints(rect.x, rect.y, rect.width, rect.height);
+            await this.dungeon.addThemeArea(offsetPoints);
+          } else {
+            const offsetPoints = ellipseToPolygonPoints(rect.x, rect.y, rect.width, rect.height);
+            await this.dungeon.addThemeArea(offsetPoints);
+          }
+        } else if (minDistance || completePolygon) {
+          // Polygon mode - needs minDistance or completePolygon
+          event.interactionData.drawingsState = 0;
+          const data = preview.document.toObject(false);
+          preview._chain = false;
+          const createData = this.constructor.placeableClass.normalizeShape(data);
+          this._maybeSnapLastPoint(createData, event.shiftKey);
+          this._autoClosePolygon(createData);
+          const offsetPoints = createDataOffsetPoints(createData);
+          await this.dungeon.addThemeArea(offsetPoints);
+        }
       } else if (minDistance || completePolygon) {
         event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
@@ -879,11 +1091,6 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         } else if (opcode === "addrectangle") {
           const rect = this._maybeSnappedRect(createData, event.shiftKey);
           await this.dungeon.addRectangle(rect);
-        } else if (opcode === "addthemepainter") {
-          this._maybeSnapLastPoint(createData, event.shiftKey);
-          this._autoClosePolygon(createData);
-          const offsetPoints = createDataOffsetPoints(createData);
-          await this.dungeon.addThemeArea(offsetPoints);
         } else if (opcode === "addgridpainter") {
           await this.dungeon.addGridPaintedArea(
             createData.flags.gridPainterHelper.paintedGeometry
