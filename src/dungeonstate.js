@@ -32,6 +32,9 @@ export class DungeonState {
   }
 
   clone() {
+    // Inconsistent cloning - some arrays use shallow copy ([...arr]),
+    // others use deep copy (JSON.parse/stringify). Shallow copies of arrays
+    // stairs uses deep copy because it contains objects.
     return new DungeonState(
       this.geometry ? this.geometry.copy() : null,
       JSON.parse(JSON.stringify(this.themeAreas)),
