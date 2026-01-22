@@ -156,8 +156,8 @@ const renderPass = async (container, state) => {
     }
   }
   container.addChild(wallGfx);
-  container.addChild(doorGfx);
   container.addChild(stairsGfx);
+  container.addChild(doorGfx);
 };
 
 const drawThemeAreas = async (container, state) => {
