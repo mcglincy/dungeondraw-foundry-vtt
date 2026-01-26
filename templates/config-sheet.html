@@ -456,6 +456,25 @@
     </div>
     <hr />
     <div class="form-group">
+      <label>{{localize "DD.StairsColor"}}</label>
+      <div class="form-fields">
+        <input
+          type="text"
+          class="color"
+          name="stairsColor"
+          value="{{config.stairsColor}}"
+          data-dtype="String"
+        />
+        <input
+          type="color"
+          value="{{config.stairsColor}}"
+          data-dtype="String"
+          data-edit="stairsColor"
+        />
+      </div>
+    </div>
+    <hr />
+    <div class="form-group">
       <label>{{localize "DD.WallColor"}}</label>
       <div class="form-fields">
         <input

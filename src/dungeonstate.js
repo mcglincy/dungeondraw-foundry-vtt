@@ -14,6 +14,7 @@ export class DungeonState {
     secretDoors,
     interiorWalls,
     invisibleWalls,
+    stairs,
     config
   ) {
     this.geometry = geometry;
@@ -22,14 +23,18 @@ export class DungeonState {
     this.secretDoors = secretDoors;
     this.interiorWalls = interiorWalls;
     this.invisibleWalls = invisibleWalls;
+    this.stairs = stairs;
     this.config = config;
   }
 
   static startState() {
-    return new DungeonState(null, [], [], [], [], [], defaultConfig());
+    return new DungeonState(null, [], [], [], [], [], [], defaultConfig());
   }
 
   clone() {
+    // Inconsistent cloning - some arrays use shallow copy ([...arr]),
+    // others use deep copy (JSON.parse/stringify). Shallow copies of arrays
+    // stairs uses deep copy because it contains objects.
     return new DungeonState(
       this.geometry ? this.geometry.copy() : null,
       JSON.parse(JSON.stringify(this.themeAreas)),
@@ -37,6 +42,7 @@ export class DungeonState {
       this.secretDoors ? [...this.secretDoors] : [],
       this.interiorWalls ? [...this.interiorWalls] : [],
       this.invisibleWalls ? [...this.invisibleWalls] : [],
+      this.stairs ? JSON.parse(JSON.stringify(this.stairs)) : [],
       JSON.parse(JSON.stringify(this.config))
     );
   }
@@ -52,6 +58,7 @@ export class DungeonState {
       secretDoors: this.secretDoors,
       interiorWalls: this.interiorWalls,
       invisibleWalls: this.invisibleWalls,
+      stairs: this.stairs,
       config: this.config,
     });
   }
@@ -68,6 +75,7 @@ export class DungeonState {
     const secretDoors = obj.secretDoors ? obj.secretDoors : [];
     const interiorWalls = obj.interiorWalls ? obj.interiorWalls : [];
     const invisibleWalls = obj.invisibleWalls ? obj.invisibleWalls : [];
+    const stairs = obj.stairs ? obj.stairs : [];
     // fill in any new defaults
     const config = foundry.utils.mergeObject(defaultConfig(), obj.config);
     return new DungeonState(
@@ -77,6 +85,7 @@ export class DungeonState {
       secretDoors,
       interiorWalls,
       invisibleWalls,
+      stairs,
       config
     );
   }

@@ -1,3 +1,8 @@
+# 4.1.0
+
+- Add stairs drawing tool.
+- Add keyboard shortcuts for drawing tools.
+
 # 4.0.0
 
 - Foundry v13 compatibility.

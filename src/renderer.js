@@ -101,6 +101,12 @@ const renderPass = async (container, state) => {
     drawSecretDoor(doorGfx, wallGfx, wallMask, state.config, secretDoor);
   }
 
+  // draw stairs
+  const stairsGfx = new PIXI.Graphics();
+  for (const stair of state.stairs || []) {
+    drawStairs(stairsGfx, state.config, stair);
+  }
+
   // layer everything properly
   container.addChild(floorGfx);
   container.addChild(interiorShadowGfx);
@@ -149,6 +155,7 @@ const renderPass = async (container, state) => {
       }
     }
   }
+  container.addChild(stairsGfx);
   container.addChild(wallGfx);
   container.addChild(doorGfx);
 };
@@ -193,7 +200,7 @@ const drawThemeAreas = async (container, state) => {
 /** Try-catch wrapper around loadTexture. */
 const getTexture = async (path) => {
   try {
-    const texture = await loadTexture(path);
+    const texture = await foundry.canvas.loadTexture(path);
     if (!texture) {
       ui.notifications.error(
         `${game.i18n.localize("DD.TextureLoadFailure")}: ${path}`
@@ -762,4 +769,48 @@ const drawDoorShadow = (gfx, config, door) => {
     doorRect[0],
     doorRect[1]
   );
+};
+
+/**
+ * Draw stairs as parallel lines within a trapezoid shape.
+ * @param {PIXI.Graphics} gfx - Graphics object to draw on
+ * @param {Object} config - Dungeon config with wall color settings
+ * @param {Object} stair - Stair data { x1, y1, x2, y2, x3, y3, x4, y4 }
+ */
+const drawStairs = (gfx, config, stair) => {
+  const { x1, y1, x2, y2, x3, y3, x4, y4 } = stair;
+
+  // Calculate perpendicular distance (stair length)
+  const perpDist = Math.sqrt((x3 - x1) ** 2 + (y3 - y1) ** 2);
+
+  if (perpDist < 1) return;
+
+  // Fixed line spacing (1/3 of grid size)
+  const lineSpacing = canvas.grid.size / 3;
+  const lineCount = Math.max(2, Math.floor(perpDist / lineSpacing) + 1);
+
+  // Use stairs color
+  gfx.lineStyle({
+    width: config.wallThickness || 8,
+    color: PIXI.utils.string2hex(config.stairsColor || "#000000"),
+    alpha: 1.0,
+    alignment: 0.5,
+    cap: "round",
+  });
+
+  for (let i = 0; i < lineCount; i++) {
+    const t = lineCount > 1 ? i / (lineCount - 1) : 0;
+
+    // Interpolate start point along left edge (x1,y1 → x3,y3)
+    const startX = x1 + (x3 - x1) * t;
+    const startY = y1 + (y3 - y1) * t;
+
+    // Interpolate end point along right edge (x2,y2 → x4,y4)
+    const endX = x2 + (x4 - x2) * t;
+    const endY = y2 + (y4 - y2) * t;
+
+    // Draw line
+    gfx.moveTo(startX, startY);
+    gfx.lineTo(endX, endY);
+  }
 };

@@ -14,6 +14,76 @@ function isGridPainter() {
   return game.activeDungeonDrawTool === "gridpainter";
 }
 
+function isStairs() {
+  return game.activeDungeonDrawTool === "stairs";
+}
+
+/**
+ * Calculate stair trapezoid geometry from first edge and mouse position.
+ * @param {Object} firstEdge - { x1, y1, x2, y2 } the first edge of the stairs
+ * @param {Object} mousePos - { x, y } current mouse position
+ * @returns {Object} - { x1, y1, x2, y2, x3, y3, x4, y4 } trapezoid corners
+ */
+function calculateStairGeometry(firstEdge, mousePos) {
+  const { x1, y1, x2, y2 } = firstEdge;
+
+  // First edge vector
+  const edgeVec = { x: x2 - x1, y: y2 - y1 };
+  const edgeLength = Math.sqrt(edgeVec.x ** 2 + edgeVec.y ** 2);
+
+  if (edgeLength < 1) {
+    return null;
+  }
+
+  // Perpendicular unit vector (rotated 90°)
+  const perpVec = { x: -edgeVec.y / edgeLength, y: edgeVec.x / edgeLength };
+
+  // Edge unit vector
+  const edgeUnit = { x: edgeVec.x / edgeLength, y: edgeVec.y / edgeLength };
+
+  // Mouse position relative to first edge start
+  const mouseVec = { x: mousePos.x - x1, y: mousePos.y - y1 };
+
+  // Perpendicular distance (stair length) - can be negative
+  const perpDist = mouseVec.x * perpVec.x + mouseVec.y * perpVec.y;
+
+  // Parallel position along edge (for width ratio)
+  const parallelPos = mouseVec.x * edgeUnit.x + mouseVec.y * edgeUnit.y;
+
+  // Calculate width ratio based on parallel position
+  // At center of edge -> 5% width (minimum)
+  // At edge endpoint -> 100% width (parallel lines)
+  // Beyond edge -> >100% width (reverse taper)
+  const edgeCenter = edgeLength / 2;
+  const distFromCenter = Math.abs(parallelPos - edgeCenter);
+  let widthRatio = Math.max(0.05, distFromCenter / edgeCenter);
+
+  // If mouse is beyond the edge endpoints, allow wider second edge
+  if (parallelPos < 0 || parallelPos > edgeLength) {
+    const beyondDist =
+      parallelPos < 0 ? -parallelPos : parallelPos - edgeLength;
+    widthRatio = 1 + beyondDist / edgeLength;
+  }
+
+  // Calculate second edge
+  const secondEdgeLength = edgeLength * widthRatio;
+
+  // Second edge start (perpendicular from x1, y1)
+  let x3 = x1 + perpVec.x * perpDist;
+  let y3 = y1 + perpVec.y * perpDist;
+
+  // Center the second edge relative to first edge
+  const offset = (edgeLength - secondEdgeLength) / 2;
+  x3 += edgeUnit.x * offset;
+  y3 += edgeUnit.y * offset;
+
+  // Second edge end
+  const x4 = x3 + edgeUnit.x * secondEdgeLength;
+  const y4 = y3 + edgeUnit.y * secondEdgeLength;
+
+  return { x1, y1, x2, y2, x3, y3, x4, y4 };
+}
+
 function findDungeonEntryAndNote() {
   for (const note of canvas.scene.notes) {
     const journalEntry = game.journal.get(note.entryId);
@@ -124,6 +194,12 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   constructor() {
     super();
     this.dungeon = null;
+    // Stairs drawing state: 0 = not drawing, 1 = first edge defined, waiting for depth
+    this.stairsPhase = 0;
+    this.stairsFirstEdge = null;
+    this.stairsPreview = null;
+    // Bound handler for phase 1 mouse tracking
+    this._stairsPhase1MouseMove = this._onStairsPhase1MouseMove.bind(this);
   }
 
   get documentCollection() {
@@ -192,6 +268,13 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           data.shape.points = [0, 0, 1, 0];
           data.bezierFactor = 0;
           break;
+        case "stairs":
+          data.shape.type =
+            foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
+          data.shape.points = [0, 0, 1, 0];
+          data.bezierFactor = 0;
+          data.strokeColor = "#444444";
+          break;
         case "freehand":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
@@ -216,6 +299,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         case "secretdoor":
         case "invisiblewall":
         case "themepainter":
+        case "stairs":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
           data.shape.width = strokeWidth + 1;
@@ -300,15 +384,61 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   /* -------------------------------------------- */
 
   /** @override */
-  _onClickLeft(event) {
+  async _onClickLeft(event) {
     const { preview, drawingsState, destination } = event.interactionData;
+
+    // Handle stairs phase 1 finalization (third click)
+    if (
+      isStairs() &&
+      this.stairsPhase === 1 &&
+      game.activeDungeonDrawMode === "add"
+    ) {
+      const mousePos = destination || event.interactionData.origin;
+      const stairGeom = calculateStairGeometry(this.stairsFirstEdge, mousePos);
+
+      if (stairGeom) {
+        // Create dungeon if needed
+        if (!this.dungeon) {
+          await this.createNewDungeon();
+        }
+        await this.dungeon.addStairs(stairGeom);
+      }
+
+      this._resetStairsState();
+      return;
+    }
+
     // Continue polygon point placement
-    if (drawingsState >= 1 && preview.isPolygon) {
+    if (drawingsState >= 1 && preview && preview.isPolygon) {
       preview._addPoint(destination, { snap: !event.shiftKey, round: true });
       preview._chain = true; // Note that we are now in chain mode
       return preview.refresh();
     }
     super._onClickLeft(event);
+  }
+
+  /** @override */
+  _onPointerMove(event) {
+    // Handle stairs phase 1 preview update on mouse move
+    if (
+      isStairs() &&
+      this.stairsPhase === 1 &&
+      game.activeDungeonDrawMode === "add"
+    ) {
+      const pos = event.getLocalPosition(this);
+      this._updateStairsPreview(pos);
+    }
+    super._onPointerMove(event);
+  }
+
+  /** @override */
+  _onClickRight(event) {
+    // Cancel stairs drawing on right-click
+    if (this.stairsPhase === 1) {
+      this._resetStairsState();
+      return;
+    }
+    super._onClickRight(event);
   }
 
   /** @override */
@@ -368,6 +498,30 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       // In theory this should never happen, but rarely does
       this.preview.addChild(preview);
     }
+
+    // Handle stairs phase 1 (defining depth after first edge is set)
+    if (
+      isStairs() &&
+      this.stairsPhase === 1 &&
+      game.activeDungeonDrawMode === "add"
+    ) {
+      const { destination } = event.interactionData;
+      this._updateStairsPreview(destination);
+      return;
+    }
+
+    // Handle stairs phase 0 - just draw the line preview (no stairs indicator yet)
+    if (
+      isStairs() &&
+      this.stairsPhase === 0 &&
+      game.activeDungeonDrawMode === "add" &&
+      drawingsState >= 1
+    ) {
+      preview._onMouseDraw(event);
+      event.interactionData.drawingsState = 2;
+      return;
+    }
+
     if (drawingsState >= 1) {
       // Deal with freehand-tool and gridpainter-tool specific handling in DrawingShape
       if (isFreehand()) {
@@ -386,10 +540,101 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         opcode === "addinteriorwall" ||
         opcode === "addsecretdoor" ||
         opcode === "addinvisiblewall" ||
-        opcode === "addgridpainter"
+        opcode === "addgridpainter" ||
+        opcode === "addstairs"
       ) {
         event.interactionData.drawingsState = 2;
       }
+    }
+  }
+
+  /**
+   * Draw stairs preview with the given geometry and alpha values.
+   * @param {Object} stairGeom - Trapezoid geometry { x1, y1, x2, y2, x3, y3, x4, y4 }
+   * @param {number} lineAlpha - Alpha for stair lines
+   * @param {number} outlineAlpha - Alpha for trapezoid outline
+   */
+  _drawStairsPreview(stairGeom, lineAlpha, outlineAlpha) {
+    if (!this.stairsPreview) {
+      this.stairsPreview = new PIXI.Graphics();
+      this.addChild(this.stairsPreview);
+    }
+    this.stairsPreview.clear();
+
+    const { x1, y1, x2, y2, x3, y3, x4, y4 } = stairGeom;
+
+    // Calculate line count based on perpendicular distance
+    const perpDist = Math.sqrt((x3 - x1) ** 2 + (y3 - y1) ** 2);
+    const lineSpacing = canvas.grid.size / 3;
+    const lineCount = Math.max(2, Math.floor(perpDist / lineSpacing) + 1);
+
+    // Draw stair lines
+    this.stairsPreview.lineStyle({
+      width: 2,
+      color: 0x000000,
+      alpha: lineAlpha,
+    });
+    for (let i = 0; i < lineCount; i++) {
+      const t = lineCount > 1 ? i / (lineCount - 1) : 0;
+      const startX = x1 + (x3 - x1) * t;
+      const startY = y1 + (y3 - y1) * t;
+      const endX = x2 + (x4 - x2) * t;
+      const endY = y2 + (y4 - y2) * t;
+      this.stairsPreview.moveTo(startX, startY);
+      this.stairsPreview.lineTo(endX, endY);
+    }
+
+    // Draw trapezoid outline
+    this.stairsPreview.lineStyle({
+      width: 1,
+      color: 0x0000ff,
+      alpha: outlineAlpha,
+    });
+    this.stairsPreview.moveTo(x1, y1);
+    this.stairsPreview.lineTo(x2, y2);
+    this.stairsPreview.lineTo(x4, y4);
+    this.stairsPreview.lineTo(x3, y3);
+    this.stairsPreview.lineTo(x1, y1);
+  }
+
+  /**
+   * Update stairs preview during phase 1 (depth selection).
+   */
+  _updateStairsPreview(mousePos) {
+    if (!this.stairsFirstEdge) return;
+    const stairGeom = calculateStairGeometry(this.stairsFirstEdge, mousePos);
+    if (!stairGeom) return;
+    this._drawStairsPreview(stairGeom, 0.8, 0.5);
+  }
+
+  /**
+   * Handle mouse move during stairs phase 1 (canvas-level listener).
+   */
+  _onStairsPhase1MouseMove(event) {
+    if (this.stairsPhase !== 1) return;
+    const pos = event.getLocalPosition(this);
+    this._updateStairsPreview(pos);
+  }
+
+  /**
+   * Start listening for phase 1 mouse movement.
+   */
+  _startStairsPhase1() {
+    this.stairsPhase = 1;
+    canvas.stage.on("pointermove", this._stairsPhase1MouseMove);
+  }
+
+  /**
+   * Clean up stairs drawing state
+   */
+  _resetStairsState() {
+    // Remove phase 1 mouse listener if active
+    canvas.stage.off("pointermove", this._stairsPhase1MouseMove);
+    this.stairsPhase = 0;
+    this.stairsFirstEdge = null;
+    if (this.stairsPreview) {
+      this.stairsPreview.destroy();
+      this.stairsPreview = null;
     }
   }
 
@@ -541,6 +786,29 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           data.x + data.shape.points[2],
           data.y + data.shape.points[3]
         );
+      } else if (opcode === "addstairs") {
+        // Stairs has a two-phase drawing process
+        if (this.stairsPhase === 0) {
+          // Phase 0 -> 1: First edge defined, now wait for depth
+          const data = preview.document.toObject(false);
+          this._maybeSnapLastPoint(data, event.shiftKey);
+          this.stairsFirstEdge = {
+            x1: data.x,
+            y1: data.y,
+            x2: data.x + data.shape.points[2],
+            y2: data.y + data.shape.points[3],
+          };
+          // Start phase 1 with canvas-level mouse tracking
+          this._startStairsPhase1();
+          // Cancel the line preview but keep stairs active
+          this._onDragLeftCancel(event);
+          // Immediately show phase 1 preview at current mouse position
+          const mousePos =
+            event.interactionData.destination || event.interactionData.origin;
+          this._updateStairsPreview(mousePos);
+          return;
+        }
+        // Phase 1 is handled in _onClickLeft
       } else if (minDistance || completePolygon) {
         event.interactionData.drawingsState = 0;
         const data = preview.document.toObject(false);
@@ -616,6 +884,9 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         } else if (opcode === "removethemepainter") {
           const rect = this._maybeSnappedRect(createData, event.shiftKey);
           await this.dungeon.removeThemeAreas(rect);
+        } else if (opcode === "removestairs") {
+          const rect = this._maybeSnappedRect(createData, event.shiftKey);
+          await this.dungeon.removeStairs(rect);
         } else if (opcode === "removegridpainter") {
           await this.dungeon.removeGridPaintedArea(
             createData.flags.gridPainterHelper.paintedGeometry

@@ -110,6 +110,12 @@ export class DungeonDrawToolbar extends Application {
           icon: "fas fa-eye-slash",
           isActive: game.activeDungeonDrawTool === "invisiblewall",
         },
+        {
+          name: "stairs",
+          title: "DD.ButtonTitleStairs",
+          icon: "fas fa-stairs",
+          isActive: game.activeDungeonDrawTool === "stairs",
+        },
       ],
       row3: [
         {
