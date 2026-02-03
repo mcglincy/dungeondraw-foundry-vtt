@@ -31,6 +31,7 @@ export const defaultConfig = () => {
     secretDoorSColor: "#ffffff",
     secretDoorStyleGM: "secret",
     secretDoorStylePlayer: "wall",
+    stairsColor: "#000000",
     threeDDoorTexture:
       "modules/dungeon-draw/assets/textures/3d_arena-gate-texture.webp",
     threeDDoorTextureTint: "",

@@ -583,15 +583,6 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   }
 
   /** @override */
-  _onDragLeftCancel(event) {
-    // Clean up stairs preview during phase 0 cancel
-    if (isStairs() && this.stairsPhase === 0 && this.stairsPreview) {
-      this.stairsPreview.clear();
-    }
-    super._onDragLeftCancel(event);
-  }
-
-  /** @override */
   _onClickLeft2(event) {
     const { drawingsState, preview } = event.interactionData;
 
@@ -660,7 +651,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       return;
     }
 
-    // Handle stairs phase 0 - show live preview while dragging first edge
+    // Handle stairs phase 0 - just draw the line preview (no stairs indicator yet)
     if (
       isStairs() &&
       this.stairsPhase === 0 &&
@@ -669,14 +660,6 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     ) {
       preview._onMouseDraw(event);
       event.interactionData.drawingsState = 2;
-      const { origin, destination } = event.interactionData;
-      const firstEdge = {
-        x1: origin.x,
-        y1: origin.y,
-        x2: destination.x,
-        y2: destination.y,
-      };
-      this._updateStairsPreviewPhase0(firstEdge);
       return;
     }
 
@@ -778,31 +761,6 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     const stairGeom = calculateStairGeometry(this.stairsFirstEdge, mousePos);
     if (!stairGeom) return;
     this._drawStairsPreview(stairGeom, 0.8, 0.5);
-  }
-
-  /**
-   * Update stairs preview during phase 0 (dragging first edge).
-   * Shows preview with default depth so user can see stairs forming.
-   */
-  _updateStairsPreviewPhase0(firstEdge) {
-    const { x1, y1, x2, y2 } = firstEdge;
-    const edgeLength = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-    if (edgeLength < 1) {
-      if (this.stairsPreview) this.stairsPreview.clear();
-      return;
-    }
-
-    // Create mock mouse position for parallel stairs at default depth
-    const defaultDepth = canvas.grid.size;
-    const perpVec = { x: -(y2 - y1) / edgeLength, y: (x2 - x1) / edgeLength };
-    const mockMousePos = {
-      x: x2 + perpVec.x * defaultDepth,
-      y: y2 + perpVec.y * defaultDepth,
-    };
-
-    const stairGeom = calculateStairGeometry(firstEdge, mockMousePos);
-    if (!stairGeom) return;
-    this._drawStairsPreview(stairGeom, 0.5, 0.3);
   }
 
   /**

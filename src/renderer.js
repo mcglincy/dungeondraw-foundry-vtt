@@ -155,9 +155,9 @@ const renderPass = async (container, state) => {
       }
     }
   }
+  container.addChild(stairsGfx);
   container.addChild(wallGfx);
   container.addChild(doorGfx);
-  container.addChild(stairsGfx);
 };
 
 const drawThemeAreas = async (container, state) => {
@@ -789,10 +789,10 @@ const drawStairs = (gfx, config, stair) => {
   const lineSpacing = canvas.grid.size / 3;
   const lineCount = Math.max(2, Math.floor(perpDist / lineSpacing) + 1);
 
-  // Use wall color for stairs
+  // Use stairs color
   gfx.lineStyle({
     width: config.wallThickness || 8,
-    color: PIXI.utils.string2hex(config.wallColor || "#000000"),
+    color: PIXI.utils.string2hex(config.stairsColor || "#000000"),
     alpha: 1.0,
     alignment: 0.5,
     cap: "round",
