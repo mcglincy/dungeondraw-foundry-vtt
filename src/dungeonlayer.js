@@ -109,6 +109,13 @@ function isGridPainter() {
   return game.activeDungeonDrawTool === "gridpainter";
 }
 
+function isThemePainterGrid() {
+  return (
+    game.activeDungeonDrawTool === "themepainter" &&
+    game.dungeonDrawShapes?.themepainter === "grid"
+  );
+}
+
 function isStairs() {
   return game.activeDungeonDrawTool === "stairs";
 }
@@ -400,6 +407,14 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
               foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
             data.shape.width = strokeWidth + 1;
             data.shape.height = strokeWidth + 1;
+          } else if (shapeMode === "grid") {
+            // Grid mode uses same setup as gridpainter
+            data.shape.type =
+              foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
+            data.shape.width = strokeWidth + 1;
+            data.shape.height = strokeWidth + 1;
+            data.strokeAlpha = 0.0;
+            data.fillAlpha = 0.0;
           } else {
             // Default: polygon mode
             data.shape.type =
@@ -667,7 +682,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       // Deal with freehand-tool and gridpainter-tool specific handling in DrawingShape
       if (isFreehand()) {
         onFreeHandMouseDraw(preview, event);
-      } else if (isGridPainter()) {
+      } else if (isGridPainter() || isThemePainterGrid()) {
         onGridPainterMouseDraw(preview, event);
       } else {
         preview._onMouseDraw(event);
@@ -687,7 +702,8 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       const isNonPolygonThemePainter =
         opcode === "addthemepainter" &&
         (themePainterShapeMode === "square" ||
-          themePainterShapeMode === "ellipse");
+          themePainterShapeMode === "ellipse" ||
+          themePainterShapeMode === "grid");
       if (
         !preview.isPolygon ||
         isFreehand() ||
@@ -1041,7 +1057,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         }
         // Phase 1 is handled in _onClickLeft
       } else if (opcode === "addthemepainter") {
-        // Handle themepainter square/ellipse modes separately (polygon mode falls through to below)
+        // Handle themepainter square/ellipse/grid modes separately (polygon mode falls through to below)
         const themePainterShapeMode =
           game.dungeonDrawShapes?.themepainter || "polygon";
         if (
@@ -1069,6 +1085,13 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
             );
             await this.dungeon.addThemeArea(offsetPoints);
           }
+        } else if (themePainterShapeMode === "grid") {
+          // Grid mode - use painted geometry from grid painter helper
+          event.interactionData.drawingsState = 0;
+          preview._chain = false;
+          await this.dungeon.addThemeAreaFromGeometry(
+            preview.document.flags.gridPainterHelper.paintedGeometry
+          );
         } else if (minDistance || completePolygon) {
           // Polygon mode - needs minDistance or completePolygon
           event.interactionData.drawingsState = 0;
@@ -1161,8 +1184,8 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         }
       }
 
-      // Cancel the GridPainter Preview
-      if (isGridPainter()) {
+      // Cancel the GridPainter Preview (also for theme painter grid mode)
+      if (isGridPainter() || isThemePainterGrid()) {
         const drawings = await Promise.all(
           preview.document.flags.gridPainterHelper.gridDrawings
         );

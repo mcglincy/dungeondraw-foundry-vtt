@@ -191,7 +191,7 @@ export class DungeonDrawToolbar extends Application {
     const toolModes = {
       interiorwall: ["line", "square", "ellipse", "polygon"],
       invisiblewall: ["line", "square", "ellipse", "polygon"],
-      themepainter: ["square", "ellipse", "polygon"],
+      themepainter: ["square", "ellipse", "polygon", "grid"],
     };
 
     const modes = toolModes[tool] || [];
@@ -282,6 +282,7 @@ export class DungeonDrawToolbar extends Application {
       square: '<i class="fas fa-square"></i>',
       ellipse: '<i class="fas fa-circle"></i>',
       polygon: '<i class="fas fa-draw-polygon"></i>',
+      grid: '<i class="fas fa-grid-3"></i>',
     };
     return icons[mode] || "";
   }

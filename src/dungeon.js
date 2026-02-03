@@ -484,6 +484,32 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
     await this.pushState(newState);
   }
 
+  async addThemeAreaFromGeometry(geometry) {
+    if (!geo.isValid(geometry)) {
+      ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));
+      return;
+    }
+
+    const themeKey = getThemePainterThemeKey();
+    const theme = getTheme(themeKey);
+
+    // Extract points from the geometry's exterior ring
+    // Handle both Polygon and MultiPolygon
+    const coords = geometry.getExteriorRing
+      ? geometry.getExteriorRing().getCoordinates()
+      : geometry.getGeometryN(0).getExteriorRing().getCoordinates();
+
+    const points = coords.map((c) => [c.x, c.y]);
+
+    const newArea = {
+      points,
+      config: theme.config,
+    };
+    const newState = this.history[this.historyIndex].clone();
+    newState.themeAreas.push(newArea);
+    await this.pushState(newState);
+  }
+
   // {x:, y:, height:, width:}
   async removeThemeAreas(rect) {
     const rectPoly = geo.rectToPolygon(rect);
