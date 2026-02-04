@@ -20,8 +20,16 @@ export const makeWalls = async (state) => {
     walls = makeWallsFromMulti(state.config, simplified, wallBreaks);
   }
 
-  const interiorWalls = makeInteriorWalls(state.config, state.interiorWalls);
-  const invisibleWalls = makeInvisibleWalls(state.config, state.invisibleWalls);
+  const interiorWalls = makeInteriorWalls(
+    state.config,
+    state.interiorWalls,
+    state.interiorWallShapes || []
+  );
+  const invisibleWalls = makeInvisibleWalls(
+    state.config,
+    state.invisibleWalls,
+    state.invisibleWallShapes || []
+  );
   const doors = makeDoors(state.config, state.doors);
   const secretDoors = makeSecretDoors(state.config, state.secretDoors);
   const allWalls = walls.concat(
@@ -137,22 +145,62 @@ const makeWallsFromPoly = (config, poly, doors) => {
   return allWalls;
 };
 
-/** [[x1,y1,x2,y2],...] */
-const makeInteriorWalls = (config, walls) => {
+/** [[x1,y1,x2,y2],...] and shapes [[[x,y],...], ...] */
+const makeInteriorWalls = (config, walls, shapes = []) => {
   const allWalls = [];
+
+  // Process existing segments (1:1 mapping)
   for (const wall of walls) {
     const data = wallData(config, wall[0], wall[1], wall[2], wall[3]);
     allWalls.push(data);
   }
+
+  // Process shapes - simplify then extract segments (same as room walls)
+  for (const shape of shapes) {
+    const poly = geo.pointsToPolygon(shape);
+    const simplified = geo.simplify(poly, 10.0); // same tolerance as room walls
+    const coords = simplified.getExteriorRing().getCoordinates();
+    for (let i = 0; i < coords.length - 1; i++) {
+      const data = wallData(
+        config,
+        coords[i].x,
+        coords[i].y,
+        coords[i + 1].x,
+        coords[i + 1].y
+      );
+      allWalls.push(data);
+    }
+  }
+
   return allWalls;
 };
 
-const makeInvisibleWalls = (config, walls) => {
+const makeInvisibleWalls = (config, walls, shapes = []) => {
   const allWalls = [];
+
+  // Process existing segments (1:1 mapping)
   for (const wall of walls) {
     const data = invisibleWallData(config, wall[0], wall[1], wall[2], wall[3]);
     allWalls.push(data);
   }
+
+  // Process shapes - simplify then extract segments (same as room walls)
+  for (const shape of shapes) {
+    const poly = geo.pointsToPolygon(shape);
+    const simplified = geo.simplify(poly, 10.0); // same tolerance as room walls
+    const coords = simplified.getExteriorRing().getCoordinates();
+    for (let i = 0; i < coords.length - 1; i++) {
+      const data = invisibleWallData(
+        config,
+        coords[i].x,
+        coords[i].y,
+        coords[i + 1].x,
+        coords[i + 1].y
+      );
+      allWalls.push(data);
+    }
+  }
+
   return allWalls;
 };
 

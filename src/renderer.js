@@ -83,12 +83,28 @@ const renderPass = async (container, state) => {
     }
   }
 
+  // draw interior wall shapes (dense geometry for smooth curves)
+  for (const shape of state.interiorWallShapes || []) {
+    drawInteriorWallShapeShadow(interiorShadowGfx, state.config, shape);
+    if (state.config.wallTexture) {
+      drawInteriorWallShape(wallMask, maskConfig, shape);
+    } else {
+      drawInteriorWallShape(wallGfx, state.config, shape);
+    }
+  }
+
   // draw invisible walls
   for (const wall of state.invisibleWalls) {
     // draw on the door gfx, so invis walls get layered on top of regular
     // walls. E.g., when used as visible windows.
     drawInvisibleWallShadow(interiorShadowGfx, state.config, wall);
     drawInvisibleWall(doorGfx, wallGfx, wallMask, state.config, wall);
+  }
+
+  // draw invisible wall shapes (dense geometry for smooth curves)
+  for (const shape of state.invisibleWallShapes || []) {
+    drawInvisibleWallShapeShadow(interiorShadowGfx, state.config, shape);
+    drawInvisibleWallShape(doorGfx, state.config, shape);
   }
 
   // draw doors
@@ -485,6 +501,55 @@ const drawInteriorWallShadow = (gfx, config, wall) => {
   });
   gfx.moveTo(wall[2], wall[3]);
   gfx.lineTo(wall[0], wall[1]);
+};
+
+// Draw interior wall shape as closed polygon (dense points for smooth curves)
+// shape is [[x, y], [x, y], ...]
+const drawInteriorWallShape = (wallGfx, config, shape) => {
+  wallGfx.lineStyle({
+    width: config.wallThickness,
+    color: PIXI.utils.string2hex(config.wallColor),
+    alpha: 1.0,
+    alignment: 0.5, // middle
+    join: "round",
+  });
+  const flatCoords = shape.flat();
+  wallGfx.drawPolygon(flatCoords);
+};
+
+const drawInteriorWallShapeShadow = (gfx, config, shape) => {
+  gfx.lineStyle({
+    width: config.wallThickness + config.interiorShadowThickness,
+    color: PIXI.utils.string2hex(config.interiorShadowColor),
+    alignment: 0.5, // middle
+    join: "round",
+  });
+  const flatCoords = shape.flat();
+  gfx.drawPolygon(flatCoords);
+};
+
+// Draw invisible wall shape as closed polygon (dense points for smooth curves)
+const drawInvisibleWallShape = (doorGfx, config, shape) => {
+  doorGfx.lineStyle({
+    width: config.invisibleWallLineThickness,
+    color: PIXI.utils.string2hex(config.invisibleWallColor),
+    alpha: 1.0,
+    alignment: 0.5, // middle
+    join: "round",
+  });
+  const flatCoords = shape.flat();
+  doorGfx.drawPolygon(flatCoords);
+};
+
+const drawInvisibleWallShapeShadow = (gfx, config, shape) => {
+  gfx.lineStyle({
+    width: config.invisibleWallLineThickness + config.interiorShadowThickness,
+    color: PIXI.utils.string2hex(config.interiorShadowColor),
+    alignment: 0.5, // middle
+    join: "round",
+  });
+  const flatCoords = shape.flat();
+  gfx.drawPolygon(flatCoords);
 };
 
 // [x1, y1, x2, y2]

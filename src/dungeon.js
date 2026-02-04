@@ -206,6 +206,30 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
     await this._addDoor(x1, y1, x2, y2, "invisibleWalls");
   }
 
+  // Batch add multiple invisible wall segments in a single pushState
+  async addInvisibleWallSegments(segments) {
+    const newState = this.history[this.historyIndex].clone();
+    for (const seg of segments) {
+      newState.invisibleWalls.push([seg[0], seg[1], seg[2], seg[3]]);
+    }
+    await this.pushState(newState);
+  }
+
+  // Add invisible wall shape (dense points for smooth rendering)
+  async addInvisibleWallShape(points) {
+    const newState = this.history[this.historyIndex].clone();
+    newState.invisibleWallShapes.push(points);
+    await this.pushState(newState);
+  }
+
+  // Add ellipse as invisible wall shape
+  async addInvisibleWallEllipse(x, y, width, height) {
+    const ellipsePoly = geo.ellipse(x, y, width, height);
+    const coords = ellipsePoly.getExteriorRing().getCoordinates();
+    const points = coords.map((c) => [c.x, c.y]);
+    await this.addInvisibleWallShape(points);
+  }
+
   async _addDoor(x1, y1, x2, y2, doorProperty) {
     const newState = this.history[this.historyIndex].clone();
     const doorPoly = geo.twoPointsToLineString(x1, y1, x2, y2);
@@ -247,20 +271,67 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
     await this.pushState(newState);
   }
 
+  // Batch add multiple interior wall segments in a single pushState
+  async addInteriorWallSegments(segments) {
+    const newState = this.history[this.historyIndex].clone();
+    for (const seg of segments) {
+      const wallsToAdd = geo.maybeSplitWall(
+        seg[0],
+        seg[1],
+        seg[2],
+        seg[3],
+        newState.doors
+      );
+      newState.interiorWalls = newState.interiorWalls.concat(wallsToAdd);
+    }
+    await this.pushState(newState);
+  }
+
+  // Add interior wall shape (dense points for smooth rendering)
+  async addInteriorWallShape(points) {
+    const newState = this.history[this.historyIndex].clone();
+    newState.interiorWallShapes.push(points);
+    await this.pushState(newState);
+  }
+
+  // Add ellipse as interior wall shape
+  async addInteriorWallEllipse(x, y, width, height) {
+    const ellipsePoly = geo.ellipse(x, y, width, height);
+    const coords = ellipsePoly.getExteriorRing().getCoordinates();
+    const points = coords.map((c) => [c.x, c.y]);
+    await this.addInteriorWallShape(points);
+  }
+
   // {x:, y:, height:, width:}
   async removeInteriorWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
-    const wallsToKeep = this.history[this.historyIndex].interiorWalls.filter(
-      (w) => {
-        const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
-        return !geo.intersects(rectPoly, wallPoly);
+    const oldState = this.history[this.historyIndex];
+
+    // Filter existing segments
+    const wallsToKeep = oldState.interiorWalls.filter((w) => {
+      const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
+      return !geo.intersects(rectPoly, wallPoly);
+    });
+
+    // Filter shapes
+    const shapesToKeep = (oldState.interiorWallShapes || []).filter((shape) => {
+      try {
+        const shapePoly = geo.pointsToPolygon(shape);
+        return !geo.intersects(rectPoly, shapePoly);
+      } catch (error) {
+        console.log(error);
+        return false;
       }
-    );
-    if (
-      wallsToKeep.length != this.history[this.historyIndex].interiorWalls.length
-    ) {
-      const newState = this.history[this.historyIndex].clone();
+    });
+
+    const hasRemovals =
+      wallsToKeep.length !== oldState.interiorWalls.length ||
+      shapesToKeep.length !== (oldState.interiorWallShapes || []).length;
+
+    if (hasRemovals) {
+      const newState = oldState.clone();
       newState.interiorWalls = wallsToKeep;
+      newState.interiorWallShapes = shapesToKeep;
       await this.pushState(newState);
     }
   }
@@ -268,18 +339,35 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
   // {x:, y:, height:, width:}
   async removeInvisibleWalls(rect) {
     const rectPoly = geo.rectToPolygon(rect);
-    const wallsToKeep = this.history[this.historyIndex].invisibleWalls.filter(
-      (w) => {
-        const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
-        return !geo.intersects(rectPoly, wallPoly);
+    const oldState = this.history[this.historyIndex];
+
+    // Filter existing segments
+    const wallsToKeep = oldState.invisibleWalls.filter((w) => {
+      const wallPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
+      return !geo.intersects(rectPoly, wallPoly);
+    });
+
+    // Filter shapes
+    const shapesToKeep = (oldState.invisibleWallShapes || []).filter(
+      (shape) => {
+        try {
+          const shapePoly = geo.pointsToPolygon(shape);
+          return !geo.intersects(rectPoly, shapePoly);
+        } catch (error) {
+          console.log(error);
+          return false;
+        }
       }
     );
-    if (
-      wallsToKeep.length !=
-      this.history[this.historyIndex].invisibleWalls.length
-    ) {
-      const newState = this.history[this.historyIndex].clone();
+
+    const hasRemovals =
+      wallsToKeep.length !== oldState.invisibleWalls.length ||
+      shapesToKeep.length !== (oldState.invisibleWallShapes || []).length;
+
+    if (hasRemovals) {
+      const newState = oldState.clone();
       newState.invisibleWalls = wallsToKeep;
+      newState.invisibleWallShapes = shapesToKeep;
       await this.pushState(newState);
     }
   }

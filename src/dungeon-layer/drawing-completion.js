@@ -1,6 +1,5 @@
 import {
   rectangleToWallSegments,
-  ellipseToWallSegments,
   polygonToWallSegments,
   rectangleToPolygonPoints,
   ellipseToPolygonPoints,
@@ -75,20 +74,18 @@ export async function handleInteriorWallCompletion(ctx) {
       rect.width,
       rect.height
     );
-    for (const seg of segments) {
-      await ctx.dungeon.addInteriorWall(seg[0], seg[1], seg[2], seg[3]);
-    }
+    await ctx.dungeon.addInteriorWallSegments(segments);
   } else if (wallShapeMode === "ellipse") {
+    // Use shape method for smooth rendering with dense points
     const rect = ctx.layer._maybeSnappedRect(ctx.data, ctx.event.shiftKey);
-    const segments = ellipseToWallSegments(
-      rect.x,
-      rect.y,
+    const centerX = rect.x + rect.width / 2;
+    const centerY = rect.y + rect.height / 2;
+    await ctx.dungeon.addInteriorWallEllipse(
+      centerX,
+      centerY,
       rect.width,
       rect.height
     );
-    for (const seg of segments) {
-      await ctx.dungeon.addInteriorWall(seg[0], seg[1], seg[2], seg[3]);
-    }
   } else if (wallShapeMode === "polygon") {
     const createData = ctx.layer.constructor.placeableClass.normalizeShape(
       ctx.data
@@ -97,9 +94,7 @@ export async function handleInteriorWallCompletion(ctx) {
     ctx.layer._autoClosePolygon(createData);
     const offsetPoints = createDataOffsetPoints(createData);
     const segments = polygonToWallSegments(offsetPoints);
-    for (const seg of segments) {
-      await ctx.dungeon.addInteriorWall(seg[0], seg[1], seg[2], seg[3]);
-    }
+    await ctx.dungeon.addInteriorWallSegments(segments);
   }
 }
 
@@ -128,20 +123,18 @@ export async function handleInvisibleWallCompletion(ctx) {
       rect.width,
       rect.height
     );
-    for (const seg of segments) {
-      await ctx.dungeon.addInvisibleWall(seg[0], seg[1], seg[2], seg[3]);
-    }
+    await ctx.dungeon.addInvisibleWallSegments(segments);
   } else if (wallShapeMode === "ellipse") {
+    // Use shape method for smooth rendering with dense points
     const rect = ctx.layer._maybeSnappedRect(ctx.data, ctx.event.shiftKey);
-    const segments = ellipseToWallSegments(
-      rect.x,
-      rect.y,
+    const centerX = rect.x + rect.width / 2;
+    const centerY = rect.y + rect.height / 2;
+    await ctx.dungeon.addInvisibleWallEllipse(
+      centerX,
+      centerY,
       rect.width,
       rect.height
     );
-    for (const seg of segments) {
-      await ctx.dungeon.addInvisibleWall(seg[0], seg[1], seg[2], seg[3]);
-    }
   } else if (wallShapeMode === "polygon") {
     const createData = ctx.layer.constructor.placeableClass.normalizeShape(
       ctx.data
@@ -150,9 +143,7 @@ export async function handleInvisibleWallCompletion(ctx) {
     ctx.layer._autoClosePolygon(createData);
     const offsetPoints = createDataOffsetPoints(createData);
     const segments = polygonToWallSegments(offsetPoints);
-    for (const seg of segments) {
-      await ctx.dungeon.addInvisibleWall(seg[0], seg[1], seg[2], seg[3]);
-    }
+    await ctx.dungeon.addInvisibleWallSegments(segments);
   }
 }
 
