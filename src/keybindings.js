@@ -1,5 +1,5 @@
 import * as constants from "./constants.js";
-import { DungeonLayer } from "./dungeonlayer.js";
+import { DungeonLayer } from "./dungeon-layer/index.js";
 import { toolbar } from "./dungeondraw.js";
 
 export class Keybindings {

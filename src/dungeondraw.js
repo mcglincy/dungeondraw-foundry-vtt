@@ -1,5 +1,5 @@
 import { ConfigSheet } from "./configsheet.js";
-import { DungeonLayer } from "./dungeonlayer.js";
+import { DungeonLayer } from "./dungeon-layer/index.js";
 import * as constants from "./constants.js";
 import { GeneratorSheet } from "./generatorsheet.js";
 import { Keybindings } from "./keybindings";
