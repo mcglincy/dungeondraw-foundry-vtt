@@ -83,8 +83,7 @@ export class DungeonDrawToolbar extends Application {
         {
           name: "gridpainter",
           title: "DD.ButtonTitleGridPainter",
-          //TODO change the icon
-          icon: "fas fa-grid-3",
+          icon: "fas fa-th",
           isActive: game.activeDungeonDrawTool === "gridpainter",
         },
       ],
@@ -159,6 +158,10 @@ export class DungeonDrawToolbar extends Application {
 
   controlToolClick(event) {
     const activeTool = $(event.currentTarget).data("tool");
+    // Clean up stairs preview state when switching away from stairs tool
+    if (game.activeDungeonDrawTool === "stairs" && activeTool !== "stairs") {
+      canvas.dungeon?._resetStairsState?.();
+    }
     game.activeDungeonDrawTool = activeTool;
     this.updateActiveCss();
   }
@@ -259,20 +262,24 @@ export class DungeonDrawToolbar extends Application {
       e.preventDefault();
       e.stopPropagation();
       const mode = $(e.currentTarget).data("mode");
+      // Defensive check for game.dungeonDrawShapes
+      if (!game.dungeonDrawShapes) game.dungeonDrawShapes = {};
       game.dungeonDrawShapes[tool] = mode;
       game.activeDungeonDrawTool = tool;
       toolbar.updateActiveCss();
       menu.remove();
     });
 
-    // Close menu when clicking elsewhere (with a small delay to let item clicks register)
-    setTimeout(() => {
-      $(document).one("mousedown contextmenu", (e) => {
-        if (!$(e.target).closest("#dd-shape-menu").length) {
-          menu.remove();
-        }
-      });
-    }, 10);
+    // Close menu when clicking elsewhere using capture phase for reliable detection
+    const closeHandler = (e) => {
+      if (!$(e.target).closest("#dd-shape-menu").length) {
+        menu.remove();
+        document.removeEventListener("mousedown", closeHandler, true);
+        document.removeEventListener("contextmenu", closeHandler, true);
+      }
+    };
+    document.addEventListener("mousedown", closeHandler, true);
+    document.addEventListener("contextmenu", closeHandler, true);
   }
 
   /** Get FontAwesome icon for a shape mode */
@@ -282,7 +289,7 @@ export class DungeonDrawToolbar extends Application {
       square: '<i class="fas fa-square"></i>',
       ellipse: '<i class="fas fa-circle"></i>',
       polygon: '<i class="fas fa-draw-polygon"></i>',
-      grid: '<i class="fas fa-grid-3"></i>',
+      grid: '<i class="fas fa-th"></i>',
     };
     return icons[mode] || "";
   }

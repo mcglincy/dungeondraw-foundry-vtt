@@ -319,7 +319,7 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
         const shapePoly = geo.pointsToPolygon(shape);
         return !geo.intersects(rectPoly, shapePoly);
       } catch (error) {
-        console.log(error);
+        console.warn("DungeonDraw: Invalid interior wall shape, removing:", error);
         return false;
       }
     });
@@ -354,7 +354,7 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
           const shapePoly = geo.pointsToPolygon(shape);
           return !geo.intersects(rectPoly, shapePoly);
         } catch (error) {
-          console.log(error);
+          console.warn("DungeonDraw: Invalid invisible wall shape, removing:", error);
           return false;
         }
       }
@@ -583,9 +583,18 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
 
     // Extract points from the geometry's exterior ring
     // Handle both Polygon and MultiPolygon
-    const coords = geometry.getExteriorRing
-      ? geometry.getExteriorRing().getCoordinates()
-      : geometry.getGeometryN(0).getExteriorRing().getCoordinates();
+    let exteriorRing;
+    if (geometry.getExteriorRing) {
+      exteriorRing = geometry.getExteriorRing();
+    } else if (geometry.getNumGeometries && geometry.getNumGeometries() > 0) {
+      const firstGeom = geometry.getGeometryN(0);
+      exteriorRing = firstGeom?.getExteriorRing?.();
+    }
+    if (!exteriorRing) {
+      ui.notifications.error(game.i18n.localize("DD.ErrorInvalidShape"));
+      return;
+    }
+    const coords = exteriorRing.getCoordinates();
 
     const points = coords.map((c) => [c.x, c.y]);
 
