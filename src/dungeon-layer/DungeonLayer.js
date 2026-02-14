@@ -370,6 +370,25 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   }
 
   /** @override */
+  async _onDragLeftCancel(event) {
+    // Clean up gridpainter/theme painter preview drawings on cancel
+    const preview = event.interactionData?.preview;
+    if (
+      (isGridPainter() || isThemePainterGrid()) &&
+      preview?.document?.flags?.gridPainterHelper?.gridDrawings?.length
+    ) {
+      const drawings = await Promise.all(
+        preview.document.flags.gridPainterHelper.gridDrawings
+      );
+      const ids = drawings.map((drawing) => drawing.id).filter(Boolean);
+      if (ids.length) {
+        await game.scenes.current.deleteEmbeddedDocuments("Drawing", ids);
+      }
+    }
+    super._onDragLeftCancel(event);
+  }
+
+  /** @override */
   _onClickLeft2(event) {
     const { drawingsState, preview } = event.interactionData;
 
