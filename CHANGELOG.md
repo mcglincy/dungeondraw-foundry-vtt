@@ -1,3 +1,7 @@
+# 4.3.1
+
+- Fix grid painter and theme painter (grid mode) preview drawings persisting on the canvas when cancelling with right-click.
+
 # 4.3.0
 
 - Add Window tool for drawing proximity-based window walls (hotkey: H).
