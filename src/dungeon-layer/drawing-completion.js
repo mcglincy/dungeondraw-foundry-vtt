@@ -50,6 +50,22 @@ export async function handleSecretDoorCompletion(ctx) {
 }
 
 /**
+ * Handle window drawing completion.
+ * @param {CompletionContext} ctx
+ */
+export async function handleWindowCompletion(ctx) {
+  ctx.event.interactionData.drawingsState = 0;
+  ctx.preview._chain = false;
+  ctx.layer._maybeSnapLastPoint(ctx.data, ctx.event.shiftKey);
+  await ctx.dungeon.addWindow(
+    ctx.data.x,
+    ctx.data.y,
+    ctx.data.x + ctx.data.shape.points[2],
+    ctx.data.y + ctx.data.shape.points[3]
+  );
+}
+
+/**
  * Handle interior wall drawing completion (line/square/ellipse/polygon modes).
  * @param {CompletionContext} ctx
  */
@@ -309,6 +325,9 @@ export async function handleRemoveCompletion(ctx, opcode) {
   } else if (opcode === "removesecretdoor") {
     const rect = ctx.layer._maybeSnappedRect(createData, ctx.event.shiftKey);
     await ctx.dungeon.removeSecretDoors(rect);
+  } else if (opcode === "removewindow") {
+    const rect = ctx.layer._maybeSnappedRect(createData, ctx.event.shiftKey);
+    await ctx.dungeon.removeWindows(rect);
   } else if (opcode === "removeinteriorwall") {
     const rect = ctx.layer._maybeSnappedRect(createData, ctx.event.shiftKey);
     await ctx.dungeon.removeInteriorWalls(rect);
