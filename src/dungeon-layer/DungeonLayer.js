@@ -478,6 +478,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         opcode === "adddoor" ||
         isLineMode ||
         opcode === "addsecretdoor" ||
+        opcode === "addwindow" ||
         isNonPolygonWallMode ||
         isNonPolygonThemePainter ||
         opcode === "addgridpainter" ||

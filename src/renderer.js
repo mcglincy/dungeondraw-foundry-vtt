@@ -907,10 +907,11 @@ const drawWindow = (doorGfx, wallGfx, wallMask, config, window) => {
   const perpX = (-deltaY / length) * (config.doorThickness / 2);
   const perpY = (deltaX / length) * (config.doorThickness / 2);
 
-  // draw 3 cross lines along the window
+  // draw cross lines along the window, starting at jamb1End and ending at windowEnd
   const numCrossLines = 3;
   for (let i = 0; i < numCrossLines; i++) {
-    const t = (i + 1) / (numCrossLines + 1);
+    // t ranges from 0 to 1, so first line is at start, last line is at end
+    const t = numCrossLines > 1 ? i / (numCrossLines - 1) : 0.5;
     const crossX = jamb1End[0] + (windowEnd[0] - jamb1End[0]) * t;
     const crossY = jamb1End[1] + (windowEnd[1] - jamb1End[1]) * t;
 

@@ -231,7 +231,13 @@ const makeSecretDoors = (config, doors) => {
 const makeWindows = (config, windows) => {
   const allWindows = [];
   for (const window of windows) {
-    const data = windowWallData(config, window[0], window[1], window[2], window[3]);
+    const data = windowWallData(
+      config,
+      window[0],
+      window[1],
+      window[2],
+      window[3]
+    );
     allWindows.push(data);
   }
   return allWindows;
