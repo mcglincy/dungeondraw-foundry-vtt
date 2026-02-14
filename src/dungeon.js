@@ -319,7 +319,10 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
         const shapePoly = geo.pointsToPolygon(shape);
         return !geo.intersects(rectPoly, shapePoly);
       } catch (error) {
-        console.warn("DungeonDraw: Invalid interior wall shape, removing:", error);
+        console.warn(
+          "DungeonDraw: Invalid interior wall shape, removing:",
+          error
+        );
         return false;
       }
     });
@@ -354,7 +357,10 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
           const shapePoly = geo.pointsToPolygon(shape);
           return !geo.intersects(rectPoly, shapePoly);
         } catch (error) {
-          console.warn("DungeonDraw: Invalid invisible wall shape, removing:", error);
+          console.warn(
+            "DungeonDraw: Invalid invisible wall shape, removing:",
+            error
+          );
           return false;
         }
       }
