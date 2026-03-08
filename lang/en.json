@@ -131,5 +131,11 @@
   "DD.KeybindingStairs": "Tool: Stairs",
   "DD.KeybindingThemePainter": "Tool: Theme Painter",
   "DD.KeybindingAddMode": "Mode: Add",
-  "DD.KeybindingRemoveMode": "Mode: Remove"
+  "DD.KeybindingRemoveMode": "Mode: Remove",
+  "DD.DrawMode.Line": "Line",
+  "DD.DrawMode.Square": "Square",
+  "DD.DrawMode.Ellipse": "Ellipse",
+  "DD.DrawMode.Polygon": "Polygon",
+  "DD.DrawMode.Grid": "Grid",
+  "DD.RightClickForOptions": "(right-click for options)"
 }

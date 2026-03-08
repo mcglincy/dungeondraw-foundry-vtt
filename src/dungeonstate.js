@@ -13,7 +13,9 @@ export class DungeonState {
     doors,
     secretDoors,
     interiorWalls,
+    interiorWallShapes,
     invisibleWalls,
+    invisibleWallShapes,
     stairs,
     config
   ) {
@@ -22,26 +24,46 @@ export class DungeonState {
     this.doors = doors;
     this.secretDoors = secretDoors;
     this.interiorWalls = interiorWalls;
+    this.interiorWallShapes = interiorWallShapes;
     this.invisibleWalls = invisibleWalls;
+    this.invisibleWallShapes = invisibleWallShapes;
     this.stairs = stairs;
     this.config = config;
   }
 
   static startState() {
-    return new DungeonState(null, [], [], [], [], [], [], defaultConfig());
+    return new DungeonState(
+      null,
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      defaultConfig()
+    );
   }
 
   clone() {
     // Inconsistent cloning - some arrays use shallow copy ([...arr]),
     // others use deep copy (JSON.parse/stringify). Shallow copies of arrays
     // stairs uses deep copy because it contains objects.
+    // Shape arrays use deep copy because they contain nested point arrays.
     return new DungeonState(
       this.geometry ? this.geometry.copy() : null,
       JSON.parse(JSON.stringify(this.themeAreas)),
       JSON.parse(JSON.stringify(this.doors)),
       this.secretDoors ? [...this.secretDoors] : [],
       this.interiorWalls ? [...this.interiorWalls] : [],
+      this.interiorWallShapes
+        ? JSON.parse(JSON.stringify(this.interiorWallShapes))
+        : [],
       this.invisibleWalls ? [...this.invisibleWalls] : [],
+      this.invisibleWallShapes
+        ? JSON.parse(JSON.stringify(this.invisibleWallShapes))
+        : [],
       this.stairs ? JSON.parse(JSON.stringify(this.stairs)) : [],
       JSON.parse(JSON.stringify(this.config))
     );
@@ -57,7 +79,9 @@ export class DungeonState {
       doors: this.doors,
       secretDoors: this.secretDoors,
       interiorWalls: this.interiorWalls,
+      interiorWallShapes: this.interiorWallShapes,
       invisibleWalls: this.invisibleWalls,
+      invisibleWallShapes: this.invisibleWallShapes,
       stairs: this.stairs,
       config: this.config,
     });
@@ -74,7 +98,13 @@ export class DungeonState {
     const doors = obj.doors ? obj.doors : [];
     const secretDoors = obj.secretDoors ? obj.secretDoors : [];
     const interiorWalls = obj.interiorWalls ? obj.interiorWalls : [];
+    const interiorWallShapes = obj.interiorWallShapes
+      ? obj.interiorWallShapes
+      : [];
     const invisibleWalls = obj.invisibleWalls ? obj.invisibleWalls : [];
+    const invisibleWallShapes = obj.invisibleWallShapes
+      ? obj.invisibleWallShapes
+      : [];
     const stairs = obj.stairs ? obj.stairs : [];
     // fill in any new defaults
     const config = foundry.utils.mergeObject(defaultConfig(), obj.config);
@@ -84,7 +114,9 @@ export class DungeonState {
       doors,
       secretDoors,
       interiorWalls,
+      interiorWallShapes,
       invisibleWalls,
+      invisibleWallShapes,
       stairs,
       config
     );

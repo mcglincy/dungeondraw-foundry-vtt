@@ -1,5 +1,5 @@
 import { ConfigSheet } from "./configsheet.js";
-import { DungeonLayer } from "./dungeonlayer.js";
+import { DungeonLayer } from "./dungeon-layer/index.js";
 import * as constants from "./constants.js";
 import { GeneratorSheet } from "./generatorsheet.js";
 import { Keybindings } from "./keybindings";
@@ -15,6 +15,12 @@ export class DungeonDraw {
 
     game.activeDungeonDrawTool = "rectangle";
     game.activeDungeonDrawMode = "add";
+    // Shape modes for tools that support multiple drawing shapes
+    game.dungeonDrawShapes = {
+      interiorwall: "line", // "line" | "square" | "ellipse" | "polygon"
+      invisiblewall: "line", // "line" | "square" | "ellipse" | "polygon"
+      themepainter: "polygon", // "square" | "ellipse" | "polygon"
+    };
   }
 
   static ready() {}

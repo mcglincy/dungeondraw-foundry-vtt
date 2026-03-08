@@ -1,3 +1,9 @@
+# 4.2.0
+
+- Add right-click context menu for Interior Wall tool with shape options: Line, Square, Ellipse, Polygon.
+- Add right-click context menu for Invisible Wall tool with shape options: Line, Square, Ellipse, Polygon.
+- Add right-click context menu for Theme Painter tool with shape options: Polygon, Square, Ellipse, Grid.
+
 # 4.1.0
 
 - Add stairs drawing tool.
