@@ -210,6 +210,7 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
     await this._addDoor(x1, y1, x2, y2, "windows");
   }
 
+
   // Batch add multiple invisible wall segments in a single pushState
   async addInvisibleWallSegments(segments) {
     const newState = this.history[this.historyIndex].clone();
