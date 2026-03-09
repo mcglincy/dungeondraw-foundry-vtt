@@ -10,6 +10,7 @@ import { calculateStairGeometry } from "./shape-conversion.js";
 import {
   handleDoorCompletion,
   handleSecretDoorCompletion,
+  handleWindowCompletion,
   handleInteriorWallCompletion,
   handleInvisibleWallCompletion,
   handleStairsCompletion,
@@ -136,6 +137,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         case "polygon":
         case "door":
         case "secretdoor":
+        case "window":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
           data.shape.points = [0, 0, 1, 0];
@@ -225,6 +227,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         case "interiorwall":
         case "door":
         case "secretdoor":
+        case "window":
         case "invisiblewall":
         case "themepainter":
         case "stairs":
@@ -475,6 +478,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         opcode === "adddoor" ||
         isLineMode ||
         opcode === "addsecretdoor" ||
+        opcode === "addwindow" ||
         isNonPolygonWallMode ||
         isNonPolygonThemePainter ||
         opcode === "addgridpainter" ||
@@ -691,6 +695,8 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         await handleDoorCompletion(ctx);
       } else if (opcode === "addsecretdoor") {
         await handleSecretDoorCompletion(ctx);
+      } else if (opcode === "addwindow") {
+        await handleWindowCompletion(ctx);
       } else if (opcode === "addinteriorwall") {
         await handleInteriorWallCompletion(ctx);
       } else if (opcode === "addinvisiblewall") {

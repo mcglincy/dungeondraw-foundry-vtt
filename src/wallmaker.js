@@ -15,7 +15,8 @@ export const makeWalls = async (state) => {
     const simplified = geo.simplify(state.geometry, 10.0);
     const wallBreaks = state.doors.concat(
       state.secretDoors,
-      state.invisibleWalls
+      state.invisibleWalls,
+      state.windows
     );
     walls = makeWallsFromMulti(state.config, simplified, wallBreaks);
   }
@@ -32,11 +33,13 @@ export const makeWalls = async (state) => {
   );
   const doors = makeDoors(state.config, state.doors);
   const secretDoors = makeSecretDoors(state.config, state.secretDoors);
+  const windows = makeWindows(state.config, state.windows);
   const allWalls = walls.concat(
     interiorWalls,
     invisibleWalls,
     doors,
-    secretDoors
+    secretDoors,
+    windows
   );
 
   // figure out what walls need to be created, deleted, or left in place
@@ -224,6 +227,22 @@ const makeSecretDoors = (config, doors) => {
   return allDoors;
 };
 
+/** [[x1,y1,x2,y2],...] */
+const makeWindows = (config, windows) => {
+  const allWindows = [];
+  for (const window of windows) {
+    const data = windowWallData(
+      config,
+      window[0],
+      window[1],
+      window[2],
+      window[3]
+    );
+    allWindows.push(data);
+  }
+  return allWindows;
+};
+
 const wallData = (config, x1, y1, x2, y2) => {
   const data = {
     // From Foundry API docs:
@@ -264,6 +283,19 @@ const doorData = (config, x1, y1, x2, y2) => {
 const secretDoorData = (config, x1, y1, x2, y2) => {
   const data = wallData(config, x1, y1, x2, y2);
   data.door = 2; // secret
+  return data;
+};
+
+const windowWallData = (config, x1, y1, x2, y2) => {
+  const data = wallData(config, x1, y1, x2, y2);
+  data.door = 0; // not a door
+  data.sight = CONST.WALL_SENSE_TYPES.PROXIMITY;
+  data.threshold = {
+    light: null,
+    sight: 10, // tokens within 10 grid units can see through
+    sound: null,
+    attenuation: true, // vision gradually improves as tokens approach
+  };
   return data;
 };
 

@@ -1,3 +1,7 @@
+# 4.3.0
+
+- Add Window tool for drawing proximity-based window walls (hotkey: H).
+
 # 4.2.0
 
 - Add right-click context menu for Interior Wall tool with shape options: Line, Square, Ellipse, Polygon.

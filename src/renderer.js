@@ -116,6 +116,10 @@ const renderPass = async (container, state) => {
     drawInteriorWallShadow(interiorShadowGfx, state.config, secretDoor);
     drawSecretDoor(doorGfx, wallGfx, wallMask, state.config, secretDoor);
   }
+  for (const window of state.windows || []) {
+    drawWindowShadow(interiorShadowGfx, state.config, window);
+    drawWindow(doorGfx, wallGfx, wallMask, state.config, window);
+  }
 
   // draw stairs
   const stairsGfx = new PIXI.Graphics();
@@ -834,6 +838,138 @@ const drawDoorShadow = (gfx, config, door) => {
     doorRect[0],
     doorRect[1]
   );
+};
+
+// [x1, y1, x2, y2]
+const drawWindow = (doorGfx, wallGfx, wallMask, config, window) => {
+  // calculate window dimensions (similar to door)
+  const totalLength = geo.distanceBetweenPoints(
+    window[0],
+    window[1],
+    window[2],
+    window[3]
+  );
+  const jambLength = 15;
+  const windowLength = totalLength - 2 * jambLength;
+  const jambFraction = jambLength / totalLength;
+  const windowFraction = windowLength / totalLength;
+  const windowEndFraction = jambFraction + windowFraction;
+  const deltaX = window[2] - window[0];
+  const deltaY = window[3] - window[1];
+  const jamb1End = [
+    window[0] + deltaX * jambFraction,
+    window[1] + deltaY * jambFraction,
+  ];
+  const windowEnd = [
+    window[0] + deltaX * windowEndFraction,
+    window[1] + deltaY * windowEndFraction,
+  ];
+
+  // draw the window jambs at wall thickness
+  if (config.wallTexture) {
+    wallMask.lineStyle({
+      width: config.wallThickness,
+      color: PIXI.utils.string2hex(config.wallColor),
+      alpha: 1.0,
+      alignment: 0.5,
+      cap: "round",
+    });
+    wallMask.moveTo(window[0], window[1]);
+    wallMask.lineTo(jamb1End[0], jamb1End[1]);
+    wallMask.moveTo(windowEnd[0], windowEnd[1]);
+    wallMask.lineTo(window[2], window[3]);
+  } else {
+    wallGfx.lineStyle({
+      width: config.wallThickness,
+      color: PIXI.utils.string2hex(config.wallColor),
+      alpha: 1.0,
+      alignment: 0.5,
+      cap: "round",
+    });
+    wallGfx.moveTo(window[0], window[1]);
+    wallGfx.lineTo(jamb1End[0], jamb1End[1]);
+    wallGfx.moveTo(windowEnd[0], windowEnd[1]);
+    wallGfx.lineTo(window[2], window[3]);
+  }
+
+  // draw crossed lines to indicate window (non-solid wall)
+  // use door color for the window frame
+  const lineThickness = config.doorLineThickness || 2;
+  doorGfx.lineStyle(
+    lineThickness,
+    PIXI.utils.string2hex(config.doorColor),
+    1.0,
+    0.5
+  );
+
+  // calculate perpendicular direction for cross lines
+  const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+  const perpX = (-deltaY / length) * (config.doorThickness / 2);
+  const perpY = (deltaX / length) * (config.doorThickness / 2);
+
+  // draw cross lines along the window, starting at jamb1End and ending at windowEnd
+  const numCrossLines = 3;
+  for (let i = 0; i < numCrossLines; i++) {
+    // t ranges from 0 to 1, so first line is at start, last line is at end
+    const t = numCrossLines > 1 ? i / (numCrossLines - 1) : 0.5;
+    const crossX = jamb1End[0] + (windowEnd[0] - jamb1End[0]) * t;
+    const crossY = jamb1End[1] + (windowEnd[1] - jamb1End[1]) * t;
+
+    doorGfx.moveTo(crossX - perpX, crossY - perpY);
+    doorGfx.lineTo(crossX + perpX, crossY + perpY);
+  }
+
+  // draw the window frame outline (thin line along the window)
+  doorGfx.moveTo(jamb1End[0], jamb1End[1]);
+  doorGfx.lineTo(windowEnd[0], windowEnd[1]);
+};
+
+const drawWindowShadow = (gfx, config, window) => {
+  const totalLength = geo.distanceBetweenPoints(
+    window[0],
+    window[1],
+    window[2],
+    window[3]
+  );
+  const jambLength = 15;
+  const jambFraction = jambLength / totalLength;
+  const windowFraction = (totalLength - 2 * jambLength) / totalLength;
+  const windowEndFraction = jambFraction + windowFraction;
+  const deltaX = window[2] - window[0];
+  const deltaY = window[3] - window[1];
+  const jamb1End = [
+    window[0] + deltaX * jambFraction,
+    window[1] + deltaY * jambFraction,
+  ];
+  const windowEnd = [
+    window[0] + deltaX * windowEndFraction,
+    window[1] + deltaY * windowEndFraction,
+  ];
+
+  gfx.lineStyle({
+    width: config.wallThickness + config.interiorShadowThickness,
+    color: PIXI.utils.string2hex(config.interiorShadowColor),
+    alignment: 0.5,
+    join: "round",
+  });
+
+  // left jamb shadow
+  gfx.moveTo(window[2], window[3]);
+  gfx.lineTo(windowEnd[0], windowEnd[1]);
+
+  // right jamb shadow
+  gfx.moveTo(jamb1End[0], jamb1End[1]);
+  gfx.lineTo(window[0], window[1]);
+
+  // window line shadow (thinner)
+  gfx.lineStyle({
+    width: config.doorLineThickness + config.interiorShadowThickness,
+    color: PIXI.utils.string2hex(config.interiorShadowColor),
+    alignment: 0.5,
+    join: "round",
+  });
+  gfx.moveTo(jamb1End[0], jamb1End[1]);
+  gfx.lineTo(windowEnd[0], windowEnd[1]);
 };
 
 /**

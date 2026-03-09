@@ -120,6 +120,12 @@ export class DungeonDrawToolbar extends Application {
           icon: "fas fa-stairs",
           isActive: game.activeDungeonDrawTool === "stairs",
         },
+        {
+          name: "window",
+          title: "DD.ButtonTitleWindow",
+          icon: "fab fa-microsoft",
+          isActive: game.activeDungeonDrawTool === "window",
+        },
       ],
       row3: [
         {

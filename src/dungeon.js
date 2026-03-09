@@ -206,6 +206,10 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
     await this._addDoor(x1, y1, x2, y2, "invisibleWalls");
   }
 
+  async addWindow(x1, y1, x2, y2) {
+    await this._addDoor(x1, y1, x2, y2, "windows");
+  }
+
   // Batch add multiple invisible wall segments in a single pushState
   async addInvisibleWallSegments(segments) {
     const newState = this.history[this.historyIndex].clone();
@@ -404,6 +408,21 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
     if (secretDoorsToKeep.length != oldState.secretDoors.length) {
       const newState = oldState.clone();
       newState.secretDoors = secretDoorsToKeep;
+      await this.pushState(newState);
+    }
+  }
+
+  // {x:, y:, height:, width:}
+  async removeWindows(rect) {
+    const rectPoly = geo.rectToPolygon(rect);
+    const oldState = this.history[this.historyIndex];
+    const windowsToKeep = oldState.windows.filter((w) => {
+      const windowPoly = geo.twoPointsToLineString(w[0], w[1], w[2], w[3]);
+      return !geo.intersects(rectPoly, windowPoly);
+    });
+    if (windowsToKeep.length != oldState.windows.length) {
+      const newState = oldState.clone();
+      newState.windows = windowsToKeep;
       await this.pushState(newState);
     }
   }
