@@ -370,6 +370,27 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   }
 
   /** @override */
+  async _onDragLeftCancel(event) {
+    // Clean up gridpainter/theme painter preview drawings on cancel
+    const preview = event.interactionData?.preview;
+    if (
+      (isGridPainter() || isThemePainterGrid()) &&
+      preview?.document?.flags?.gridPainterHelper?.gridDrawings?.length
+    ) {
+      const gridDrawings =
+        preview.document.flags.gridPainterHelper.gridDrawings;
+      // Clear immediately to prevent duplicate deletions from _onDragLeftDrop -> _onDragLeftCancel
+      preview.document.flags.gridPainterHelper.gridDrawings = [];
+      const drawings = await Promise.all(gridDrawings);
+      const ids = drawings.map((d) => d.id).filter(Boolean);
+      if (ids.length) {
+        await game.scenes.current.deleteEmbeddedDocuments("Drawing", ids);
+      }
+    }
+    super._onDragLeftCancel(event);
+  }
+
+  /** @override */
   _onClickLeft2(event) {
     const { drawingsState, preview } = event.interactionData;
 
@@ -715,16 +736,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         }
       }
 
-      // Cancel the GridPainter Preview (also for theme painter grid mode)
-      if (isGridPainter() || isThemePainterGrid()) {
-        const drawings = await Promise.all(
-          preview.document.flags.gridPainterHelper.gridDrawings
-        );
-        const ids = drawings.map((drawing) => drawing.id);
-        game.scenes.current.deleteEmbeddedDocuments("Drawing", ids);
-      }
-
-      // Cancel the preview
+      // GridPainter preview cleanup is handled by _onDragLeftCancel
       return this._onDragLeftCancel(event);
     }
 
