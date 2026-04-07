@@ -173,7 +173,11 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           break;
         }
         case "themepainter": {
-          const shapeMode = game.dungeonDrawShapes?.themepainter || "polygon";
+          const snapActive =
+            Settings.snapToGrid() && game.dungeonDrawSnapActive;
+          const shapeMode = snapActive
+            ? "square"
+            : game.dungeonDrawShapes?.themepainter || "polygon";
           if (shapeMode === "square") {
             data.shape.type =
               foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
