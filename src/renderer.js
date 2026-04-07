@@ -44,6 +44,7 @@ const renderPass = async (container, state) => {
   const wallGfx = new PIXI.Graphics();
   const doorGfx = new PIXI.Graphics();
   let tiledWallContainer = null;
+  let cornerContainer = null;
 
   // maybe draw an outer surrounding blurred shadow
   addExteriorShadow(container, state.config, state.geometry);
@@ -222,12 +223,29 @@ const renderPass = async (container, state) => {
         }
       }
     }
+    // Corner texture: placed on top of the wall fill, clipped by the same mask
+    if (state.config.wallCornerTexture) {
+      const cornerTexture = await getTexture(state.config.wallCornerTexture);
+      if (cornerTexture?.valid) {
+        cornerContainer = new PIXI.Container();
+        drawCornerTextures(
+          cornerContainer,
+          state.config,
+          cornerTexture,
+          state.geometry
+        );
+        cornerContainer.mask = wallMask;
+      }
+    }
   }
   container.addChild(stairsGfx);
   if (tiledWallContainer) {
     container.addChild(tiledWallContainer);
   }
   container.addChild(wallGfx);
+  if (cornerContainer) {
+    container.addChild(cornerContainer);
+  }
   container.addChild(doorGfx);
 };
 
@@ -1137,6 +1155,89 @@ const drawTiledWallGeometry = (container, config, texture, multi) => {
         );
       }
     }
+  }
+};
+
+/**
+ * Draw corner texture sprites at every non-straight vertex of a MultiPolygon.
+ * A vertex is skipped when the dot product of the two adjacent edge directions
+ * exceeds CORNER_STRAIGHT_THRESHOLD (i.e., the walls are nearly collinear).
+ * Each sprite is a wallThickness × wallThickness square centered at the vertex,
+ * rotated to align with the bisector of the two wall directions.
+ */
+const CORNER_STRAIGHT_THRESHOLD = 0.98; // skip if deviation from straight < ~11°
+
+const drawCornerTextures = (container, config, texture, multi) => {
+  for (let i = 0; i < multi.getNumGeometries(); i++) {
+    const poly = multi.getGeometryN(i);
+    drawCornerTexturesForRing(
+      container,
+      config,
+      texture,
+      poly.getExteriorRing()
+    );
+    const numHoles = poly.getNumInteriorRing();
+    for (let h = 0; h < numHoles; h++) {
+      drawCornerTexturesForRing(
+        container,
+        config,
+        texture,
+        poly.getInteriorRingN(h)
+      );
+    }
+  }
+};
+
+const drawCornerTexturesForRing = (container, config, texture, ring) => {
+  const coords = ring.getCoordinates();
+  // closed ring: coords[0] === coords[last], so n = coords.length - 1 unique vertices
+  const n = coords.length - 1;
+  if (n < 2) return;
+
+  for (let i = 0; i < n; i++) {
+    const prev = coords[(i - 1 + n) % n];
+    const curr = coords[i];
+    const next = coords[(i + 1) % n];
+
+    // Incoming direction: prev → curr
+    const dxIn = curr.x - prev.x;
+    const dyIn = curr.y - prev.y;
+    const lenIn = Math.sqrt(dxIn * dxIn + dyIn * dyIn);
+    if (lenIn === 0) continue;
+    const inX = dxIn / lenIn;
+    const inY = dyIn / lenIn;
+
+    // Outgoing direction: curr → next
+    const dxOut = next.x - curr.x;
+    const dyOut = next.y - curr.y;
+    const lenOut = Math.sqrt(dxOut * dxOut + dyOut * dyOut);
+    if (lenOut === 0) continue;
+    const outX = dxOut / lenOut;
+    const outY = dyOut / lenOut;
+
+    // Skip if the two segments are nearly collinear
+    const dot = inX * outX + inY * outY;
+    if (dot > CORNER_STRAIGHT_THRESHOLD) continue;
+
+    // Bisector of the two directions (pointing "into" the corner)
+    const bisX = inX + outX;
+    const bisY = inY + outY;
+    const bisLen = Math.sqrt(bisX * bisX + bisY * bisY);
+    const bisAngle =
+      bisLen < 0.001
+        ? Math.atan2(inX, -inY) // degenerate: use incoming normal
+        : Math.atan2(bisY / bisLen, bisX / bisLen);
+
+    const size = config.wallThickness;
+    const sprite = new PIXI.Sprite(texture);
+    sprite.anchor.set(0.5, 0.5);
+    sprite.position.set(curr.x, curr.y);
+    sprite.rotation = bisAngle;
+    sprite.scale.set(size / texture.width, size / texture.height);
+    if (config.wallTextureTint) {
+      sprite.tint = PIXI.utils.string2hex(config.wallTextureTint);
+    }
+    container.addChild(sprite);
   }
 };
 

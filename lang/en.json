@@ -85,6 +85,7 @@
   "DD.SettingMakeFoundryWalls": "Make Foundry Walls",
   "DD.SettingSnapToGrid": "Snap to grid",
   "DD.SettingSupport3DCanvas": "Enable support for 3D Canvas module",
+  "DD.WallCornerTexture": "Wall corner texture",
   "DD.WallTextureDirectional": "Directional wall texture",
   "DD.WallTileEnabled": "Tiled wall texture",
   "DD.WallTileLength": "Wall tile length (grid squares)",
