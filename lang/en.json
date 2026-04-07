@@ -85,14 +85,9 @@
   "DD.SettingMakeFoundryWalls": "Make Foundry Walls",
   "DD.SettingSnapToGrid": "Snap to grid",
   "DD.SettingSupport3DCanvas": "Enable support for 3D Canvas module",
-<<<<<<< HEAD
-=======
   "DD.WallTextureDirectional": "Directional wall texture",
-  "DD.SettingTaggerEnabled": "Enable Tagger integration",
-  "DD.SettingTaggerEnabledHint": "Requires the Tagger module. When enabled, all walls created by Dungeon Draw will be tagged.",
-  "DD.SettingTaggerTag": "Tagger base tag",
-  "DD.SettingTaggerTagHint": "Base tag applied to all Dungeon Draw walls. Each wall type also receives a subtype tag, e.g. 'mytag-door', 'mytag-window', 'mytag-wall', 'mytag-interior-wall', 'mytag-invisible-wall', 'mytag-secret-door'.",
->>>>>>> f3e4760 (Add directional wall texture option to themes)
+  "DD.WallTileEnabled": "Tiled wall texture",
+  "DD.WallTileLength": "Wall tile length (grid squares)",
   "DD.SceneBackgroundColor": "Scene Background Color",
   "DD.SceneControlTitle": "Dungeon Draw",
   "DD.SceneGridColor": "Scene Grid Color",

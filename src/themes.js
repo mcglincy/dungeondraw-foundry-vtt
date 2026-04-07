@@ -42,6 +42,8 @@ export const defaultConfig = () => {
     wallColor: "#000000",
     wallTexture: "",
     wallTextureDirectional: false,
+    wallTileEnabled: false,
+    wallTileLength: 4,
     WallTextureScaling: 1,
     wallTextureTint: "",
     wallThickness: 8,
