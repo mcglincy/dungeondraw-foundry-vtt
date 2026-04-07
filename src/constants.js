@@ -14,3 +14,6 @@ export const SETTING_MAKE_FOUNDRY_WALLS = "makeFoundryWalls";
 export const SETTING_RELEASE_NOTES_VERSION = "releaseNotesVersion";
 export const SETTING_SNAP_TO_GRID = "snapToGrid";
 export const SETTING_THEME_PAINTER_THEME = "themePainterTheme";
+
+export const SETTING_TAGGER_ENABLED = "taggerEnabled";
+export const SETTING_TAGGER_TAG = "taggerTag";
