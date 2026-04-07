@@ -138,37 +138,55 @@ const renderPass = async (container, state) => {
     );
     // TODO: verify mask add
     container.addChild(wallMask);
-    // expand our geometry, so we add sprites
-    // under the half of the wall thickness that expands past the geometry
-    const expandedGeometry = geo.expandGeometry(
-      state.geometry,
-      state.config.wallThickness / 2.0
-    );
     const texture = await getTexture(state.config.wallTexture);
     if (texture?.valid) {
-      let matrix = null;
-      matrix = PIXI.Matrix.IDENTITY.clone();
-      if (state.config.wallTextureRotation) {
-        matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
-      }
-      if (state.config.WallTextureScaling) {
-        matrix.scale(
-          state.config.WallTextureScaling,
-          state.config.WallTextureScaling
-        );
-      }
       maybeStartTextureVideo(texture);
-      wallGfx.beginTextureFill({
-        texture,
-        alpha: 1.0,
-        matrix,
-      });
-      const flatCoords = expandedGeometry
-        .getCoordinates()
-        .map((c) => [c.x, c.y])
-        .flat();
-      wallGfx.drawPolygon(flatCoords);
-      wallGfx.endFill();
+      if (state.config.wallTextureDirectional) {
+        // Per-segment directional texture: rotate each segment's texture to match its angle
+        drawDirectionalWallTextures(
+          wallGfx,
+          state.config,
+          texture,
+          state.geometry
+        );
+        for (const wall of state.interiorWalls) {
+          drawDirectionalSegmentTexture(
+            wallGfx,
+            state.config,
+            texture,
+            wall[0],
+            wall[1],
+            wall[2],
+            wall[3]
+          );
+        }
+        for (const shape of state.interiorWallShapes || []) {
+          drawDirectionalShapeTexture(wallGfx, state.config, texture, shape);
+        }
+      } else {
+        // Single global texture fill over the expanded geometry
+        const expandedGeometry = geo.expandGeometry(
+          state.geometry,
+          state.config.wallThickness / 2.0
+        );
+        const matrix = PIXI.Matrix.IDENTITY.clone();
+        if (state.config.wallTextureRotation) {
+          matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
+        }
+        if (state.config.WallTextureScaling) {
+          matrix.scale(
+            state.config.WallTextureScaling,
+            state.config.WallTextureScaling
+          );
+        }
+        wallGfx.beginTextureFill({ texture, alpha: 1.0, matrix });
+        const flatCoords = expandedGeometry
+          .getCoordinates()
+          .map((c) => [c.x, c.y])
+          .flat();
+        wallGfx.drawPolygon(flatCoords);
+        wallGfx.endFill();
+      }
       wallGfx.mask = wallMask;
       if (state.config.wallTextureTint) {
         wallGfx.tint = PIXI.utils.string2hex(state.config.wallTextureTint);
@@ -1013,5 +1031,98 @@ const drawStairs = (gfx, config, stair) => {
     // Draw line
     gfx.moveTo(startX, startY);
     gfx.lineTo(endX, endY);
+  }
+};
+
+/**
+ * Draw a single wall segment as a textured rectangle, with the texture
+ * rotated to align with the segment's direction.
+ */
+const drawDirectionalSegmentTexture = (
+  wallGfx,
+  config,
+  texture,
+  x1,
+  y1,
+  x2,
+  y2
+) => {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const matrix = PIXI.Matrix.IDENTITY.clone();
+  matrix.rotate(angle);
+  if (config.WallTextureScaling) {
+    matrix.scale(config.WallTextureScaling, config.WallTextureScaling);
+  }
+  const rect = geo.rectangleForSegment(config.wallThickness, x1, y1, x2, y2);
+  wallGfx.beginTextureFill({ texture, alpha: 1.0, matrix });
+  wallGfx.drawPolygon(rect);
+  wallGfx.endFill();
+};
+
+/**
+ * Draw all exterior wall edges of a MultiPolygon geometry with directional textures.
+ */
+const drawDirectionalWallTextures = (wallGfx, config, texture, multi) => {
+  for (let i = 0; i < multi.getNumGeometries(); i++) {
+    const poly = multi.getGeometryN(i);
+    const exterior = poly.getExteriorRing();
+    const coords = exterior.getCoordinates();
+    for (let j = 0; j < coords.length - 1; j++) {
+      drawDirectionalSegmentTexture(
+        wallGfx,
+        config,
+        texture,
+        coords[j].x,
+        coords[j].y,
+        coords[j + 1].x,
+        coords[j + 1].y
+      );
+    }
+    const numHoles = poly.getNumInteriorRing();
+    for (let h = 0; h < numHoles; h++) {
+      const hole = poly.getInteriorRingN(h);
+      const holeCoords = hole.getCoordinates();
+      for (let j = 0; j < holeCoords.length - 1; j++) {
+        drawDirectionalSegmentTexture(
+          wallGfx,
+          config,
+          texture,
+          holeCoords[j].x,
+          holeCoords[j].y,
+          holeCoords[j + 1].x,
+          holeCoords[j + 1].y
+        );
+      }
+    }
+  }
+};
+
+/**
+ * Draw all edges of an interior wall shape with directional textures.
+ * shape is [[x, y], [x, y], ...] (closed polygon)
+ */
+const drawDirectionalShapeTexture = (wallGfx, config, texture, shape) => {
+  for (let i = 0; i < shape.length - 1; i++) {
+    drawDirectionalSegmentTexture(
+      wallGfx,
+      config,
+      texture,
+      shape[i][0],
+      shape[i][1],
+      shape[i + 1][0],
+      shape[i + 1][1]
+    );
+  }
+  if (shape.length > 1) {
+    const last = shape[shape.length - 1];
+    drawDirectionalSegmentTexture(
+      wallGfx,
+      config,
+      texture,
+      last[0],
+      last[1],
+      shape[0][0],
+      shape[0][1]
+    );
   }
 };
