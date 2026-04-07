@@ -39,6 +39,24 @@ export class Settings {
         },
       }
     );
+    game.settings.register(constants.MODULE_NAME, constants.SETTING_SNAP_MODE, {
+      name: game.i18n.localize("DD.SettingSnapMode"),
+      hint: game.i18n.localize("DD.SettingSnapModeHint"),
+      scope: "client",
+      default: constants.SNAP_MODES.VERTEX,
+      type: String,
+      choices: {
+        [constants.SNAP_MODES.VERTEX]: game.i18n.localize("DD.SnapModeVertex"),
+        [constants.SNAP_MODES.VERTEX_CENTER]: game.i18n.localize(
+          "DD.SnapModeVertexCenter"
+        ),
+        [constants.SNAP_MODES.VERTEX_MIDPOINT]: game.i18n.localize(
+          "DD.SnapModeVertexMidpoint"
+        ),
+        [constants.SNAP_MODES.ALL]: game.i18n.localize("DD.SnapModeAll"),
+      },
+      config: true,
+    });
     game.settings.register(
       constants.MODULE_NAME,
       constants.SETTING_RELEASE_NOTES_VERSION,
@@ -96,6 +114,13 @@ export class Settings {
     return game.settings.get(
       constants.MODULE_NAME,
       constants.SETTING_SNAP_TO_GRID
+    );
+  }
+
+  static snapMode() {
+    return game.settings.get(
+      constants.MODULE_NAME,
+      constants.SETTING_SNAP_MODE
     );
   }
 

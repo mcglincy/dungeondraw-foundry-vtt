@@ -2,6 +2,7 @@ import { Dungeon } from "../dungeon.js";
 import { regenerate } from "../generator.js";
 import { GridPainterHelper } from "../GridPainterHelper.js";
 import { Settings } from "../settings.js";
+import { SNAP_MODES } from "../constants.js";
 import {
   findDungeonEntryAndNote,
   createDungeonEntryAndNote,
@@ -338,7 +339,11 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
 
     // Continue polygon point placement
     if (drawingsState >= 1 && preview && preview.isPolygon) {
-      preview._addPoint(destination, { snap: !event.shiftKey, round: true });
+      const snapDest =
+        Settings.snapToGrid() && game.dungeonDrawSnapActive && !event.shiftKey
+          ? this._snapPoint(destination)
+          : destination;
+      preview._addPoint(snapDest, { snap: false, round: true });
       preview._chain = true; // Note that we are now in chain mode
       return preview.refresh();
     }
@@ -408,8 +413,12 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     await super._onDragLeftStart(event);
     const interaction = event.interactionData;
 
-    if (Settings.snapToGrid() && !event.shiftKey) {
-      interaction.origin = this.getSnappedPoint(interaction.origin);
+    if (
+      Settings.snapToGrid() &&
+      game.dungeonDrawSnapActive &&
+      !event.shiftKey
+    ) {
+      interaction.origin = this._snapPoint(interaction.origin);
     }
 
     // Create the preview object
@@ -600,13 +609,30 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     }
   }
 
+  /** Snap a point according to the current snap mode setting. */
+  _snapPoint(point) {
+    const M = CONST.GRID_SNAPPING_MODES;
+    const snapMode = Settings.snapMode();
+    let mode;
+    if (snapMode === SNAP_MODES.VERTEX_CENTER) {
+      mode = M.VERTEX | M.CENTER;
+    } else if (snapMode === SNAP_MODES.VERTEX_MIDPOINT) {
+      mode = M.VERTEX | M.SIDE_MIDPOINT;
+    } else if (snapMode === SNAP_MODES.ALL) {
+      mode = M.VERTEX | M.CENTER | M.SIDE_MIDPOINT;
+    } else {
+      mode = M.VERTEX;
+    }
+    return canvas.grid.getSnappedPoint({ x: point.x, y: point.y }, { mode });
+  }
+
   _maybeSnappedRect(createData, shiftPressed) {
-    if (Settings.snapToGrid() && !shiftPressed) {
+    if (Settings.snapToGrid() && game.dungeonDrawSnapActive && !shiftPressed) {
       const position = {
         x: createData.x + createData.shape.width,
         y: createData.y + createData.shape.height,
       };
-      const snappedPoint = this.getSnappedPoint(position);
+      const snappedPoint = this._snapPoint(position);
       createData.shape.height = snappedPoint.y - createData.y;
       createData.shape.width = snappedPoint.x - createData.x;
     }
@@ -624,12 +650,12 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     if (length === 0) {
       return;
     }
-    if (Settings.snapToGrid() && !shiftPressed) {
+    if (Settings.snapToGrid() && game.dungeonDrawSnapActive && !shiftPressed) {
       const position = {
         x: createData.shape.points[length - 2],
         y: createData.shape.points[length - 1],
       };
-      const snappedPoint = this.getSnappedPoint(position);
+      const snappedPoint = this._snapPoint(position);
       createData.shape.points[length - 2] = snappedPoint.x;
       createData.shape.points[length - 1] = snappedPoint.y;
     }
@@ -655,8 +681,12 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     const interaction = event.interactionData;
 
     // Snap the destination to the grid
-    if (Settings.snapToGrid() && !event.shiftKey) {
-      interaction.destination = this.getSnappedPoint(interaction.destination);
+    if (
+      Settings.snapToGrid() &&
+      game.dungeonDrawSnapActive &&
+      !event.shiftKey
+    ) {
+      interaction.destination = this._snapPoint(interaction.destination);
     }
 
     const { destination, origin, preview } = event.interactionData;

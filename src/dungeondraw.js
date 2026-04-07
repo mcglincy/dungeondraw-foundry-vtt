@@ -15,6 +15,7 @@ export class DungeonDraw {
 
     game.activeDungeonDrawTool = "rectangle";
     game.activeDungeonDrawMode = "add";
+    game.dungeonDrawSnapActive = true;
     // Shape modes for tools that support multiple drawing shapes
     game.dungeonDrawShapes = {
       interiorwall: "line", // "line" | "square" | "ellipse" | "polygon"
@@ -74,6 +75,17 @@ export class DungeonDraw {
             await canvas.dungeon.dungeon.redo();
           },
           button: true,
+        },
+        snaptogrid: {
+          name: "snaptogrid",
+          title: "DD.ButtonTitleSnapToGrid",
+          icon: "fas fa-magnet",
+          toggle: true,
+          active: game.dungeonDrawSnapActive,
+          visible: Settings.snapToGrid(),
+          onClick: (active) => {
+            game.dungeonDrawSnapActive = active;
+          },
         },
         generate: {
           name: "generate",

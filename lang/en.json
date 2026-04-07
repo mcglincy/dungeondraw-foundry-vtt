@@ -84,6 +84,12 @@
   "DD.SettingAllowTrustedPlayers": "Allow Trusted Players",
   "DD.SettingMakeFoundryWalls": "Make Foundry Walls",
   "DD.SettingSnapToGrid": "Snap to grid",
+  "DD.SettingSnapMode": "Snap mode",
+  "DD.SettingSnapModeHint": "Controls which grid points are snapped to when snap to grid is enabled.",
+  "DD.SnapModeVertex": "Corners only",
+  "DD.SnapModeVertexCenter": "Corners and cell centers",
+  "DD.SnapModeVertexMidpoint": "Corners and edge midpoints",
+  "DD.SnapModeAll": "Corners, centers, and edge midpoints",
   "DD.SettingSupport3DCanvas": "Enable support for 3D Canvas module",
   "DD.SceneBackgroundColor": "Scene Background Color",
   "DD.SceneControlTitle": "Dungeon Draw",
@@ -139,5 +145,6 @@
   "DD.DrawMode.Ellipse": "Ellipse",
   "DD.DrawMode.Polygon": "Polygon",
   "DD.DrawMode.Grid": "Grid",
-  "DD.RightClickForOptions": "(right-click for options)"
+  "DD.RightClickForOptions": "(right-click for options)",
+  "DD.ButtonTitleSnapToGrid": "Snap to Grid"
 }
