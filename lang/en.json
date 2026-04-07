@@ -88,6 +88,7 @@
   "DD.WallTextureDirectional": "Directional wall texture",
   "DD.WallTileEnabled": "Tiled wall texture",
   "DD.WallTileLength": "Wall tile length (grid squares)",
+  "DD.WallTileOverlap": "Wall tile overlap (pixels)",
   "DD.SceneBackgroundColor": "Scene Background Color",
   "DD.SceneControlTitle": "Dungeon Draw",
   "DD.SceneGridColor": "Scene Grid Color",

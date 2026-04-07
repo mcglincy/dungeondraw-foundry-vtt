@@ -1080,9 +1080,12 @@ const drawTiledWallSegment = (container, config, texture, x1, y1, x2, y2) => {
 
   const angle = Math.atan2(dy, dx);
   const tileWorldWidth = config.wallTileLength * canvas.grid.size;
-  // Uniform scale: set width = tileWorldWidth, preserve aspect ratio.
+  // Each sprite is extended by wallTileOverlap pixels to eliminate sub-pixel
+  // gaps between adjacent tiles. The wallMask clips the overshoot at ends.
+  const tileDrawWidth = tileWorldWidth + (config.wallTileOverlap ?? 0);
+  // Uniform scale: set width = tileDrawWidth, preserve aspect ratio.
   // The wallMask clips whatever extends past the wall stroke thickness.
-  const scale = tileWorldWidth / texture.width;
+  const scale = tileDrawWidth / texture.width;
   const numTiles = Math.ceil(segmentLength / tileWorldWidth);
 
   for (let i = 0; i < numTiles; i++) {
