@@ -41,6 +41,7 @@ export const defaultConfig = () => {
     threeDWallSidesTextureTint: "",
     wallColor: "#000000",
     wallCornerTexture: "",
+    wallCornerTextureScale: 1,
     wallTexture: "",
     wallTextureDirectional: false,
     wallTileEnabled: false,

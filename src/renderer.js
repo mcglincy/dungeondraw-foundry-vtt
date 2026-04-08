@@ -223,7 +223,8 @@ const renderPass = async (container, state) => {
         }
       }
     }
-    // Corner texture: placed on top of the wall fill, clipped by the same mask
+    // Corner texture: placed on top of the wall fill, unmasked so the full
+    // sprite is visible regardless of wallThickness.
     if (state.config.wallCornerTexture) {
       const cornerTexture = await getTexture(state.config.wallCornerTexture);
       if (cornerTexture?.valid) {
@@ -234,7 +235,6 @@ const renderPass = async (container, state) => {
           cornerTexture,
           state.geometry
         );
-        cornerContainer.mask = wallMask;
       }
     }
   }
@@ -1089,6 +1089,10 @@ const drawStairs = (gfx, config, stair) => {
  * Place repeating tile sprites along a single wall segment.
  * Each sprite is uniformly scaled so its width equals wallTileLength grid
  * squares; height is preserved by aspect ratio and clipped by the wallMask.
+ *
+ * A per-segment clip mask (filled rectangle) prevents tiles from overshooting
+ * past segment endpoints. The rectangle is extended by wallThickness/2 at each
+ * end so that polygon corner joins are covered without gaps.
  */
 const drawTiledWallSegment = (container, config, texture, x1, y1, x2, y2) => {
   const dx = x2 - x1;
@@ -1097,18 +1101,46 @@ const drawTiledWallSegment = (container, config, texture, x1, y1, x2, y2) => {
   if (segmentLength === 0) return;
 
   const angle = Math.atan2(dy, dx);
+  const cosA = Math.cos(angle);
+  const sinA = Math.sin(angle);
+
   const tileWorldWidth = config.wallTileLength * canvas.grid.size;
   // Each sprite is extended by wallTileOverlap pixels to eliminate sub-pixel
-  // gaps between adjacent tiles. The wallMask clips the overshoot at ends.
+  // gaps between adjacent tiles. The per-segment mask clips the overshoot at ends.
   const tileDrawWidth = tileWorldWidth + (config.wallTileOverlap ?? 0);
   // Uniform scale: set width = tileDrawWidth, preserve aspect ratio.
-  // The wallMask clips whatever extends past the wall stroke thickness.
   const scale = tileDrawWidth / texture.width;
   const numTiles = Math.ceil(segmentLength / tileWorldWidth);
 
+  // Per-segment clip mask: a filled rectangle covering this segment's wall
+  // area, extended by wallThickness/2 at each end to fill polygon corner joins.
+  const hw = config.wallThickness / 2;
+  // Perpendicular unit vector (rotated 90° from wall direction)
+  const pxX = -sinA;
+  const pxY = cosA;
+  // Extend the rectangle endpoints along the wall direction to cover corners
+  const extX = cosA * hw;
+  const extY = sinA * hw;
+  const sx1 = x1 - extX;
+  const sy1 = y1 - extY;
+  const sx2 = x2 + extX;
+  const sy2 = y2 + extY;
+
+  const segMask = new PIXI.Graphics();
+  segMask.beginFill(0xffffff, 1);
+  segMask.moveTo(sx1 + pxX * hw, sy1 + pxY * hw);
+  segMask.lineTo(sx2 + pxX * hw, sy2 + pxY * hw);
+  segMask.lineTo(sx2 - pxX * hw, sy2 - pxY * hw);
+  segMask.lineTo(sx1 - pxX * hw, sy1 - pxY * hw);
+  segMask.closePath();
+  segMask.endFill();
+
+  const segContainer = new PIXI.Container();
+  segContainer.mask = segMask;
+
   for (let i = 0; i < numTiles; i++) {
-    const tileX = x1 + Math.cos(angle) * i * tileWorldWidth;
-    const tileY = y1 + Math.sin(angle) * i * tileWorldWidth;
+    const tileX = x1 + cosA * i * tileWorldWidth;
+    const tileY = y1 + sinA * i * tileWorldWidth;
 
     const sprite = new PIXI.Sprite(texture);
     sprite.anchor.set(0, 0.5);
@@ -1118,8 +1150,11 @@ const drawTiledWallSegment = (container, config, texture, x1, y1, x2, y2) => {
     if (config.wallTextureTint) {
       sprite.tint = PIXI.utils.string2hex(config.wallTextureTint);
     }
-    container.addChild(sprite);
+    segContainer.addChild(sprite);
   }
+
+  container.addChild(segMask);
+  container.addChild(segContainer);
 };
 
 /** Tile all exterior wall edges of a MultiPolygon geometry. */
@@ -1228,7 +1263,7 @@ const drawCornerTexturesForRing = (container, config, texture, ring) => {
         ? Math.atan2(inX, -inY) // degenerate: use incoming normal
         : Math.atan2(bisY / bisLen, bisX / bisLen);
 
-    const size = config.wallThickness;
+    const size = config.wallThickness * (config.wallCornerTextureScale ?? 1);
     const sprite = new PIXI.Sprite(texture);
     sprite.anchor.set(0.5, 0.5);
     sprite.position.set(curr.x, curr.y);
