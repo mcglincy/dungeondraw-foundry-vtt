@@ -119,6 +119,128 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
   }
 
   /* -------------------------------------------- */
+
+  async saveToTile() {
+    const state = this.state();
+    if (!state.geometry) {
+      return;
+    }
+
+    // Compute tight world-space bounding box from all dungeon content.
+    // All coordinates are in canvas world space (scene coords + padding offset).
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    const expandPoint = (x, y) => {
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    };
+
+    // Main dungeon geometry
+    for (const coord of state.geometry.getCoordinates()) {
+      expandPoint(coord.x, coord.y);
+    }
+
+    // Doors, secret doors, interior walls, invisible walls, windows: [x0, y0, x1, y1]
+    for (const seg of [
+      ...state.doors,
+      ...(state.secretDoors || []),
+      ...state.interiorWalls,
+      ...(state.invisibleWalls || []),
+      ...(state.windows || []),
+    ]) {
+      expandPoint(seg[0], seg[1]);
+      expandPoint(seg[2], seg[3]);
+    }
+
+    // Stairs: { x1, y1, x2, y2, x3, y3, x4, y4 }
+    for (const stair of state.stairs || []) {
+      expandPoint(stair.x1, stair.y1);
+      expandPoint(stair.x2, stair.y2);
+      expandPoint(stair.x3, stair.y3);
+      expandPoint(stair.x4, stair.y4);
+    }
+
+    // Wall shapes (interior + invisible): [[x, y], ...]
+    for (const shape of [
+      ...(state.interiorWallShapes || []),
+      ...(state.invisibleWallShapes || []),
+    ]) {
+      for (const [x, y] of shape) {
+        expandPoint(x, y);
+      }
+    }
+
+    // Expand by wall thickness + exterior shadow to avoid clipping rendered edges
+    const margin =
+      (state.config.wallThickness || 8) +
+      (state.config.exteriorShadowThickness || 0);
+    minX -= margin;
+    minY -= margin;
+    maxX += margin;
+    maxY += margin;
+
+    const tileWidth = maxX - minX;
+    const tileHeight = maxY - minY;
+
+    const tempContainer = new PIXI.Container();
+
+    // Anchor the PIXI extract bounds to our tight bbox
+    const sizeForcer = new PIXI.Sprite();
+    sizeForcer.width = tileWidth;
+    sizeForcer.height = tileHeight;
+    sizeForcer.position.x = minX;
+    sizeForcer.position.y = minY;
+    tempContainer.addChild(sizeForcer);
+
+    // Save original parent so we can restore it after extraction.
+    // PIXI's addChild reparents the object, removing it from DungeonLayer.
+    const originalParent = this.parent;
+    const originalIndex = originalParent?.getChildIndex(this) ?? -1;
+    tempContainer.addChild(this);
+
+    // Use a timestamp suffix to avoid PIXI serving a cached texture from a
+    // previous save when the tile dimensions or position have changed.
+    const folder = "";
+    const filename = `${canvas.scene.name}-dungeon-tile-${Date.now()}.png`;
+    const base64 = await canvas.app.renderer.extract.base64(tempContainer);
+    const res = await fetch(base64);
+    const blob = await res.blob();
+    const file = new File([blob], filename, { type: "image/png" });
+    await foundry.applications.apps.FilePicker.implementation.upload(
+      "data",
+      folder,
+      file,
+      {}
+    );
+    const path = folder ? folder + "/" + filename : filename;
+
+    // Restore dungeon to its original place in DungeonLayer
+    if (originalParent) {
+      originalParent.addChildAt(this, originalIndex);
+    } else {
+      tempContainer.removeChild(this);
+    }
+
+    // Tile positions use canvas world coordinates (same space as geometry coords),
+    // so place the tile directly at the computed bounds — no offset adjustment needed.
+    await canvas.scene.createEmbeddedDocuments("Tile", [
+      {
+        texture: { src: path },
+        x: minX,
+        y: minY,
+        width: tileWidth,
+        height: tileHeight,
+        z: 0,
+        overhead: false,
+      },
+    ]);
+  }
+
+  /* -------------------------------------------- */
   /* Rendering                                    */
   /* -------------------------------------------- */
 

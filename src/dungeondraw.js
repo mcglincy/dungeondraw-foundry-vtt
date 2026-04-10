@@ -99,6 +99,16 @@ export class DungeonDraw {
           },
           button: true,
         },
+        savetotile: {
+          name: "savetotile",
+          title: "DD.ButtonTitleSaveToTile",
+          icon: "fas fa-image",
+          visible: game.user.isGM,
+          onClick: async () => {
+            await canvas.dungeon.dungeon.saveToTile();
+          },
+          button: true,
+        },
         clear: {
           name: "clear",
           title: "DD.ButtonTitleClearAll",
