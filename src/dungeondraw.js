@@ -109,6 +109,14 @@ export class DungeonDraw {
           },
           button: true,
         },
+        cleardrawing: {
+          name: "cleardrawing",
+          title: "DD.ButtonTitleClearDrawing",
+          icon: "fas fa-eraser",
+          visible: game.user.isGM,
+          onClick: () => canvas.dungeon.dungeon?.clearDrawing(),
+          button: true,
+        },
         clear: {
           name: "clear",
           title: "DD.ButtonTitleClearAll",

@@ -2,6 +2,7 @@ import { DungeonState } from "./dungeonstate.js";
 import { render } from "./renderer.js";
 import * as geo from "./geo-utils.js";
 import { getTheme, getThemePainterThemeKey } from "./themes.js";
+import * as constants from "./constants.js";
 
 /**
  * @extends {PlaceableObject}
@@ -33,6 +34,35 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
 
   async deleteAll() {
     // keep our most recent config around
+    const lastState = this.state();
+    const resetState = DungeonState.startState();
+    resetState.config = lastState.config;
+    this.history = [resetState];
+    this.historyIndex = 0;
+    await this.history[this.historyIndex].saveToJournalEntry(this.journalEntry);
+    this.refresh();
+  }
+
+  /* -------------------------------------------- */
+
+  async clearDrawing() {
+    // Remove the dungeon-draw tracking flag from all DD-owned walls so they
+    // are no longer managed by this module (and won't be deleted by Clear All).
+    const ddWalls = canvas.scene
+      .getEmbeddedCollection("Wall")
+      .filter((w) =>
+        w.getFlag(constants.MODULE_NAME, constants.FLAG_DUNGEON_VERSION)
+      );
+    if (ddWalls.length) {
+      const flagPath = `flags.${constants.MODULE_NAME}.-=${constants.FLAG_DUNGEON_VERSION}`;
+      await canvas.scene.updateEmbeddedDocuments(
+        "Wall",
+        ddWalls.map((w) => ({ _id: w.id, [flagPath]: null }))
+      );
+    }
+
+    // Reset the dungeon drawing state without touching walls (makeWalls will
+    // find no DD-flagged walls left, so nothing gets deleted).
     const lastState = this.state();
     const resetState = DungeonState.startState();
     resetState.config = lastState.config;
