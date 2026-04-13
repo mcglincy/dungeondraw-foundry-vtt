@@ -218,14 +218,6 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
 
     const tempContainer = new PIXI.Container();
 
-    // Anchor the PIXI extract bounds to our tight bbox
-    const sizeForcer = new PIXI.Sprite();
-    sizeForcer.width = tileWidth;
-    sizeForcer.height = tileHeight;
-    sizeForcer.position.x = minX;
-    sizeForcer.position.y = minY;
-    tempContainer.addChild(sizeForcer);
-
     // Save original parent so we can restore it after extraction.
     // PIXI's addChild reparents the object, removing it from DungeonLayer.
     const originalParent = this.parent;
@@ -236,7 +228,17 @@ export class Dungeon extends foundry.canvas.placeables.PlaceableObject {
     // previous save when the tile dimensions or position have changed.
     const folder = "";
     const filename = `${canvas.scene.name}-dungeon-tile-${Date.now()}.png`;
-    const base64 = await canvas.app.renderer.extract.base64(tempContainer);
+    // Clip the extraction to exactly the computed bounds. This ensures the
+    // extracted PNG is always tileWidth×tileHeight regardless of any sprites
+    // (e.g. corner textures) that extend beyond the wall geometry — no
+    // content scaling occurs when Foundry sizes the tile to these dimensions.
+    const frame = new PIXI.Rectangle(minX, minY, tileWidth, tileHeight);
+    const base64 = await canvas.app.renderer.extract.base64(
+      tempContainer,
+      "image/png",
+      1.0,
+      frame
+    );
     const res = await fetch(base64);
     const blob = await res.blob();
     const file = new File([blob], filename, { type: "image/png" });
