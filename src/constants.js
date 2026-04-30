@@ -22,3 +22,6 @@ export const SNAP_MODES = {
   ALL: "all",
 };
 export const SETTING_THEME_PAINTER_THEME = "themePainterTheme";
+
+export const SETTING_TAGGER_ENABLED = "taggerEnabled";
+export const SETTING_TAGGER_TAG = "taggerTag";

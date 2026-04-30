@@ -155,6 +155,7 @@ const makeInteriorWalls = (config, walls, shapes = []) => {
   // Process existing segments (1:1 mapping)
   for (const wall of walls) {
     const data = wallData(config, wall[0], wall[1], wall[2], wall[3]);
+    addTaggerTags(data, "interior-wall");
     allWalls.push(data);
   }
 
@@ -171,6 +172,7 @@ const makeInteriorWalls = (config, walls, shapes = []) => {
         coords[i + 1].x,
         coords[i + 1].y
       );
+      addTaggerTags(data, "interior-wall");
       allWalls.push(data);
     }
   }
@@ -243,6 +245,13 @@ const makeWindows = (config, windows) => {
   return allWindows;
 };
 
+const addTaggerTags = (data, typeTag) => {
+  if (!Settings.taggerEnabled()) return;
+  const baseTag = Settings.taggerTag().trim();
+  if (!baseTag) return;
+  data.flags["tagger"] = { tags: [baseTag, `${baseTag}-${typeTag}`] };
+};
+
 const wallData = (config, x1, y1, x2, y2) => {
   const data = {
     // From Foundry API docs:
@@ -265,6 +274,7 @@ const wallData = (config, x1, y1, x2, y2) => {
       wallTint: config.threeDWallTextureTint,
     };
   }
+  addTaggerTags(data, "wall");
   return data;
 };
 
@@ -277,12 +287,14 @@ const doorData = (config, x1, y1, x2, y2) => {
     data.flags["levels-3d-preview"]["wallTexture"] = config.threeDDoorTexture;
     data.flags["levels-3d-preview"]["wallTint"] = config.threeDDoorTextureTint;
   }
+  addTaggerTags(data, "door");
   return data;
 };
 
 const secretDoorData = (config, x1, y1, x2, y2) => {
   const data = wallData(config, x1, y1, x2, y2);
   data.door = 2; // secret
+  addTaggerTags(data, "secret-door");
   return data;
 };
 
@@ -296,6 +308,7 @@ const windowWallData = (config, x1, y1, x2, y2) => {
     sound: null,
     attenuation: true, // vision gradually improves as tokens approach
   };
+  addTaggerTags(data, "window");
   return data;
 };
 
@@ -304,5 +317,6 @@ const invisibleWallData = (config, x1, y1, x2, y2) => {
   data.door = 0; // secret
   data.light = 0;
   data.sight = 0;
+  addTaggerTags(data, "invisible-wall");
   return data;
 };
