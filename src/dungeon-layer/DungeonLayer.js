@@ -104,35 +104,38 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
    * @return {Object}           The new drawing data
    */
   _getNewDrawingData(origin) {
+    // Only pull specific properties from the user's default drawing config.
+    // Deep-cloning the full config can bring in values (e.g., strokeAlpha: 0,
+    // fillType: NONE) that fail Foundry's DrawingDocument visible content validation.
     const defaults = game.settings.get(
       "core",
       foundry.canvas.layers.DrawingsLayer.DEFAULT_CONFIG_SETTING
     );
-    const data = foundry.utils.deepClone(defaults);
-
-    // Mandatory additions
-    delete data._id;
-    data.x = origin.x;
-    data.y = origin.y;
-    data.sort = Math.max(this.getMaxSort() + 1, 0);
-    data.author = game.user.id;
-    data.shape = {};
-    data.interface = false;
-    const strokeWidth = data.strokeWidth ?? 8;
+    const data = {
+      x: origin.x,
+      y: origin.y,
+      sort: Math.max(this.getMaxSort() + 1, 0),
+      author: game.user.id,
+      shape: {},
+      interface: false,
+      strokeWidth: 8,
+      strokeAlpha: 1,
+      strokeColor: defaults.strokeColor ?? "#ffffff",
+    };
 
     if (game.activeDungeonDrawMode === "add") {
       switch (game.activeDungeonDrawTool) {
         case "rectangle":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
-          data.shape.width = strokeWidth + 1;
-          data.shape.height = strokeWidth + 1;
+          data.shape.width = data.strokeWidth + 1;
+          data.shape.height = data.strokeWidth + 1;
           break;
         case "ellipse":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
-          data.shape.width = strokeWidth + 1;
-          data.shape.height = strokeWidth + 1;
+          data.shape.width = data.strokeWidth + 1;
+          data.shape.height = data.strokeWidth + 1;
           break;
         case "polygon":
         case "door":
@@ -150,13 +153,13 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           if (shapeMode === "square") {
             data.shape.type =
               foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
-            data.shape.width = strokeWidth + 1;
-            data.shape.height = strokeWidth + 1;
+            data.shape.width = data.strokeWidth + 1;
+            data.shape.height = data.strokeWidth + 1;
           } else if (shapeMode === "ellipse") {
             data.shape.type =
               foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
-            data.shape.width = strokeWidth + 1;
-            data.shape.height = strokeWidth + 1;
+            data.shape.width = data.strokeWidth + 1;
+            data.shape.height = data.strokeWidth + 1;
           } else if (shapeMode === "polygon") {
             data.shape.type =
               foundry.canvas.placeables.Drawing.SHAPE_TYPES.POLYGON;
@@ -176,21 +179,21 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
           if (shapeMode === "square") {
             data.shape.type =
               foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
-            data.shape.width = strokeWidth + 1;
-            data.shape.height = strokeWidth + 1;
+            data.shape.width = data.strokeWidth + 1;
+            data.shape.height = data.strokeWidth + 1;
           } else if (shapeMode === "ellipse") {
             data.shape.type =
               foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
-            data.shape.width = strokeWidth + 1;
-            data.shape.height = strokeWidth + 1;
+            data.shape.width = data.strokeWidth + 1;
+            data.shape.height = data.strokeWidth + 1;
           } else if (shapeMode === "grid") {
             // Grid mode uses same setup as gridpainter
             data.shape.type =
               foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
-            data.shape.width = strokeWidth + 1;
-            data.shape.height = strokeWidth + 1;
-            data.strokeAlpha = 0.0;
-            data.fillAlpha = 0.0;
+            data.shape.width = data.strokeWidth + 1;
+            data.shape.height = data.strokeWidth + 1;
+            data.strokeAlpha = 0.01;
+            data.fillAlpha = 0.01;
           } else {
             // Default: polygon mode
             data.shape.type =
@@ -216,10 +219,10 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         case "gridpainter":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
-          data.shape.width = strokeWidth + 1;
-          data.shape.height = strokeWidth + 1;
-          data.strokeAlpha = 0.0;
-          data.fillAlpha = 0.0;
+          data.shape.width = data.strokeWidth + 1;
+          data.shape.height = data.strokeWidth + 1;
+          data.strokeAlpha = 0.01;
+          data.fillAlpha = 0.01;
       }
     } else if (game.activeDungeonDrawMode === "remove") {
       switch (game.activeDungeonDrawTool) {
@@ -233,14 +236,14 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         case "stairs":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
-          data.shape.width = strokeWidth + 1;
-          data.shape.height = strokeWidth + 1;
+          data.shape.width = data.strokeWidth + 1;
+          data.shape.height = data.strokeWidth + 1;
           break;
         case "ellipse":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.ELLIPSE;
-          data.shape.width = strokeWidth + 1;
-          data.shape.height = strokeWidth + 1;
+          data.shape.width = data.strokeWidth + 1;
+          data.shape.height = data.strokeWidth + 1;
           break;
         case "polygon":
           data.shape.type =
@@ -257,10 +260,10 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
         case "gridpainter":
           data.shape.type =
             foundry.canvas.placeables.Drawing.SHAPE_TYPES.RECTANGLE;
-          data.shape.width = strokeWidth + 1;
-          data.shape.height = strokeWidth + 1;
-          data.strokeAlpha = 0.0;
-          data.fillAlpha = 0.0;
+          data.shape.width = data.strokeWidth + 1;
+          data.shape.height = data.strokeWidth + 1;
+          data.strokeAlpha = 0.01;
+          data.fillAlpha = 0.01;
       }
     }
 
