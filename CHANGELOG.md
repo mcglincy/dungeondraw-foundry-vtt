@@ -1,3 +1,9 @@
+# 4.4.0
+
+- Tagger module integration for wall tagging by @oskarnp314.
+- Save as Tile feature by @oskarnp314.
+- Fix for errors caused by setting Foundry drawing defaults. 
+
 # 4.3.1
 
 - Fix grid painter and theme painter (grid mode) preview drawings persisting on the canvas when cancelling with right-click.
