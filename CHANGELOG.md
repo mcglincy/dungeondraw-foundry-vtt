@@ -1,27 +1,18 @@
-# 4.4.0
+# 4.2.0
 
 - Tagger module integration for wall tagging by @oskarnp314.
 - Save as Tile feature by @oskarnp314.
 - Fix for errors caused by setting Foundry drawing defaults. 
 
-# 4.3.1
-
-- Fix grid painter and theme painter (grid mode) preview drawings persisting on the canvas when cancelling with right-click.
-
-# 4.3.0
-
-- Add Window tool for drawing proximity-based window walls (hotkey: H).
-
-# 4.2.0
-
-- Add right-click context menu for Interior Wall tool with shape options: Line, Square, Ellipse, Polygon.
-- Add right-click context menu for Invisible Wall tool with shape options: Line, Square, Ellipse, Polygon.
-- Add right-click context menu for Theme Painter tool with shape options: Polygon, Square, Ellipse, Grid.
-
 # 4.1.0
 
 - Add stairs drawing tool.
 - Add keyboard shortcuts for drawing tools.
+- Fix grid painter and theme painter (grid mode) preview drawings persisting on the canvas when cancelling with right-click.
+- Add right-click context menu for Interior Wall tool with shape options: Line, Square, Ellipse, Polygon.
+- Add right-click context menu for Invisible Wall tool with shape options: Line, Square, Ellipse, Polygon.
+- Add right-click context menu for Theme Painter tool with shape options: Polygon, Square, Ellipse, Grid.
+- Add Window tool for drawing proximity-based window walls (hotkey: H).
 
 # 4.0.0
 
