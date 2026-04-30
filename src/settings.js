@@ -83,6 +83,30 @@ export class Settings {
         config: true,
       }
     );
+    game.settings.register(
+      constants.MODULE_NAME,
+      constants.SETTING_TAGGER_ENABLED,
+      {
+        name: game.i18n.localize("DD.SettingTaggerEnabled"),
+        hint: game.i18n.localize("DD.SettingTaggerEnabledHint"),
+        scope: "world",
+        default: false,
+        type: Boolean,
+        config: true,
+      }
+    );
+    game.settings.register(
+      constants.MODULE_NAME,
+      constants.SETTING_TAGGER_TAG,
+      {
+        name: game.i18n.localize("DD.SettingTaggerTag"),
+        hint: game.i18n.localize("DD.SettingTaggerTagHint"),
+        scope: "world",
+        default: "dungeon-draw",
+        type: String,
+        config: true,
+      }
+    );
   }
 
   static threeDCanvasEnabled() {
@@ -103,6 +127,20 @@ export class Settings {
     return game.settings.get(
       constants.MODULE_NAME,
       constants.SETTING_MAKE_FOUNDRY_WALLS
+    );
+  }
+
+  static taggerEnabled() {
+    return game.settings.get(
+      constants.MODULE_NAME,
+      constants.SETTING_TAGGER_ENABLED
+    );
+  }
+
+  static taggerTag() {
+    return game.settings.get(
+      constants.MODULE_NAME,
+      constants.SETTING_TAGGER_TAG
     );
   }
 }
