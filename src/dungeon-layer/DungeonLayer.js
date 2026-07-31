@@ -387,7 +387,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       const drawings = await Promise.all(gridDrawings);
       const ids = drawings.map((d) => d.id).filter(Boolean);
       if (ids.length) {
-        await game.scenes.current.deleteEmbeddedDocuments("Drawing", ids);
+        await canvas.scene.deleteEmbeddedDocuments("Drawing", ids);
       }
     }
     super._onDragLeftCancel(event);
