@@ -84,7 +84,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
   get documentCollection() {
     // avoid returning all Drawings in the scene, as we
     // don't want DungeonLayer to draw them during draw().
-    return null;
+    return [];
   }
 
   /** @inheritdoc */
