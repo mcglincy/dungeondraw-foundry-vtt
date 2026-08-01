@@ -1,8 +1,12 @@
+# 4.4.0
+
+- Foundry v14 compatibility.
+
 # 4.2.0
 
 - Tagger module integration for wall tagging by @oskarnp314.
 - Save as Tile feature by @oskarnp314.
-- Fix for errors caused by setting Foundry drawing defaults. 
+- Fix for errors caused by setting Foundry drawing defaults.
 
 # 4.1.0
 

@@ -67,6 +67,7 @@ async function createDungeonNote(journalEntry) {
   await canvas.scene.createEmbeddedDocuments("Note", [
     {
       entryId: journalEntry.id,
+      pageId: null,
       fontSize: 20,
       icon: "icons/svg/cave.svg",
       iconSize: 32,
