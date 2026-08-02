@@ -43,6 +43,8 @@ const renderPass = async (container, state) => {
   const interiorShadowGfx = new PIXI.Graphics();
   const wallGfx = new PIXI.Graphics();
   const doorGfx = new PIXI.Graphics();
+  let tiledWallContainer = null;
+  let cornerContainer = null;
 
   // maybe draw an outer surrounding blurred shadow
   addExteriorShadow(container, state.config, state.geometry);
@@ -138,45 +140,112 @@ const renderPass = async (container, state) => {
     );
     // TODO: verify mask add
     container.addChild(wallMask);
-    // expand our geometry, so we add sprites
-    // under the half of the wall thickness that expands past the geometry
-    const expandedGeometry = geo.expandGeometry(
-      state.geometry,
-      state.config.wallThickness / 2.0
-    );
     const texture = await getTexture(state.config.wallTexture);
     if (texture?.valid) {
-      let matrix = null;
-      matrix = PIXI.Matrix.IDENTITY.clone();
-      if (state.config.wallTextureRotation) {
-        matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
-      }
-      if (state.config.WallTextureScaling) {
-        matrix.scale(
-          state.config.WallTextureScaling,
-          state.config.WallTextureScaling
-        );
-      }
       maybeStartTextureVideo(texture);
-      wallGfx.beginTextureFill({
-        texture,
-        alpha: 1.0,
-        matrix,
-      });
-      const flatCoords = expandedGeometry
-        .getCoordinates()
-        .map((c) => [c.x, c.y])
-        .flat();
-      wallGfx.drawPolygon(flatCoords);
-      wallGfx.endFill();
-      wallGfx.mask = wallMask;
-      if (state.config.wallTextureTint) {
-        wallGfx.tint = PIXI.utils.string2hex(state.config.wallTextureTint);
+      if (state.config.wallTileEnabled) {
+        // Sprite-based tiled rendering: place repeating tiles along each segment,
+        // clipped by wallMask so the last tile is cut off at the segment end.
+        tiledWallContainer = new PIXI.Container();
+        drawTiledWallGeometry(
+          tiledWallContainer,
+          state.config,
+          texture,
+          state.geometry
+        );
+        for (const wall of state.interiorWalls) {
+          drawTiledWallSegment(
+            tiledWallContainer,
+            state.config,
+            texture,
+            wall[0],
+            wall[1],
+            wall[2],
+            wall[3]
+          );
+        }
+        for (const shape of state.interiorWallShapes || []) {
+          drawTiledWallShape(tiledWallContainer, state.config, texture, shape);
+        }
+        tiledWallContainer.mask = wallMask;
+      } else if (state.config.wallTextureDirectional) {
+        // Per-segment directional texture: rotate each segment's texture to match its angle
+        drawDirectionalWallTextures(
+          wallGfx,
+          state.config,
+          texture,
+          state.geometry
+        );
+        for (const wall of state.interiorWalls) {
+          drawDirectionalSegmentTexture(
+            wallGfx,
+            state.config,
+            texture,
+            wall[0],
+            wall[1],
+            wall[2],
+            wall[3]
+          );
+        }
+        for (const shape of state.interiorWallShapes || []) {
+          drawDirectionalShapeTexture(wallGfx, state.config, texture, shape);
+        }
+        wallGfx.mask = wallMask;
+        if (state.config.wallTextureTint) {
+          wallGfx.tint = PIXI.utils.string2hex(state.config.wallTextureTint);
+        }
+      } else {
+        // Single global texture fill over the expanded geometry
+        const expandedGeometry = geo.expandGeometry(
+          state.geometry,
+          state.config.wallThickness / 2.0
+        );
+        const matrix = PIXI.Matrix.IDENTITY.clone();
+        if (state.config.wallTextureRotation) {
+          matrix.rotate(state.config.wallTextureRotation * PIXI.DEG_TO_RAD);
+        }
+        if (state.config.WallTextureScaling) {
+          matrix.scale(
+            state.config.WallTextureScaling,
+            state.config.WallTextureScaling
+          );
+        }
+        wallGfx.beginTextureFill({ texture, alpha: 1.0, matrix });
+        const flatCoords = expandedGeometry
+          .getCoordinates()
+          .map((c) => [c.x, c.y])
+          .flat();
+        wallGfx.drawPolygon(flatCoords);
+        wallGfx.endFill();
+        wallGfx.mask = wallMask;
+        if (state.config.wallTextureTint) {
+          wallGfx.tint = PIXI.utils.string2hex(state.config.wallTextureTint);
+        }
+      }
+    }
+    // Corner texture: placed on top of the wall fill, unmasked so the full
+    // sprite is visible regardless of wallThickness.
+    if (state.config.wallCornerTexture) {
+      const cornerTexture = await getTexture(state.config.wallCornerTexture);
+      if (cornerTexture?.valid) {
+        cornerContainer = new PIXI.Container();
+        drawCornerTextures(
+          cornerContainer,
+          state.config,
+          cornerTexture,
+          state.geometry
+        );
       }
     }
   }
   container.addChild(stairsGfx);
+  if (tiledWallContainer) {
+    container.addChild(tiledWallContainer);
+  }
   container.addChild(wallGfx);
+  if (cornerContainer) {
+    container.addChild(cornerContainer);
+  }
   container.addChild(doorGfx);
 };
 
@@ -1013,5 +1082,316 @@ const drawStairs = (gfx, config, stair) => {
     // Draw line
     gfx.moveTo(startX, startY);
     gfx.lineTo(endX, endY);
+  }
+};
+
+/**
+ * Place repeating tile sprites along a single wall segment.
+ * Each sprite is uniformly scaled so its width equals wallTileLength grid
+ * squares; height is preserved by aspect ratio and clipped by the wallMask.
+ *
+ * A per-segment clip mask (filled rectangle) prevents tiles from overshooting
+ * past segment endpoints. The rectangle is extended by wallThickness/2 at each
+ * end so that polygon corner joins are covered without gaps.
+ */
+const drawTiledWallSegment = (container, config, texture, x1, y1, x2, y2) => {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const segmentLength = Math.sqrt(dx * dx + dy * dy);
+  if (segmentLength === 0) return;
+
+  const angle = Math.atan2(dy, dx);
+  const cosA = Math.cos(angle);
+  const sinA = Math.sin(angle);
+
+  const tileWorldWidth = config.wallTileLength * canvas.grid.size;
+  // Each sprite is extended by wallTileOverlap pixels to eliminate sub-pixel
+  // gaps between adjacent tiles. The per-segment mask clips the overshoot at ends.
+  const tileDrawWidth = tileWorldWidth + (config.wallTileOverlap ?? 0);
+  // Uniform scale: set width = tileDrawWidth, preserve aspect ratio.
+  const scale = tileDrawWidth / texture.width;
+  const numTiles = Math.ceil(segmentLength / tileWorldWidth);
+
+  // Per-segment clip mask: a filled rectangle covering this segment's wall
+  // area, extended by wallThickness/2 at each end to fill polygon corner joins.
+  const hw = config.wallThickness / 2;
+  // Perpendicular unit vector (rotated 90° from wall direction)
+  const pxX = -sinA;
+  const pxY = cosA;
+  // Extend the rectangle endpoints along the wall direction to cover corners
+  const extX = cosA * hw;
+  const extY = sinA * hw;
+  const sx1 = x1 - extX;
+  const sy1 = y1 - extY;
+  const sx2 = x2 + extX;
+  const sy2 = y2 + extY;
+
+  const segMask = new PIXI.Graphics();
+  segMask.beginFill(0xffffff, 1);
+  segMask.moveTo(sx1 + pxX * hw, sy1 + pxY * hw);
+  segMask.lineTo(sx2 + pxX * hw, sy2 + pxY * hw);
+  segMask.lineTo(sx2 - pxX * hw, sy2 - pxY * hw);
+  segMask.lineTo(sx1 - pxX * hw, sy1 - pxY * hw);
+  segMask.closePath();
+  segMask.endFill();
+
+  const segContainer = new PIXI.Container();
+  segContainer.mask = segMask;
+
+  for (let i = 0; i < numTiles; i++) {
+    const tileX = x1 + cosA * i * tileWorldWidth;
+    const tileY = y1 + sinA * i * tileWorldWidth;
+
+    const sprite = new PIXI.Sprite(texture);
+    sprite.anchor.set(0, 0.5);
+    sprite.position.set(tileX, tileY);
+    sprite.rotation = angle;
+    sprite.scale.set(scale, scale);
+    if (config.wallTextureTint) {
+      sprite.tint = PIXI.utils.string2hex(config.wallTextureTint);
+    }
+    segContainer.addChild(sprite);
+  }
+
+  container.addChild(segMask);
+  container.addChild(segContainer);
+};
+
+/** Tile all exterior wall edges of a MultiPolygon geometry. */
+const drawTiledWallGeometry = (container, config, texture, multi) => {
+  for (let i = 0; i < multi.getNumGeometries(); i++) {
+    const poly = multi.getGeometryN(i);
+    const exterior = poly.getExteriorRing();
+    const coords = exterior.getCoordinates();
+    for (let j = 0; j < coords.length - 1; j++) {
+      drawTiledWallSegment(
+        container,
+        config,
+        texture,
+        coords[j].x,
+        coords[j].y,
+        coords[j + 1].x,
+        coords[j + 1].y
+      );
+    }
+    const numHoles = poly.getNumInteriorRing();
+    for (let h = 0; h < numHoles; h++) {
+      const hole = poly.getInteriorRingN(h);
+      const holeCoords = hole.getCoordinates();
+      for (let j = 0; j < holeCoords.length - 1; j++) {
+        drawTiledWallSegment(
+          container,
+          config,
+          texture,
+          holeCoords[j].x,
+          holeCoords[j].y,
+          holeCoords[j + 1].x,
+          holeCoords[j + 1].y
+        );
+      }
+    }
+  }
+};
+
+/**
+ * Draw corner texture sprites at every non-straight vertex of a MultiPolygon.
+ * A vertex is skipped when the dot product of the two adjacent edge directions
+ * exceeds CORNER_STRAIGHT_THRESHOLD (i.e., the walls are nearly collinear).
+ * Each sprite is a wallThickness × wallThickness square centered at the vertex,
+ * rotated to align with the bisector of the two wall directions.
+ */
+const CORNER_STRAIGHT_THRESHOLD = 0.98; // skip if deviation from straight < ~11°
+
+const drawCornerTextures = (container, config, texture, multi) => {
+  for (let i = 0; i < multi.getNumGeometries(); i++) {
+    const poly = multi.getGeometryN(i);
+    drawCornerTexturesForRing(
+      container,
+      config,
+      texture,
+      poly.getExteriorRing()
+    );
+    const numHoles = poly.getNumInteriorRing();
+    for (let h = 0; h < numHoles; h++) {
+      drawCornerTexturesForRing(
+        container,
+        config,
+        texture,
+        poly.getInteriorRingN(h)
+      );
+    }
+  }
+};
+
+const drawCornerTexturesForRing = (container, config, texture, ring) => {
+  const coords = ring.getCoordinates();
+  // closed ring: coords[0] === coords[last], so n = coords.length - 1 unique vertices
+  const n = coords.length - 1;
+  if (n < 2) return;
+
+  for (let i = 0; i < n; i++) {
+    const prev = coords[(i - 1 + n) % n];
+    const curr = coords[i];
+    const next = coords[(i + 1) % n];
+
+    // Incoming direction: prev → curr
+    const dxIn = curr.x - prev.x;
+    const dyIn = curr.y - prev.y;
+    const lenIn = Math.sqrt(dxIn * dxIn + dyIn * dyIn);
+    if (lenIn === 0) continue;
+    const inX = dxIn / lenIn;
+    const inY = dyIn / lenIn;
+
+    // Outgoing direction: curr → next
+    const dxOut = next.x - curr.x;
+    const dyOut = next.y - curr.y;
+    const lenOut = Math.sqrt(dxOut * dxOut + dyOut * dyOut);
+    if (lenOut === 0) continue;
+    const outX = dxOut / lenOut;
+    const outY = dyOut / lenOut;
+
+    // Skip if the two segments are nearly collinear
+    const dot = inX * outX + inY * outY;
+    if (dot > CORNER_STRAIGHT_THRESHOLD) continue;
+
+    // Bisector of the two directions (pointing "into" the corner)
+    const bisX = inX + outX;
+    const bisY = inY + outY;
+    const bisLen = Math.sqrt(bisX * bisX + bisY * bisY);
+    const bisAngle =
+      bisLen < 0.001
+        ? Math.atan2(inX, -inY) // degenerate: use incoming normal
+        : Math.atan2(bisY / bisLen, bisX / bisLen);
+
+    const size = config.wallThickness * (config.wallCornerTextureScale ?? 1);
+    const sprite = new PIXI.Sprite(texture);
+    sprite.anchor.set(0.5, 0.5);
+    sprite.position.set(curr.x, curr.y);
+    sprite.rotation = bisAngle;
+    sprite.scale.set(size / texture.width, size / texture.height);
+    if (config.wallTextureTint) {
+      sprite.tint = PIXI.utils.string2hex(config.wallTextureTint);
+    }
+    container.addChild(sprite);
+  }
+};
+
+/** Tile all edges of a closed interior wall shape. */
+const drawTiledWallShape = (container, config, texture, shape) => {
+  for (let i = 0; i < shape.length - 1; i++) {
+    drawTiledWallSegment(
+      container,
+      config,
+      texture,
+      shape[i][0],
+      shape[i][1],
+      shape[i + 1][0],
+      shape[i + 1][1]
+    );
+  }
+  if (shape.length > 1) {
+    const last = shape[shape.length - 1];
+    drawTiledWallSegment(
+      container,
+      config,
+      texture,
+      last[0],
+      last[1],
+      shape[0][0],
+      shape[0][1]
+    );
+  }
+};
+
+/**
+ * Draw a single wall segment as a textured rectangle, with the texture
+ * rotated to align with the segment's direction.
+ */
+const drawDirectionalSegmentTexture = (
+  wallGfx,
+  config,
+  texture,
+  x1,
+  y1,
+  x2,
+  y2
+) => {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const matrix = PIXI.Matrix.IDENTITY.clone();
+  matrix.rotate(angle);
+  if (config.WallTextureScaling) {
+    matrix.scale(config.WallTextureScaling, config.WallTextureScaling);
+  }
+  const rect = geo.rectangleForSegment(config.wallThickness, x1, y1, x2, y2);
+  wallGfx.beginTextureFill({ texture, alpha: 1.0, matrix });
+  wallGfx.drawPolygon(rect);
+  wallGfx.endFill();
+};
+
+/**
+ * Draw all exterior wall edges of a MultiPolygon geometry with directional textures.
+ */
+const drawDirectionalWallTextures = (wallGfx, config, texture, multi) => {
+  for (let i = 0; i < multi.getNumGeometries(); i++) {
+    const poly = multi.getGeometryN(i);
+    const exterior = poly.getExteriorRing();
+    const coords = exterior.getCoordinates();
+    for (let j = 0; j < coords.length - 1; j++) {
+      drawDirectionalSegmentTexture(
+        wallGfx,
+        config,
+        texture,
+        coords[j].x,
+        coords[j].y,
+        coords[j + 1].x,
+        coords[j + 1].y
+      );
+    }
+    const numHoles = poly.getNumInteriorRing();
+    for (let h = 0; h < numHoles; h++) {
+      const hole = poly.getInteriorRingN(h);
+      const holeCoords = hole.getCoordinates();
+      for (let j = 0; j < holeCoords.length - 1; j++) {
+        drawDirectionalSegmentTexture(
+          wallGfx,
+          config,
+          texture,
+          holeCoords[j].x,
+          holeCoords[j].y,
+          holeCoords[j + 1].x,
+          holeCoords[j + 1].y
+        );
+      }
+    }
+  }
+};
+
+/**
+ * Draw all edges of an interior wall shape with directional textures.
+ * shape is [[x, y], [x, y], ...] (closed polygon)
+ */
+const drawDirectionalShapeTexture = (wallGfx, config, texture, shape) => {
+  for (let i = 0; i < shape.length - 1; i++) {
+    drawDirectionalSegmentTexture(
+      wallGfx,
+      config,
+      texture,
+      shape[i][0],
+      shape[i][1],
+      shape[i + 1][0],
+      shape[i + 1][1]
+    );
+  }
+  if (shape.length > 1) {
+    const last = shape[shape.length - 1];
+    drawDirectionalSegmentTexture(
+      wallGfx,
+      config,
+      texture,
+      last[0],
+      last[1],
+      shape[0][0],
+      shape[0][1]
+    );
   }
 };
