@@ -136,7 +136,7 @@
   "DD.WallThickness": "Wall Thickness",
   "DD.WallTileEnabled": "Tiled wall texture",
   "DD.WallTileLength": "Wall tile length (grid squares)",
-  "DD.WallTileOverlap": "Wall tile overlap (pixels)",  
+  "DD.WallTileOverlap": "Wall tile overlap (pixels)",
   "DD.Width": "Width",
   "DD.KeybindingRectangle": "Tool: Rectangle",
   "DD.KeybindingPolygon": "Tool: Polygon",
