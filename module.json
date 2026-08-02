@@ -7,9 +7,10 @@
   ],
   "title": "Dungeon Draw",
   "description": "A dungeon-drawing module for Foundry VTT",
-  "version": "4.4.0",
+  "version": "5.0.0",
   "library": false,
   "compatibility": {
+    "maximum": 14,
     "minimum": 14,
     "verified": 14
   },
