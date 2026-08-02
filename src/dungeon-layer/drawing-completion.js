@@ -5,6 +5,7 @@ import {
   ellipseToPolygonPoints,
   createDataOffsetPoints,
 } from "./shape-conversion.js";
+import { Settings } from "../settings.js";
 
 /**
  * @typedef {Object} CompletionContext
@@ -200,8 +201,10 @@ export async function handleStairsCompletion(ctx) {
  * @returns {boolean} True if handled, false if polygon mode needs minDistance/completePolygon check
  */
 export async function handleThemePainterCompletion(ctx) {
-  const themePainterShapeMode =
-    game.dungeonDrawShapes?.themepainter || "polygon";
+  const snapActive = Settings.snapToGrid() && game.dungeonDrawSnapActive;
+  const themePainterShapeMode = snapActive
+    ? "square"
+    : game.dungeonDrawShapes?.themepainter || "polygon";
 
   if (
     themePainterShapeMode === "square" ||
