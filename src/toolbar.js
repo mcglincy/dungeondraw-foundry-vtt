@@ -300,3 +300,5 @@ export class DungeonDrawToolbar extends Application {
     return icons[mode] || "";
   }
 }
+
+export const toolbar = new DungeonDrawToolbar();

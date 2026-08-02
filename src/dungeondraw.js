@@ -4,9 +4,7 @@ import * as constants from "./constants.js";
 import { GeneratorSheet } from "./generatorsheet.js";
 import { Keybindings } from "./keybindings";
 import { Settings } from "./settings";
-import { DungeonDrawToolbar } from "./toolbar";
-
-export const toolbar = new DungeonDrawToolbar();
+import { toolbar } from "./toolbar";
 
 export class DungeonDraw {
   static init() {

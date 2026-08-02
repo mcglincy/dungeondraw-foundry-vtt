@@ -1,6 +1,6 @@
 import * as constants from "./constants.js";
 import { DungeonLayer } from "./dungeon-layer/index.js";
-import { toolbar } from "./dungeondraw.js";
+import { toolbar } from "./toolbar.js";
 
 export class Keybindings {
   static register() {
