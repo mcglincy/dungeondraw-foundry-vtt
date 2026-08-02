@@ -50,6 +50,18 @@ export class DungeonDrawToolbar extends Application {
       game.activeDungeonDrawMode === "add" ? "toggle-on" : "";
     const toggleRemoveClass =
       game.activeDungeonDrawMode === "remove" ? "toggle-on" : "";
+    // Flattened choices for the {{selectOptions}} helper. Foundry v14 removed
+    // the {{select}} helper the template used to build these inline.
+    const themeOptions = [
+      ...customThemeKeys.map((key) => ({
+        value: `custom.${key}`,
+        name: customThemes[key].name,
+      })),
+      ...themeKeys.map((key) => ({
+        value: `module.${key}`,
+        name: themes[key].name,
+      })),
+    ];
 
     const data = {
       customThemes,
@@ -137,6 +149,7 @@ export class DungeonDrawToolbar extends Application {
         },
       ],
       themeKeys,
+      themeOptions,
       themePainterThemeKey,
       themes,
       toggleAddClass,

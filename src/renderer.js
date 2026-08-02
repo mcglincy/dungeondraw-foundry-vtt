@@ -4,8 +4,11 @@ import * as geo from "./geo-utils.js";
  * Render the given dungeon state into the given container.
  */
 export const render = async (container, state) => {
-  // clear everything
-  container.clear();
+  // clear everything. PlaceableObject#clear was deprecated to a no-op in v14,
+  // so destroy the previously rendered children ourselves.
+  container
+    .removeChildren()
+    .forEach((child) => child.destroy({ children: true }));
   // main geometry/config render pass
   await renderPass(container, state);
   // draw theme-painted areas as additional render passes

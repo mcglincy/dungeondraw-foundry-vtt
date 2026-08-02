@@ -166,7 +166,12 @@ export class DungeonDraw {
   }
 
   static async activateSceneControls() {
-    $("#controls").append(toolbar.element);
+    // Move the toolbar out of <body> and into the left UI column, next to the
+    // scene controls, so that it scales and fades along with the rest of the UI.
+    const uiLeft = document.getElementById("ui-left");
+    if (uiLeft) {
+      uiLeft.append(toolbar.element[0]);
+    }
     toolbar.element.addClass("active");
   }
 }

@@ -12,11 +12,7 @@
       <label>{{localize "DD.Algorithm"}}</label>
       <div class="form-fields">
         <select name="algorithm" data-dtype="String">
-          {{#select algorithm}}
-          <option value="2d-dungeon">2D Dungeon</option>
-          <option value="dungeoneer">Dungeoneer</option>
-          <option value="rot-js-cellular">Rot.js Cave System</option>
-          {{/select}}
+          {{selectOptions algorithmChoices selected=algorithm}}
         </select>
       </div>
     </div>

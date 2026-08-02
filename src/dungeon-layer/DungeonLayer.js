@@ -8,6 +8,7 @@ import {
   createDungeonEntryAndNote,
 } from "./dungeon-journal.js";
 import { calculateStairGeometry } from "./shape-conversion.js";
+import { PreviewDrawing } from "./preview-drawing.js";
 import {
   handleDoorCompletion,
   handleSecretDoorCompletion,
@@ -88,6 +89,32 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     return [];
   }
 
+  /**
+   * PlaceablesLayer#getMaxSort reads documentCollection.documentClass, which our
+   * empty stand-in collection does not have. We own no placeables, so report the
+   * "no objects" value the base class documents.
+   * @override
+   */
+  getMaxSort() {
+    return -Infinity;
+  }
+
+  /**
+   * PlaceableDirectory builds its sidebar tabs by calling prepareSceneControls()
+   * on every CONFIG.Canvas.layers entry whose documentName has a CONFIG sidebar
+   * definition, and it destructures the result without a null check. Because we
+   * borrow documentName "Drawing", we get asked - and the inherited
+   * implementation returns null, which throws while the sidebar renders.
+   * Return a hidden stub so the directory skips us. The real scene control is
+   * registered from the getSceneControlButtons hook in dungeondraw.js, which
+   * runs after SceneControls has collected the per-layer controls and therefore
+   * replaces this entry.
+   * @override
+   */
+  static prepareSceneControls() {
+    return { name: "dungeondraw", visible: false };
+  }
+
   /** @inheritdoc */
   static get layerOptions() {
     return foundry.utils.mergeObject(super.layerOptions, {
@@ -108,10 +135,10 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     // Only pull specific properties from the user's default drawing config.
     // Deep-cloning the full config can bring in values (e.g., strokeAlpha: 0,
     // fillType: NONE) that fail Foundry's DrawingDocument visible content validation.
-    const defaults = game.settings.get(
-      "core",
-      foundry.canvas.layers.DrawingsLayer.DEFAULT_CONFIG_SETTING
-    );
+    // v14 dropped DrawingsLayer.DEFAULT_CONFIG_SETTING ("core.defaultDrawingConfig")
+    // in favor of the drawing palette, which exposes the same defaults.
+    const defaults =
+      foundry.canvas.layers.DrawingsLayer.paletteClass?.createData ?? {};
     const data = {
       x: origin.x,
       y: origin.y,
@@ -415,9 +442,31 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
     super._onClickLeft2(event);
   }
 
+  /**
+   * v14 refuses to begin a drag unless the active scene control tool declares
+   * `creation: true`, and also refuses while anything sits in the preview
+   * container. Dungeon Draw picks its drawing tool from its own toolbar rather
+   * than from the scene controls, and keeps an in-progress polygon in the
+   * preview container between clicks, so neither check applies here. Keep only
+   * the paused-game guard.
+   * @override
+   */
+  // eslint-disable-next-line no-unused-vars
+  _canDragLeftStart(user, event) {
+    if (game.paused && !game.user.isGM) {
+      ui.notifications.warn("GAME.PausedWarning", { localize: true });
+      return false;
+    }
+    return true;
+  }
+
   /** @override */
   async _onDragLeftStart(event) {
-    await super._onDragLeftStart(event);
+    // Deliberately not calling super: as of v14 PlaceablesLayer#_onDragLeftStart
+    // builds its own core Drawing preview out of the active tool's palette data,
+    // which we neither have nor want. Through v13 it only cleared the preview
+    // container, which is all we need before creating our own preview below.
+    this.clearPreviewContainer();
     const interaction = event.interactionData;
 
     if (
@@ -443,7 +492,7 @@ export class DungeonLayer extends foundry.canvas.layers.PlaceablesLayer {
       }
       throw e;
     }
-    const drawing = new this.constructor.placeableClass(document);
+    const drawing = new PreviewDrawing(document);
     drawing._fixedPoints = [0, 0];
     document._object = drawing;
     interaction.preview = this.preview.addChild(drawing);

@@ -30,6 +30,11 @@ export class GeneratorSheet extends FormApplication {
   /** @override */
   getData() {
     return {
+      algorithmChoices: {
+        "2d-dungeon": "2D Dungeon",
+        dungeoneer: "Dungeoneer",
+        "rot-js-cellular": "Rot.js Cave System",
+      },
       height: 30,
       width: 30,
 

@@ -42,13 +42,8 @@
     <div class="control-tool-row">
       {{#each row3}} {{> toolPartial}} {{/each}}
       <select name="themePainterThemeKey" data-dtype="string">
-        {{#select themePainterThemeKey}} {{#each customThemeKeys as |themeKey|}}
-        {{name}} {{#with (lookup ../customThemes themeKey)~}}
-        <option value="custom.{{themeKey}}">{{name}}</option>
-        {{/with}} {{/each}} {{#each themeKeys as |themeKey|}} {{name}} {{#with
-        (lookup ../themes themeKey)~}}
-        <option value="module.{{themeKey}}">{{name}}</option>
-        {{/with}} {{/each}} {{/select}}
+        {{selectOptions themeOptions selected=themePainterThemeKey
+        valueAttr="value" labelAttr="name" }}
       </select>
     </div>
   </div>

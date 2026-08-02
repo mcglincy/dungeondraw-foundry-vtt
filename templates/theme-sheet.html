@@ -411,11 +411,8 @@
       <label>{{localize "DD.SecretDoorStyleGM"}}</label>
       <div class="form-fields">
         <select name="secretDoorStyleGM" data-dtype="string">
-          {{#select config.secretDoorStyleGM}}
-          <option value="door">Door</option>
-          <option value="secret">Secret</option>
-          <option value="wall">Wall</option>
-          {{/select}}
+          {{selectOptions (object door="Door" secret="Secret" wall="Wall")
+          selected=config.secretDoorStyleGM }}
         </select>
       </div>
     </div>
@@ -423,11 +420,8 @@
       <label>{{localize "DD.SecretDoorStylePlayer"}}</label>
       <div class="form-fields">
         <select name="secretDoorStylePlayer" data-dtype="string">
-          {{#select config.secretDoorStylePlayer}}
-          <option value="door">Door</option>
-          <option value="secret">Secret</option>
-          <option value="wall">Wall</option>
-          {{/select}}
+          {{selectOptions (object door="Door" secret="Secret" wall="Wall")
+          selected=config.secretDoorStylePlayer }}
         </select>
       </div>
     </div>

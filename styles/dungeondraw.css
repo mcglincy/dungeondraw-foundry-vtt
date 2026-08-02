@@ -36,6 +36,8 @@
   top: 96px;
   /* width: 220px; */
   box-shadow: none;
+  /* #ui-left sets pointer-events: none for its children to opt back into */
+  pointer-events: all;
 }
 #dd-control-tools:hover {
 }
