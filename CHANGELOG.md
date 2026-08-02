@@ -1,6 +1,8 @@
-# 4.4.0
+# 5.0.0
 
-- Foundry v14 compatibility.
+- Foundry v14 compatibility by @jfosnc.
+- Add Tagger module integration for wall tagging by @oskarnp314.
+- Snap to corner improvements by @oskarnp314.
 
 # 4.2.0
 
